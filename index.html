@@ -1,970 +1,1592 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🥒 キュウリ施肥設計アプリ</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>きゅうり生育予測ノート</title>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
 :root{
-  --green:#2e8b57;--light-green:#eaf7ef;--deep:#185c37;
-  --orange:#f39c12;--blue:#2d8acb;--gray:#f4f6f8;
-  --text:#243238;--border:#dce4e8;
+  --paper:#F6F5F0; --panel:#FFFFFF; --ink:#1B2E22; --mute:#6D7A70;
+  --line:#E1E1D8; --leaf:#1F6E42; --leaf-soft:#E7F1E9;
+  --sun:#B8873A; --sun-soft:#F3ECDD; --sky:#3C6E93; --sky-soft:#E9EFF3;
+  --coral:#B1503A; --coral-soft:#F5E7E2; --water:#3C6E93; --alert:#B1503A;
+  --forest:#123424; --forest2:#1B4A34;
+  --shadow:0 1px 2px rgba(18,52,36,.06),0 6px 16px rgba(18,52,36,.06);
 }
 *{box-sizing:border-box}
-body{
-  margin:0;background:linear-gradient(135deg,#f3fff7,#f7fbff);
-  color:var(--text);font-family:"Yu Gothic","Meiryo",sans-serif;
-}
-header{
-  background:linear-gradient(135deg,var(--green),#46b978);
-  color:#fff;padding:24px 16px;text-align:center;
-  box-shadow:0 3px 12px #0002;
-}
-header h1{margin:0;font-size:clamp(1.35rem,3vw,2rem)}
-header p{margin:8px 0 0;font-size:.9rem;opacity:.95}
-.container{max-width:1180px;margin:22px auto;padding:0 14px}
-.toolbar,.card{
-  background:#fff;border:1px solid var(--border);border-radius:16px;
-  box-shadow:0 5px 18px #1c473014;
-}
-.toolbar{padding:12px;display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
-button,.button{
-  border:0;border-radius:10px;padding:10px 15px;cursor:pointer;
-  font-weight:700;font-size:.9rem;transition:.2s;
-}
-button:hover{transform:translateY(-1px);filter:brightness(.97)}
-.primary{background:var(--green);color:#fff}
-.secondary{background:#e9f2ff;color:#17558a}
-.warning{background:#fff1d9;color:#8a5600}
-.danger{background:#ffe8e8;color:#9a2d2d}
-.tabs{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:16px}
-.tab{
-  flex:1;min-width:150px;background:#e7edf0;color:#52636b;
-  border-radius:12px;padding:13px 10px;text-align:center;
-}
-.tab.active{background:var(--deep);color:#fff}
-.panel{display:none}.panel.active{display:block}
-.card{padding:20px;margin-bottom:16px}
-.card h2{
-  margin:0 0 16px;color:var(--deep);font-size:1.15rem;
-  border-left:5px solid var(--green);padding-left:10px;
-}
-.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
-.grid.two{grid-template-columns:repeat(2,minmax(0,1fr))}
-.field{display:flex;flex-direction:column;gap:6px}
-.field.full{grid-column:1/-1}
-label{font-weight:700;font-size:.9rem}
-input,select,textarea{
-  width:100%;border:1px solid #cbd7dc;border-radius:9px;
-  padding:10px;background:#fff;font-size:.95rem;color:var(--text);
-}
-input:focus,select:focus,textarea:focus{
-  outline:2px solid #9bd8b3;border-color:var(--green)
-}
-.unit{color:#65747a;font-size:.8rem}
-.readonly{background:#f0f5f3;font-weight:700}
-.inline{display:flex;gap:8px;align-items:center}
-.inline input{flex:1}
-.checks{display:flex;flex-wrap:wrap;gap:9px}
-.check{
-  display:flex;align-items:center;gap:6px;background:#f0f7f3;
-  border:1px solid #cce6d5;border-radius:9px;padding:9px 11px;
-  font-size:.88rem;
-}
-.check input{width:auto}
-.location-box{
-  background:linear-gradient(135deg,#eefaf2,#f0f7ff);
-  border:1px solid #cde7d5;border-radius:12px;padding:13px;
-}
-.location-values{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:10px}
-.small{font-size:.8rem;color:#66767b}
-.note{
-  padding:12px 14px;background:#fff9e9;border-left:4px solid var(--orange);
-  border-radius:8px;font-size:.85rem;line-height:1.7;
-}
-.diag-veg{border-left-color:#2d8acb!important;background:#eaf3fb!important}
-.diag-rep{border-left-color:#e0672c!important;background:#fdf1ea!important}
-.diag-bal{border-left-color:var(--green)!important;background:var(--light-green)!important}
-.nav-buttons{display:flex;justify-content:space-between;gap:10px;margin-top:16px}
-.result-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
-.result{
-  border-radius:13px;padding:15px;background:var(--light-green);
-  border:1px solid #c8e6d2;
-}
-.result .label{font-size:.82rem;color:#557064}
-.result .value{font-size:1.35rem;font-weight:800;color:var(--deep);margin-top:5px}
-table{width:100%;border-collapse:collapse;font-size:.88rem}
-th,td{border:1px solid var(--border);padding:9px;text-align:center}
-th{background:#eaf5ee;color:var(--deep)}
-tbody tr:nth-child(even){background:#fafcfc}
-.mini-table th,.mini-table td{padding:6px 8px;font-size:.85rem}
-.mini-table input{padding:6px;text-align:center}
-.badge{display:inline-block;padding:4px 8px;border-radius:999px;background:#e6f3ff;color:#1d6591;font-size:.78rem;font-weight:700}
-.lib-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-top:14px}
-.lib-item{border:1px solid var(--border);border-radius:12px;padding:13px;background:#fafcfc;display:flex;flex-direction:column;gap:7px}
-.lib-item.selected{border-color:var(--green);background:var(--light-green);box-shadow:0 0 0 2px #2e8b5733}
-.lib-item-head{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
-.lib-item-name{font-weight:700}
-.type-pill{padding:3px 9px;border-radius:999px;font-size:.72rem;font-weight:700;color:#fff}
-.type-pill.veg{background:var(--blue)}
-.type-pill.rep{background:#e0672c}
-.type-pill.bal{background:var(--green)}
-.add-fert-form{margin-top:16px;border-top:1px dashed var(--border);padding-top:16px}
-footer{text-align:center;color:#718087;font-size:.8rem;padding:20px}
-@media(max-width:800px){
-  .grid,.grid.two,.result-grid,.lib-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
-  .location-values{grid-template-columns:1fr}
-}
-@media(max-width:520px){
-  .grid,.grid.two,.result-grid,.lib-grid{grid-template-columns:1fr}
-  .tab{min-width:100%;}.toolbar button{flex:1}
-}
+html,body{margin:0;padding:0}
+body{background:var(--paper);color:var(--ink);
+  font-family:"Hiragino Kaku Gothic ProN","Yu Gothic Medium","Yu Gothic",Meiryo,system-ui,sans-serif;
+  font-size:15px;line-height:1.7;-webkit-font-smoothing:antialiased}
+h1,h2,h3,h4{margin:0;font-weight:700;letter-spacing:.01em}
+a{color:var(--leaf)}
+code{font-size:12.5px;background:var(--sun-soft);padding:1px 5px;border-radius:4px}
+.wrap{max-width:1160px;margin:0 auto;padding:0 20px 100px}
+
+header{background:var(--forest);position:sticky;top:0;z-index:20;box-shadow:0 2px 10px rgba(18,52,36,.18)}
+.head-in{max-width:1160px;margin:0 auto;padding:18px 20px 0;display:flex;flex-wrap:wrap;gap:14px;align-items:center;justify-content:space-between}
+h1{font-size:20px;color:#fff;font-weight:700}
+h1 span{display:block;font-size:11.5px;font-weight:400;color:#9FC2AB;letter-spacing:.04em;margin-top:4px}
+.hsel{display:flex;gap:8px;align-items:center;font-size:13px}
+.hsel select{min-width:170px;background:#fff;border-color:transparent}
+nav{max-width:1160px;margin:0 auto;padding:14px 20px 0;display:flex;gap:22px;overflow-x:auto}
+nav button{background:none;border:0;border-bottom:2px solid transparent;color:#9FC2AB;
+  padding:0 2px 12px;font-size:13.5px;font-weight:500;white-space:nowrap;box-shadow:none;border-radius:0}
+nav button.on{color:#fff;border-bottom-color:var(--sun);font-weight:700;box-shadow:none;transform:none}
+.who{font-size:12px;color:#9FC2AB;font-weight:500;white-space:nowrap}
+.who b{color:#fff;font-weight:700}
+
+.tab{display:none;padding-top:28px}
+.tab.on{display:block}
+
+.hero{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:24px 26px 20px;margin-bottom:26px;box-shadow:var(--shadow)}
+.hero h2{font-size:13px;color:var(--mute);font-weight:700;text-transform:none}
+.hero .asof{font-size:12.5px;color:var(--mute);margin:2px 0 20px}
+.meter{margin:0 0 24px}
+.meter:last-child{margin-bottom:6px}
+.meter-top{display:flex;justify-content:space-between;align-items:baseline;font-size:13px;color:var(--mute);margin-bottom:8px;gap:10px}
+.meter-top b{font-size:16px;color:var(--ink);font-weight:700;font-variant-numeric:tabular-nums}
+.track{position:relative;height:8px;border-radius:4px;overflow:visible}
+.track.stem{background:linear-gradient(90deg,#EDEEE7 0%,#EDEEE7 48%,var(--leaf-soft) 52%,var(--leaf) 100%)}
+.track.bal{background:linear-gradient(90deg,var(--sun-soft) 0%,#EDEEE7 48%,#EDEEE7 52%,var(--leaf-soft) 100%)}
+.zero{position:absolute;left:50%;top:-3px;bottom:-3px;width:1px;background:var(--ink);opacity:.3}
+.zero::after{content:"平準点";position:absolute;top:-18px;left:50%;transform:translateX(-50%);font-size:10px;color:var(--mute);white-space:nowrap}
+.pin{position:absolute;top:50%;width:14px;height:14px;margin-top:-7px;margin-left:-7px;background:var(--panel);
+  border:3px solid var(--ink);border-radius:50%;transition:left .45s cubic-bezier(.3,.8,.3,1)}
+.pin::before{display:none}
+.arrow{position:absolute;top:-19px;font-size:11px;font-weight:700;transition:left .45s ease;color:var(--mute)}
+.ends{display:flex;justify-content:space-between;font-size:11.5px;color:var(--mute);margin-top:14px}
+.verdict{font-size:14px;margin-top:10px}
+.verdict em{font-style:normal;font-weight:700;color:var(--leaf)}
+.tagline{display:inline-block;font-size:11.5px;font-weight:600;padding:2px 9px;border:1px solid var(--line);border-radius:5px;margin-right:8px;color:var(--mute)}
+.tagline.hi{border-color:var(--alert);color:var(--alert)}
+
+.cols{display:grid;grid-template-columns:400px 1fr;gap:24px;align-items:start}
+@media(max-width:900px){.cols{grid-template-columns:1fr}}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:22px 24px;margin-bottom:22px;box-shadow:var(--shadow)}
+.card>h3{font-size:15.5px;margin-bottom:4px;font-weight:700}
+.card>.sub{font-size:12.5px;color:var(--mute);margin:0 0 18px}
+.card.pop-blue{background:var(--sky-soft);border-color:transparent}
+.card.pop-sun{background:var(--sun-soft);border-color:transparent}
+
+label{display:block;font-size:13px;margin-bottom:14px}
+label>span{display:block;color:var(--mute);margin-bottom:5px;font-size:12px}
+input[type=text],input[type=number],input[type=date],input[type=url],select,textarea{
+  width:100%;padding:8px 10px;font:inherit;font-size:14px;border:1px solid var(--line);
+  border-radius:7px;background:#fff;color:var(--ink);font-variant-numeric:tabular-nums}
+textarea{resize:vertical;min-height:54px}
+input:focus,select:focus,textarea:focus,button:focus-visible{outline:2px solid var(--sky);outline-offset:1px;border-color:var(--sky)}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+.check{display:flex;gap:8px;align-items:flex-start;font-size:13px;margin-bottom:12px}
+.check input{margin-top:4px;width:auto}
+.tags{display:flex;flex-wrap:wrap;gap:6px;margin:-4px 0 14px}
+.tags label{display:inline-flex;align-items:center;gap:5px;margin:0;font-size:12.5px;border:1px solid var(--line);
+  padding:4px 10px;border-radius:6px;cursor:pointer;background:#fff}
+.tags input{width:auto;margin:0}
+button{font:inherit;cursor:pointer;border-radius:7px;border:1px solid var(--forest);
+  background:var(--forest);color:#fff;padding:9px 18px;font-size:13.5px;font-weight:600;
+  box-shadow:var(--shadow);transition:background .15s,transform .1s}
+button:hover{background:var(--forest2)}
+button:active{transform:translateY(1px)}
+button.ghost{background:#fff;color:var(--ink);border-color:var(--line);box-shadow:none}
+button.ghost:hover{border-color:var(--ink);background:var(--paper)}
+button.small{padding:5px 12px;font-size:12px}
+button:disabled{opacity:.4;cursor:not-allowed;box-shadow:none;transform:none}
+.btnrow{display:flex;gap:10px;flex-wrap:wrap}
+
+table{width:100%;border-collapse:collapse;font-size:13px;font-variant-numeric:tabular-nums}
+th,td{text-align:left;padding:8px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-weight:600;color:var(--mute);font-size:11.5px;letter-spacing:.02em}
+td.num,th.num{text-align:right}
+tr.pick td{background:var(--leaf-soft);font-weight:600}
+.empty{font-size:13.5px;color:var(--mute);padding:14px 0}
+.scroll{overflow-x:auto}
+
+.plan{border-top:1px solid var(--line)}
+.plan div{display:grid;grid-template-columns:130px 1fr;gap:10px;padding:10px 0;border-bottom:1px solid var(--line);font-size:13.5px}
+.plan div b{font-weight:600;color:var(--leaf);font-size:12px}
+.model{background:var(--sun-soft);border-left:3px solid var(--sun);border-radius:0 8px 8px 0;padding:12px 16px;margin:16px 0;font-size:13.5px}
+.model b{display:block;font-size:15.5px;margin-bottom:2px}
+.big{background:var(--sky-soft);border-radius:10px;padding:16px 18px;margin-bottom:16px}
+.big .v{font-size:32px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1.2;color:var(--sky)}
+.big .u{font-size:13.5px;font-weight:400;color:var(--mute);margin-left:4px}
+.big .k{font-size:12px;color:var(--mute);font-weight:600;text-transform:none}
+
+.lib{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px}
+.house{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px 20px;box-shadow:var(--shadow)}
+.house.active{border-color:var(--leaf);box-shadow:0 0 0 1px var(--leaf),var(--shadow)}
+.house h4{margin:0 0 2px;font-size:16px}
+.house .meta{font-size:12.5px;color:var(--mute);margin-bottom:14px}
+.house dl{display:grid;grid-template-columns:auto 1fr;gap:3px 10px;margin:0 0 14px;font-size:13px}
+.house dt{color:var(--mute);font-size:12px}
+.house dd{margin:0;text-align:right;font-variant-numeric:tabular-nums;font-weight:600}
+.bar{height:4px;background:#EDEEE7;border-radius:2px;position:relative;margin:3px 0 14px}
+.bar i{position:absolute;top:-3px;width:10px;height:10px;border-radius:50%;background:var(--panel);border:2.5px solid var(--leaf)}
+.bar .z{position:absolute;left:50%;top:-1px;width:1px;height:6px;background:var(--ink);opacity:.3}
+.chip{display:inline-block;font-size:11px;font-weight:600;border:1px solid var(--line);padding:2px 9px;margin:0 4px 4px 0;border-radius:5px;background:#fff;color:var(--mute)}
+.chip.veg{background:var(--leaf-soft);color:var(--leaf);border-color:transparent}
+.chip.repro{background:var(--sun-soft);color:#8a651e;border-color:transparent}
+.chip.strong{background:var(--coral-soft);color:#8a3a27;border-color:transparent}
+.chip.weak{background:var(--sky-soft);color:#2d5877;border-color:transparent}
+.chip.base{background:#F0F0EA;border-color:transparent}
+
+.wx{display:flex;gap:0;overflow-x:auto;padding-bottom:6px}
+.wx div.day{min-width:64px;text-align:center;font-size:11.5px;padding:9px 3px;border-right:1px solid var(--line);font-variant-numeric:tabular-nums}
+.wx div.day:last-child{border-right:0}
+.wx div.day.past{background:var(--paper);border-radius:8px}
+.wx .d{color:var(--mute)}
+.wx .hi{font-weight:700;color:var(--coral)}
+.wx .lo{color:var(--sky)}
+.wx .rh{color:var(--leaf)}
+.wx .rain{color:var(--water)}
+.wx .rad{color:var(--sun)}
+
+.note{font-size:12.5px;color:var(--mute);border-top:1px solid var(--line);padding-top:12px;margin-top:16px}
+.warn{color:var(--alert);font-weight:600}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:24px;background:var(--forest);color:#fff;
+  padding:11px 20px;border-radius:8px;font-size:13.5px;font-weight:500;opacity:0;pointer-events:none;transition:opacity .2s;z-index:50;max-width:90vw;box-shadow:0 6px 20px rgba(18,52,36,.3)}
+.toast.on{opacity:1}
+details{font-size:13px;margin-top:10px}
+summary{cursor:pointer;color:var(--leaf);font-weight:600}
+details table{margin-top:10px}
+
+.plantgrid{border:1px solid var(--line);border-radius:10px;padding:6px 12px;margin-bottom:14px;background:var(--paper)}
+.prow{display:grid;grid-template-columns:38px 1fr 1fr 64px 64px;gap:7px;align-items:center;padding:6px 0}
+.prow.prowhead{padding:8px 0 4px}
+.prow.prowhead span{font-size:10.5px;color:var(--mute);font-weight:600;text-align:center}
+.prow span{font-size:12px;font-weight:600;color:var(--ink)}
+.prow input{padding:6px 6px;font-size:12.5px;text-align:center}
+
+.scatter{border:1px solid var(--line);border-radius:10px;background:#fff;overflow:hidden}
+.scatter svg{display:block;width:100%;height:auto}
+.reglegend{display:flex;gap:16px;font-size:12px;color:var(--mute);margin-top:8px}
+.reglegend i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px;vertical-align:-1px}
+
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 </head>
 <body>
+
 <header>
-  <h1>🥒 キュウリ液肥・追肥設計アプリ</h1>
-  <p>圃場情報・生育状況・気象条件から、施肥計画のたたき台を作成します</p>
+  <div class="head-in">
+    <h1>きゅうり生育予測ノート<span>摘心栽培／開花節直下の茎径・節間長から先の生育を読む</span></h1>
+    <div class="hsel">
+      <select id="houseSel"></select>
+      <span class="who" id="who">未サインイン</span>
+    </div>
+  </div>
+  <nav>
+    <button data-tab="now" class="on">いまの生育</button>
+    <button data-tab="water">かん水と液肥</button>
+    <button data-tab="reg">回帰分析</button>
+    <button data-tab="lib">ハウス一覧</button>
+    <button data-tab="fert">液肥ライブラリ</button>
+    <button data-tab="env">ハウス内環境</button>
+    <button data-tab="wx">外の気象</button>
+    <button data-tab="sync">同期と書き出し</button>
+  </nav>
 </header>
 
-<div class="container">
-  <div class="toolbar">
-    <button class="primary" onclick="saveData()">💾 パラメータ保存</button>
-    <button class="secondary" onclick="loadData()">📂 保存データ読込</button>
-    <button class="secondary" onclick="downloadJSON()">⬇ JSON出力</button>
-    <button class="secondary" onclick="downloadCSV()">📊 CSV出力</button>
-    <button class="warning" onclick="window.print()">🖨 印刷・PDF</button>
-    <button class="danger" onclick="resetForm()">↺ リセット</button>
-    <input type="file" id="jsonFile" accept=".json" hidden onchange="readJSON(event)">
+<div class="wrap">
+
+<!-- ============ いまの生育 ============ -->
+<section class="tab on" id="tab-now">
+  <div class="hero">
+    <h2>いまの生育</h2>
+    <div class="asof" id="asof">調査データがありません。</div>
+    <div class="meter">
+      <div class="meter-top"><span>草勢の強さ（開花節直下の茎径）</span><b id="stemVal">—</b></div>
+      <div class="track stem"><div class="zero"></div><div class="pin" id="stemPin" style="left:50%"></div><div class="arrow" id="stemArrow" style="left:50%"></div></div>
+      <div class="ends"><span>細い・草勢が弱い</span><span>太い・草勢が強い</span></div>
+      <div class="verdict" id="stemVerdict"></div>
+    </div>
+    <div class="meter">
+      <div class="meter-top"><span>成長のバランス（開花節直下の節間長）</span><b id="nodeVal">—</b></div>
+      <div class="track bal"><div class="zero"></div><div class="pin" id="nodePin" style="left:50%"></div><div class="arrow" id="nodeArrow" style="left:50%"></div></div>
+      <div class="ends"><span>短い・生殖成長</span><span>長い・栄養成長</span></div>
+      <div class="verdict" id="nodeVerdict"></div>
+    </div>
   </div>
 
-  <div class="tabs">
-    <button class="tab active" data-tab="basic">① 基本情報</button>
-    <button class="tab" data-tab="growth">② 生育・着果</button>
-    <button class="tab" data-tab="weather">③ 気象</button>
-    <button class="tab" data-tab="library">④ 液肥ライブラリ</button>
-    <button class="tab" data-tab="fertilizer">⑤ 施肥条件</button>
-    <button class="tab" data-tab="result">⑥ 計算結果</button>
+  <div class="cols">
+    <div>
+      <div class="card">
+        <h3>生育調査を記録する</h3>
+        <p class="sub">7日間隔で実施。中庸な株を6株選び、開花節直下の茎径・節間長・開花数・着果数を測ります。8日以上あけると予測の精度が落ちます。</p>
+        <label><span>調査日</span><input type="date" id="fDate"></label>
+        <span style="display:block;color:var(--mute);margin-bottom:6px;font-size:12px">株ごとの記録</span>
+        <div class="plantgrid" id="plantGrid">
+          <div class="prow prowhead"><span></span><span>茎径mm</span><span>節間長cm</span><span>開花数</span><span>着果数</span></div>
+          <div class="prow"><span>株1</span><input type="number" step="0.1" class="pstem"><input type="number" step="0.1" class="pnode"><input type="number" step="1" min="0" class="pflower"><input type="number" step="1" min="0" class="pfruit"></div>
+          <div class="prow"><span>株2</span><input type="number" step="0.1" class="pstem"><input type="number" step="0.1" class="pnode"><input type="number" step="1" min="0" class="pflower"><input type="number" step="1" min="0" class="pfruit"></div>
+          <div class="prow"><span>株3</span><input type="number" step="0.1" class="pstem"><input type="number" step="0.1" class="pnode"><input type="number" step="1" min="0" class="pflower"><input type="number" step="1" min="0" class="pfruit"></div>
+          <div class="prow"><span>株4</span><input type="number" step="0.1" class="pstem"><input type="number" step="0.1" class="pnode"><input type="number" step="1" min="0" class="pflower"><input type="number" step="1" min="0" class="pfruit"></div>
+          <div class="prow"><span>株5</span><input type="number" step="0.1" class="pstem"><input type="number" step="0.1" class="pnode"><input type="number" step="1" min="0" class="pflower"><input type="number" step="1" min="0" class="pfruit"></div>
+          <div class="prow"><span>株6</span><input type="number" step="0.1" class="pstem"><input type="number" step="0.1" class="pnode"><input type="number" step="1" min="0" class="pflower"><input type="number" step="1" min="0" class="pfruit"></div>
+        </div>
+        <div class="check"><input type="checkbox" id="fWeak"><label for="fWeak" style="margin:0">弱小枝（節間長4cm未満）を含む<br><span style="display:inline;color:var(--mute)">集計を中央値に切り替えます</span></label></div>
+        <label><span>収量 kg/10a（任意）</span><input type="number" id="fYield" min="0" step="0.1"></label>
+        <label><span>メモ（任意）</span><textarea id="fMemo" placeholder="摘心、摘葉、天候など"></textarea></label>
+        <div class="btnrow"><button id="btnAdd">記録を保存</button><button class="ghost" id="btnClearForm">入力を消す</button></div>
+      </div>
+
+      <div class="card">
+        <h3>カレンダーへ登録</h3>
+        <p class="sub" id="calSub">調査結果と次の予定を終日予定として書き出します。</p>
+        <div class="btnrow">
+          <button class="ghost" id="btnGcalLast">最新の記録を登録</button>
+          <button class="ghost" id="btnGcalNext">次回の予定を登録</button>
+          <button class="ghost" id="btnIcs">.icsで書き出す</button>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="card">
+        <h3>向こう1か月の生育予測</h3>
+        <p class="sub">茎径は16日、節間長は12日で傾向が切り替わります。</p>
+        <div id="forecast"><p class="empty">生育調査が3回そろうと予測を表示します。</p></div>
+      </div>
+      <div class="card">
+        <h3>推奨する栽培管理</h3>
+        <p class="sub">平準点から離れる予測なら管理を強く、近づくなら弱くします。</p>
+        <div id="plan"><p class="empty">予測が出ると管理内容を提示します。</p></div>
+        <details>
+          <summary>栽培管理内容の早見表（表2-7）を見る</summary>
+          <div class="scroll"><table>
+            <tr><th>項目</th><th>草勢を強く</th><th>草勢を弱く</th><th>栄養成長へ</th><th>生殖成長へ</th></tr>
+            <tr><td>平均気温</td><td>下げる</td><td>上げる</td><td>—</td><td>—</td></tr>
+            <tr><td>温度変化</td><td>—</td><td>—</td><td>夕方緩徐降温</td><td>夕方急速降温</td></tr>
+            <tr><td>昼夜温差</td><td>夜温を低く</td><td>夜温を高く</td><td>DIFを小さく</td><td>DIFを大きく</td></tr>
+            <tr><td>CO₂施用</td><td>外気以上＋朝の高濃度</td><td>外気程度</td><td>—</td><td>—</td></tr>
+            <tr><td>かん水</td><td>量を多く</td><td>量を少なく</td><td>時間を長く</td><td>時間を短く</td></tr>
+            <tr><td>追肥</td><td>N多K少（N/K 1.2〜1.5）</td><td>N少K多（0.6〜0.9）</td><td>EC 1.2〜1.5</td><td>EC 1.8〜2.2</td></tr>
+          </table></div>
+        </details>
+      </div>
+      <div class="card">
+        <h3>このハウスの調査記録</h3>
+        <p class="sub" id="recSub">まだ記録がありません。</p>
+        <div class="scroll" id="records"></div>
+      </div>
+    </div>
   </div>
+</section>
 
-  <section id="basic" class="panel active">
-    <div class="card">
-      <h2>📍 位置情報・圃場情報</h2>
-      <div class="location-box">
-        <div class="inline">
-          <button class="primary" onclick="getLocation()">現在地を取得</button>
-          <button class="secondary" onclick="manualLookupPlace()">📍 地名を確認</button>
-        </div>
-        <div class="small" id="locationStatus">位置情報はブラウザの許可が必要です。緯度・経度は手動入力もできます。</div>
-        <div class="location-values">
-          <div><span class="small">緯度</span><input id="latitude" type="number" step="0.000001" placeholder="例：36.05"></div>
-          <div><span class="small">経度</span><input id="longitude" type="number" step="0.000001" placeholder="例：139.55"></div>
-          <div><span class="small">地名・大字</span><div id="placeName" class="readonly">未取得</div></div>
-        </div>
+<!-- ============ かん水と液肥 ============ -->
+<section class="tab" id="tab-water">
+  <div class="cols">
+    <div>
+      <div class="card">
+        <h3>きょうの目安</h3>
+        <p class="sub" id="wtSub">生育予測と日射予報から計算します。</p>
+        <div id="wtToday"><p class="empty">生育調査3回と気象データがそろうと表示します。</p></div>
       </div>
-      <div class="grid" style="margin-top:15px">
-        <div class="field">
-          <label for="fieldName">圃場名</label>
-          <input id="fieldName" placeholder="例：第1ハウス">
-        </div>
-        <div class="field">
-          <label for="environment">栽培環境</label>
-          <select id="environment">
-            <option>ハウス</option><option>露地</option><option>雨よけ</option>
-            <option>植物工場</option><option>その他</option>
-          </select>
-        </div>
-        <div class="field">
-          <label for="plants">株数</label>
-          <div class="inline"><input id="plants" type="number" min="0" value="100"><span class="unit">株</span></div>
-        </div>
-        <div class="field">
-          <label for="area">面積</label>
-          <div class="inline"><input id="area" type="number" min="0" step="0.1" value="50"><span class="unit">m²</span></div>
-        </div>
-        <div class="field">
-          <label>株数密度</label>
-          <input id="densityM2" class="readonly" readonly>
-          <span class="unit">株/m²</span>
-        </div>
-        <div class="field">
-          <label>株数密度</label>
-          <input id="densityTsubo" class="readonly" readonly>
-          <span class="unit">株/坪</span>
-        </div>
-        <div class="field">
-          <label for="plantingDate">定植日</label>
-          <input id="plantingDate" type="date">
-        </div>
-        <div class="field">
-          <label for="stage">生育ステージ</label>
-          <select id="stage">
-            <option>活着後</option><option>つる伸長期</option>
-            <option>開花・着果期</option><option>収穫初期</option>
-            <option selected>収穫盛期</option><option>終盤</option>
-          </select>
-        </div>
-        <div class="field">
-          <label for="method">施肥方式</label>
-          <select id="method">
-            <option>灌水同時施肥</option>
-            <option selected>点滴灌水施肥</option>
-            <option>培地・養液施用</option>
-            <option>貯液タンク・液肥混入器</option>
-          </select>
-        </div>
-        <div class="field full">
-          <label>管理手法</label>
-          <div class="checks">
-            <label class="check"><input type="checkbox" name="management" value="定期追肥">定期追肥</label>
-            <label class="check"><input type="checkbox" name="management" value="少量多回数" checked>少量多回数</label>
-            <label class="check"><input type="checkbox" name="management" value="灌水連動" checked>灌水連動</label>
-            <label class="check"><input type="checkbox" name="management" value="生育ステージ別" checked>生育ステージ別</label>
-            <label class="check"><input type="checkbox" name="management" value="日射・天候連動">日射・天候連動</label>
-            <label class="check"><input type="checkbox" name="management" value="草勢・着果連動">草勢・着果連動</label>
-            <label class="check"><input type="checkbox" name="management" value="分析値連動">分析値連動</label>
-          </div>
-        </div>
-        <div class="field">
-          <label for="planStart">計画開始日</label>
-          <input id="planStart" type="date">
-        </div>
-        <div class="field">
-          <label for="planEnd">計画終了日</label>
-          <input id="planEnd" type="date">
-        </div>
-        <div class="field">
-          <label>計画日数</label>
-          <input id="planDays" class="readonly" readonly>
-          <span class="unit">日</span>
-        </div>
+      <div class="card">
+        <h3>計算の前提</h3>
+        <p class="sub" style="margin:0">日射比例かん水の基本は100〜120 mL/株/MJ、草勢を強めるときは140〜160、弱めるときは70〜90（表2-3）。ここに飽差の補正をかけ、株あたりの実数にしています。飽差が高い日は蒸散が進むため増やし、低い日は減らします。かん水回数は1日1〜14回の範囲で、日射量から割り振ります。</p>
       </div>
     </div>
-    <div class="nav-buttons"><span></span><button class="primary" onclick="nextTab('growth')">次へ →</button></div>
-  </section>
-
-  <section id="growth" class="panel">
-    <div class="card">
-      <h2>🌱 生育情報</h2>
-      <div class="grid">
-        <div class="field">
-          <label for="lai">LAI</label>
-          <input id="lai" type="number" min="0" step="0.1" value="2.5">
-          <span class="unit">葉面積指数</span>
-        </div>
-        <div class="field">
-          <label for="expectedYield">期間内予定収量</label>
-          <div class="inline"><input id="expectedYield" type="number" min="0" step="0.1" value="150"><span class="unit">kg</span></div>
-        </div>
-        <div class="field">
-          <label for="vigor">草勢</label>
-          <select id="vigor"><option>弱い</option><option selected>適正</option><option>強い</option></select>
-        </div>
-        <div class="field">
-          <label for="leafColor">葉色</label>
-          <select id="leafColor"><option>淡い</option><option selected>適正</option><option>濃い</option></select>
-        </div>
-        <div class="field">
-          <label for="fruitGrowth">果実肥大</label>
-          <select id="fruitGrowth"><option>遅い</option><option selected>適正</option><option>旺盛</option></select>
-        </div>
-        <div class="field">
-          <label for="fruitStatus">着果状況</label>
-          <select id="fruitStatus"><option>少ない</option><option selected>適正</option><option>多い</option></select>
-        </div>
-        <div class="field">
-          <label for="internode">節間長</label>
-          <select id="internode"><option>短い</option><option selected>普通</option><option>長い</option></select>
-        </div>
-        <div class="field">
-          <label for="tendril">生長点・巻きひげの状態</label>
-          <select id="tendril">
-            <option>短く下向き（着果型）</option>
-            <option selected>ふつう</option>
-            <option>長く上向き（勢い旺盛）</option>
-          </select>
-        </div>
+    <div>
+      <div class="card">
+        <h3>14日間のかん水計画</h3>
+        <p class="sub">日射予報に応じて日ごとに変わります。天気が変わったら取り直してください。</p>
+        <div class="scroll" id="wtTable"><p class="empty">「外の気象」タブで予報を取得してください。</p></div>
+        <div class="btnrow" style="margin-top:14px"><button class="ghost small" id="btnWtCsv">計画をCSVで書き出す</button></div>
+      </div>
+      <div class="card">
+        <h3>いま使う液肥</h3>
+        <p class="sub">登録した液肥から、いまの方針に合うものを選びます。</p>
+        <div id="fertPick"><p class="empty">液肥ライブラリに登録すると候補を出します。</p></div>
       </div>
     </div>
+  </div>
+</section>
 
-    <div class="card">
-      <h2>🌸 雌花数・着果率（株ごと・最大6株）</h2>
-      <p class="small">1株ごとの雌花数・着果数を入力すると、平均雌花数・平均着果率を自動計算します。株によるバラつきを把握しやすくなります。</p>
-      <div style="overflow:auto">
-        <table class="mini-table">
-          <thead><tr><th>株</th><th>雌花数（花/日）</th><th>着果数（果/日）</th><th>着果率（%）</th></tr></thead>
-          <tbody>
-            <tr><td>1株目</td><td><input type="number" min="0" step="1" id="female_1" value="10" oninput="updateGrowthAverages()"></td><td><input type="number" min="0" step="1" id="fruitset_1" value="8" oninput="updateGrowthAverages()"></td><td><span id="rate_1">-</span></td></tr>
-            <tr><td>2株目</td><td><input type="number" min="0" step="1" id="female_2" value="10" oninput="updateGrowthAverages()"></td><td><input type="number" min="0" step="1" id="fruitset_2" value="8" oninput="updateGrowthAverages()"></td><td><span id="rate_2">-</span></td></tr>
-            <tr><td>3株目</td><td><input type="number" min="0" step="1" id="female_3" value="10" oninput="updateGrowthAverages()"></td><td><input type="number" min="0" step="1" id="fruitset_3" value="8" oninput="updateGrowthAverages()"></td><td><span id="rate_3">-</span></td></tr>
-            <tr><td>4株目</td><td><input type="number" min="0" step="1" id="female_4" value="10" oninput="updateGrowthAverages()"></td><td><input type="number" min="0" step="1" id="fruitset_4" value="8" oninput="updateGrowthAverages()"></td><td><span id="rate_4">-</span></td></tr>
-            <tr><td>5株目</td><td><input type="number" min="0" step="1" id="female_5" value="10" oninput="updateGrowthAverages()"></td><td><input type="number" min="0" step="1" id="fruitset_5" value="8" oninput="updateGrowthAverages()"></td><td><span id="rate_5">-</span></td></tr>
-            <tr><td>6株目</td><td><input type="number" min="0" step="1" id="female_6" value="10" oninput="updateGrowthAverages()"></td><td><input type="number" min="0" step="1" id="fruitset_6" value="8" oninput="updateGrowthAverages()"></td><td><span id="rate_6">-</span></td></tr>
-          </tbody>
-          <tfoot>
-            <tr style="font-weight:700;background:#eaf5ee">
-              <td>平均</td><td><span id="avgFemaleFlowers">-</span></td><td>-</td><td><span id="avgFruitSetRate">-</span></td>
-            </tr>
-          </tfoot>
-        </table>
+<!-- ============ 回帰分析 ============ -->
+<section class="tab" id="tab-reg">
+  <div class="cols">
+    <div>
+      <div class="card pop-blue">
+        <h3>回帰分析</h3>
+        <p class="sub">環境データ（CSV取込）と生育調査データを組にして、単回帰で関係を見ます。</p>
+        <label><span>Y：生育側（目的変数）</span><select id="regY">
+          <option value="stem">茎径（草勢） mm</option><option value="node">節間長（バランス） cm</option>
+          <option value="flower">開花数</option><option value="fruit">着果数</option><option value="yield">収量 kg/10a</option></select></label>
+        <label><span>X：環境側（説明変数）</span><select id="regX">
+          <option value="tmean">平均気温 ℃</option><option value="tday">昼温 ℃</option><option value="tnight">夜温 ℃</option>
+          <option value="dif">DIF（昼夜温差） ℃</option><option value="rh">相対湿度 %</option><option value="vpd">飽差 g/m³</option>
+          <option value="co2">CO₂濃度 ppm</option></select></label>
+        <label><span>ラグ日数：<b id="regLagVal">7日</b>（環境の変化から何日後の生育を見るか）</span>
+          <input type="range" id="regLag" min="0" max="30" value="7" step="1"></label>
+        <div class="check"><input type="checkbox" id="regAuto" checked><label for="regAuto" style="margin:0">0〜30日を自動で探索し、最も相関が強いラグ日数を使う</label></div>
+        <div class="btnrow"><button id="btnRegRun">計算する</button><button class="ghost" id="btnRegCsv">組データをCSVで書き出す</button></div>
+      </div>
+      <div class="card">
+        <h3>読み方</h3>
+        <p class="sub" style="margin:0">環境の変化が生育に表れるまで7〜14日かかることが分かっています（マニュアル追補1）。まずは自動探索でどのラグが強く効いているかを見て、そこから茎径は気温・DIFとの関係を、節間長は湿度・飽差との関係を確認するのがおすすめです。r（相関係数）は−1〜1、絶対値が0.5を超えると関係ありとみなせます。n（組の数）が少ないと数値がぶれやすいので、5組未満のときは参考程度に。</p>
       </div>
     </div>
-
-    <div class="card">
-      <h2>🔬 栄養成長・生殖成長 診断</h2>
-      <p class="small">草勢・葉色・果実肥大・着果状況・節間長・生長点の状態・平均着果率・平均雌花数から、栄養成長型／生殖成長型／バランス型を簡易判定します。判定結果に応じて④液肥ライブラリでおすすめの液肥タイプを表示します。</p>
-      <div id="diagnosisBox" class="note">診断結果はここに表示されます。</div>
-    </div>
-
-    <div class="nav-buttons">
-      <button class="secondary" onclick="nextTab('basic')">← 戻る</button>
-      <button class="primary" onclick="nextTab('weather')">次へ →</button>
-    </div>
-  </section>
-
-  <section id="weather" class="panel">
-    <div class="card">
-      <h2>☀️ 気象パラメータ（Open-Meteo）</h2>
-      <div class="inline" style="margin-bottom:10px">
-        <button class="primary" onclick="fetchOpenMeteo()">📡 Open-Meteoから気象データを取得</button>
+    <div>
+      <div class="card" id="regResult"><p class="empty">環境データ（CSV取込）と生育調査データが3組以上そろうと計算できます。</p></div>
+      <div class="card" id="regScatterCard" style="display:none">
+        <h3>散布図</h3>
+        <div class="scatter" id="regScatter"></div>
+        <div class="reglegend"><span><i style="background:var(--sky)"></i>記録</span><span><i style="background:var(--coral);border-radius:2px"></i>回帰直線</span></div>
       </div>
-      <div class="small" id="weatherStatus">①基本情報タブで緯度・経度を取得／入力すると、本日の気象データを自動取得できます。値は取得後も手動で修正できます。</div>
-      <div class="grid" style="margin-top:12px">
-        <div class="field">
-          <label for="radiation">短波放射</label>
-          <div class="inline"><input id="radiation" type="number" min="0" step="0.1" value="12.5"><span class="unit">MJ/m²/日</span></div>
-        </div>
-        <div class="field">
-          <label for="temperature">平均気温</label>
-          <div class="inline"><input id="temperature" type="number" step="0.1" value="27"><span class="unit">℃</span></div>
-        </div>
-        <div class="field">
-          <label for="humidity">平均湿度</label>
-          <div class="inline"><input id="humidity" type="number" min="0" max="100" step="1" value="75"><span class="unit">%</span></div>
-        </div>
-        <div class="field">
-          <label for="sunshine">日照時間</label>
-          <div class="inline"><input id="sunshine" type="number" min="0" step="0.1" value="6.5"><span class="unit">時間/日</span></div>
-        </div>
-        <div class="field">
-          <label for="rainfall">降水量</label>
-          <div class="inline"><input id="rainfall" type="number" min="0" step="0.1" value="0"><span class="unit">mm/日</span></div>
-        </div>
-        <div class="field">
-          <label for="weather">天候区分</label>
-          <select id="weather">
-            <option>晴れ</option><option selected>曇り</option><option>雨</option><option>猛暑</option>
-          </select>
-        </div>
-      </div>
-      <p class="note">気象値はOpen-Meteo（api.open-meteo.com、APIキー不要）の当日予報値を取得します。取得できない場合や現地の実測値がある場合は、手動で上書きしてください。</p>
-    </div>
-    <div class="nav-buttons">
-      <button class="secondary" onclick="nextTab('growth')">← 戻る</button>
-      <button class="primary" onclick="nextTab('library')">次へ →</button>
-    </div>
-  </section>
-
-  <section id="library" class="panel">
-    <div class="card">
-      <h2>🧪 液肥ライブラリ</h2>
-      <div id="diagnosisBoxLib" class="note" style="margin-bottom:14px">診断結果はここに表示されます。</div>
-      <div id="libraryList" class="lib-grid"></div>
-
-      <div class="add-fert-form">
-        <h2 style="border:none;padding:0;margin-bottom:10px">➕ 液肥をライブラリに追加</h2>
-        <div class="grid">
-          <div class="field full">
-            <label for="custName">液肥名</label>
-            <input id="custName" placeholder="例：〇〇社 液肥1号">
-          </div>
-          <div class="field">
-            <label for="custN">N（チッソ）%</label>
-            <input id="custN" type="number" min="0" step="0.1" value="10">
-          </div>
-          <div class="field">
-            <label for="custP">P（リン酸）%</label>
-            <input id="custP" type="number" min="0" step="0.1" value="10">
-          </div>
-          <div class="field">
-            <label for="custK">K（カリ）%</label>
-            <input id="custK" type="number" min="0" step="0.1" value="10">
-          </div>
-          <div class="field">
-            <label for="custType">タイプ</label>
-            <select id="custType">
-              <option value="vegetative">栄養促進型（高チッソ）</option>
-              <option value="reproductive">生殖促進型（高リン酸・カリ）</option>
-              <option value="balanced" selected>バランス型</option>
-            </select>
-          </div>
-          <div class="field full">
-            <label for="custNote">メモ・使用場面</label>
-            <input id="custNote" placeholder="例：着果負担が大きく草勢が落ちてきた時に">
-          </div>
-        </div>
-        <button class="primary" style="margin-top:12px" onclick="addCustomFertilizer()">ライブラリに追加</button>
+      <div class="card" id="regScanCard" style="display:none">
+        <h3>ラグ日数ごとの相関</h3>
+        <p class="sub">0〜30日、それぞれのラグでの相関係数 r です。山になっているところが「効き始めるまでの日数」の目安です。</p>
+        <div class="scroll" id="regScanTable"></div>
       </div>
     </div>
-    <div class="nav-buttons">
-      <button class="secondary" onclick="nextTab('weather')">← 戻る</button>
-      <button class="primary" onclick="nextTab('fertilizer')">次へ →</button>
-    </div>
-  </section>
+  </div>
+</section>
 
-  <section id="fertilizer" class="panel">
-    <div class="card">
-      <h2>💧 灌水・肥料・分析条件</h2>
-      <div id="diagnosisBoxMini" class="note" style="margin-bottom:10px"></div>
-      <div id="selectedFertilizerSummary" class="note" style="margin-bottom:16px">液肥が選択されていません。④液肥ライブラリタブから選択してください。</div>
-      <input type="hidden" id="selectedFertilizerId" value="">
-      <div class="grid">
-        <div class="field">
-          <label for="waterPerPlant">1株あたり灌水量</label>
-          <div class="inline"><input id="waterPerPlant" type="number" min="0" step="0.1" value="1.5"><span class="unit">L/株/回</span></div>
+<!-- ============ ハウス一覧 ============ -->
+<section class="tab" id="tab-lib">
+  <div class="cols">
+    <div>
+      <div class="card">
+        <h3 id="hfTitle">ハウスを追加</h3>
+        <p class="sub">緯度経度は気象予報の取得に、株数はかん水量の計算に使います。</p>
+        <label><span>ハウス名</span><input type="text" id="hName" placeholder="第1ハウス"></label>
+        <div class="row">
+          <label><span>作型</span><select id="hType"><option>早熟</option><option>抑制</option><option>促成</option><option>その他</option></select></label>
+          <label><span>品種</span><input type="text" id="hVariety" placeholder="兼備2号"></label>
         </div>
-        <div class="field">
-          <label for="waterTimes">灌水回数</label>
-          <div class="inline"><input id="waterTimes" type="number" min="1" step="1" value="5"><span class="unit">回/日</span></div>
+        <div class="row">
+          <label><span>緯度</span><input type="number" id="hLat" step="0.0001" placeholder="40.2065"></label>
+          <label><span>経度</span><input type="number" id="hLon" step="0.0001" placeholder="141.4356"></label>
         </div>
-        <div class="field">
-          <label for="fertTimes">施肥回数</label>
-          <div class="inline"><input id="fertTimes" type="number" min="1" step="1" value="5"><span class="unit">回/日</span></div>
+        <div class="btnrow" style="margin-bottom:14px"><button class="ghost small" id="btnGeo">現在地から入れる</button></div>
+        <div class="row">
+          <label><span>定植日</span><input type="date" id="hPlant"></label>
+          <label><span>栽培終了予定</span><input type="date" id="hEnd"></label>
         </div>
-        <div class="field">
-          <label for="targetN">基準目標N濃度</label>
-          <div class="inline"><input id="targetN" type="number" min="0" step="1" value="120"><span class="unit">mg/L</span></div>
+        <div class="row">
+          <label><span>栽植株数（株/10a）</span><input type="number" id="hDensity" step="1" placeholder="1111"></label>
+          <label><span>栽培面積（a）</span><input type="number" id="hArea" step="0.1" placeholder="5.4"></label>
         </div>
-        <div class="field">
-          <label for="fertilizerN">液肥N含有率（ライブラリ選択で自動入力／手動修正可）</label>
-          <div class="inline"><input id="fertilizerN" type="number" min="0.1" step="0.1" value="10"><span class="unit">%</span></div>
-        </div>
-        <div class="field">
-          <label for="stockRatio">液肥原液倍率</label>
-          <div class="inline"><input id="stockRatio" type="number" min="1" step="1" value="100"><span class="unit">倍</span></div>
-        </div>
-        <div class="field">
-          <label for="rawEC">原水EC</label>
-          <div class="inline"><input id="rawEC" type="number" min="0" step="0.01" value="0.25"><span class="unit">dS/m</span></div>
-        </div>
-        <div class="field">
-          <label for="drainEC">排液EC</label>
-          <div class="inline"><input id="drainEC" type="number" min="0" step="0.01" value="1.8"><span class="unit">dS/m</span></div>
-        </div>
-        <div class="field">
-          <label for="targetEC">目標排液EC</label>
-          <div class="inline"><input id="targetEC" type="number" min="0" step="0.01" value="2.0"><span class="unit">dS/m</span></div>
-        </div>
+        <label><span>被覆・設備</span><input type="text" id="hFacility" placeholder="農PO一重・温風器・点滴チューブ"></label>
+        <label><span>メモ</span><textarea id="hMemo"></textarea></label>
+        <div class="btnrow"><button id="btnHouseSave">保存</button><button class="ghost" id="btnHouseNew">新規入力に戻す</button></div>
       </div>
-      <p class="note">本計算は設計のたたき台です。実際の施肥では、肥料製品ラベル、原水分析、土壌・培地・排液EC、地域の栽培指導基準を優先してください。</p>
     </div>
-    <div class="nav-buttons">
-      <button class="secondary" onclick="nextTab('library')">← 液肥ライブラリへ</button>
-      <button class="primary" onclick="calculateAndShow()">計算結果を見る →</button>
-    </div>
-  </section>
+    <div><div class="lib" id="lib"></div></div>
+  </div>
+</section>
 
-  <section id="result" class="panel">
-    <div class="card">
-      <h2>📊 施肥計算結果</h2>
-      <div id="resultSummary" class="result-grid"></div>
-      <div style="margin-top:18px">
-        <h3>補正内容</h3>
-        <div id="factorMessage" class="note"></div>
+<!-- ============ 液肥ライブラリ ============ -->
+<section class="tab" id="tab-fert">
+  <div class="cols">
+    <div>
+      <div class="card">
+        <h3 id="ffTitle">液肥を登録</h3>
+        <p class="sub">成分から N/K 比を計算し、方針に合うものを自動で選べるようにします。</p>
+        <label><span>製品名</span><input type="text" id="pName" placeholder="住友液肥1号"></label>
+        <div class="row3">
+          <label><span>N（%）</span><input type="number" id="pN" step="0.1" placeholder="10"></label>
+          <label><span>P（%）</span><input type="number" id="pP" step="0.1" placeholder="4"></label>
+          <label><span>K（%）</span><input type="number" id="pK" step="0.1" placeholder="4"></label>
+        </div>
+        <p class="sub" id="pRatio" style="margin:-8px 0 14px">N/K 比：—</p>
+        <div class="row">
+          <label><span>標準希釈倍率</span><input type="number" id="pDil" step="10" placeholder="500"></label>
+          <label><span>その希釈でのEC（mS/cm）</span><input type="number" id="pEc" step="0.1" placeholder="1.5"></label>
+        </div>
+        <span style="font-size:12.5px;color:var(--mute)">使いどころ</span>
+        <div class="tags" style="margin-top:4px">
+          <label><input type="checkbox" class="ftag" value="strong">草勢を強めるとき</label>
+          <label><input type="checkbox" class="ftag" value="weak">草勢を弱めるとき</label>
+          <label><input type="checkbox" class="ftag" value="veg">栄養成長へ傾けるとき</label>
+          <label><input type="checkbox" class="ftag" value="repro">生殖成長へ傾けるとき</label>
+          <label><input type="checkbox" class="ftag" value="base">通常・基本</label>
+        </div>
+        <label><span>在庫・入手先など</span><textarea id="pMemo"></textarea></label>
+        <div class="btnrow"><button id="btnFertSave">保存</button><button class="ghost" id="btnFertNew">新規入力に戻す</button>
+          <button class="ghost" id="btnFertSeed">よく使う3種を入れる</button></div>
       </div>
     </div>
-    <div class="card">
-      <h2>🗓 期間内施肥計画</h2>
-      <div style="overflow:auto">
-        <table>
-          <thead><tr><th>日</th><th>回</th><th>灌水量</th><th>原液量</th><th>メモ</th></tr></thead>
-          <tbody id="planTable"></tbody>
-        </table>
+    <div>
+      <div class="card">
+        <h3>登録した液肥</h3>
+        <p class="sub" id="fertSub">まだ登録がありません。</p>
+        <div class="scroll" id="fertTable"></div>
+        <p class="note">N/K 比 1.2〜1.5 は草勢を強める側、0.6〜0.9 は弱める側の目安です（表2-5）。給液ECは栄養成長に傾けるなら1.2〜1.5、生殖成長なら1.8〜2.2、上限は2.6で数日単位にとどめます（表2-6）。</p>
       </div>
     </div>
-    <div class="card">
-      <h2>⚠️ 使用上の注意</h2>
-      <ul>
-        <li>表示値は入力条件から算出した参考値です。</li>
-        <li>液肥の混入量は、実際の混入器の仕様・吐出量・原液濃度で必ず確認してください。</li>
-        <li>排液ECが高い場合は施肥量を減らすだけでなく、灌水量、排水性、根域環境も確認してください。</li>
-        <li>雨天・高温・萎れ・根傷みがある場合は、施肥よりも灌水、排水、根域状態を優先してください。</li>
-        <li>養液栽培では、NだけでなくP・K・Ca・Mg・微量要素・pHのバランス確認が必要です。</li>
-        <li>栄養成長・生殖成長の診断は簡易的な目安です。最終判断は実際の生育観察に基づいて行ってください。</li>
-      </ul>
+  </div>
+</section>
+
+<!-- ============ ハウス内環境 ============ -->
+<section class="tab" id="tab-env">
+  <div class="cols">
+    <div>
+      <div class="card">
+        <h3>環境データを読み込む</h3>
+        <p class="sub">記録計のCSVを、選択中のハウスに取り込みます。気温だけ、湿度だけといった1項目ずつの書き出しでかまいません。<b>気温のCSVと湿度のCSVは別々に、1回ずつ取り込んでください。</b>同じ時刻の値は項目ごとに上書きされるので、両方取り込むと自動で飽差が計算されます。複数ファイルの選択は、同じ項目を日付違いで分けて書き出した場合にまとめて読むためのものです。</p>
+        <label><span>CSVファイル</span><input type="file" id="csvFile" accept=".csv,.txt" multiple style="font-size:13px"></label>
+        <div id="csvMap" style="display:none">
+          <p class="sub" style="margin-bottom:10px" id="csvGuess"></p>
+          <label><span>日時の列</span><select id="colDT"></select></label>
+          <label><span>気温（℃）</span><select id="colT"></select></label>
+          <label><span>相対湿度（%）</span><select id="colH"></select></label>
+          <label><span>CO₂（ppm）</span><select id="colC"></select></label>
+          <label><span>日射（W/m²）</span><select id="colR"></select></label>
+          <div class="btnrow"><button id="btnCsvImport">取り込む</button></div>
+          <p class="note" id="csvInfo"></p>
+        </div>
+      </div>
+      <div class="card">
+        <h3>集計のしかた</h3>
+        <p class="sub" style="margin:0">読み込んだ値はまず1時間ごとに平均し、そこから日別の平均・最高・最低・昼温（6〜18時）・夜温・DIF・平均湿度・平均飽差を出します。1分間隔でも10分間隔でもそのまま読めます。飽差は気温と相対湿度がそろった時刻だけで計算します。</p>
+      </div>
     </div>
-    <div class="nav-buttons">
-      <button class="secondary" onclick="nextTab('fertilizer')">← 条件を修正</button>
-      <button class="primary" onclick="window.print()">🖨 印刷・PDF保存</button>
+    <div>
+      <div class="card">
+        <h3>ハウス内の推移</h3>
+        <p class="sub" id="envSub">環境データがありません。</p>
+        <div class="scroll" id="envTable"></div>
+        <div class="btnrow" style="margin-top:14px">
+          <button class="ghost small" id="btnEnvCsv">日別をCSVで書き出す</button>
+          <button class="ghost small" id="btnEnvClear">このハウスの環境データを消す</button>
+        </div>
+      </div>
+      <div class="card">
+        <h3>環境と生育のずれ</h3>
+        <p class="sub">環境を変えても生育に表れるまで7〜14日かかります。調査日の直前14日間の環境をあわせて表示します。</p>
+        <div class="scroll" id="lagTable"><p class="empty">環境データと調査記録がそろうと表示します。</p></div>
+      </div>
     </div>
-  </section>
+  </div>
+</section>
+
+<!-- ============ 外の気象 ============ -->
+<section class="tab" id="tab-wx">
+  <div class="card">
+    <h3>外気象の実績と予報</h3>
+    <p class="sub">Open-Meteoから、過去7日と先14日の気温・相対湿度・短波放射・雨量を取得します。</p>
+    <div class="btnrow" style="margin-bottom:16px">
+      <button id="btnWx">取得する</button><button class="ghost" id="btnWxCsv">CSVで書き出す</button>
+    </div>
+    <div id="wx"><p class="empty">ハウスの緯度経度を設定してから取得してください。</p></div>
+  </div>
+  <div class="card">
+    <h3>施設内気温の目安</h3>
+    <p class="sub">外気予報にハウスの昇温分を足した見積もりです。実測CSVがあれば直近の実測から昇温分を補正します。</p>
+    <div id="wxIn"><p class="empty">先に外気象を取得してください。</p></div>
+  </div>
+</section>
+
+<!-- ============ 同期と書き出し ============ -->
+<section class="tab" id="tab-sync">
+  <div class="cols">
+    <div>
+      <div class="card">
+        <h3>Googleアカウントでサインイン</h3>
+        <p class="sub">サインインすると、自分のスプレッドシートに記録を保存し、別の端末から同じデータを開けます。カレンダーへの登録も1回の操作で済みます。</p>
+        <label><span>OAuth クライアントID</span><input type="text" id="gClient" placeholder="xxxxxxxx.apps.googleusercontent.com"></label>
+        <div class="btnrow">
+          <button id="btnSignIn">サインイン</button>
+          <button class="ghost" id="btnSignOut">サインアウト</button>
+        </div>
+        <p class="note" id="authNote">サインインしていません。</p>
+      </div>
+      <div class="card">
+        <h3>スプレッドシートと同期</h3>
+        <p class="sub">サインインしたうえで、保存先のスプレッドシートを作るか、既存のIDを指定します。</p>
+        <label><span>スプレッドシートID</span><input type="text" id="gSheet" placeholder="作成すると自動で入ります"></label>
+        <div class="btnrow" style="margin-bottom:12px">
+          <button class="ghost" id="btnMakeSheet">新しく作る</button>
+          <button class="ghost" id="btnOpenSheet">シートを開く</button>
+        </div>
+        <div class="check"><input type="checkbox" id="syncAuto"><label for="syncAuto" style="margin:0">記録を保存したら自動で送る</label></div>
+        <div class="btnrow">
+          <button id="btnPush">この端末の内容を送る</button>
+          <button class="ghost" id="btnPull">シートから取り込む</button>
+        </div>
+        <p class="note" id="syncNote">まだ同期していません。</p>
+      </div>
+      <div class="card">
+        <h3>書き出し</h3>
+        <p class="sub">CSVは表計算ソフトで、JSONはこのアプリの引っ越しに使えます。</p>
+        <div class="btnrow">
+          <button class="ghost" id="exRec">調査記録</button>
+          <button class="ghost" id="exEnv">環境日別</button>
+          <button class="ghost" id="exHouse">ハウス一覧</button>
+          <button class="ghost" id="exFert">液肥</button>
+          <button class="ghost" id="exJson">全データJSON</button>
+        </div>
+        <label style="margin-top:18px"><span>JSONから復元</span><input type="file" id="impJson" accept=".json" style="font-size:13px"></label>
+      </div>
+    </div>
+    <div>
+      <div class="card">
+        <h3>サインインの準備</h3>
+        <p class="sub">初回だけ、Googleに「このアプリ」を登録します。費用はかかりません。</p>
+        <div class="plan">
+          <div><b>1</b><span>このHTMLを <code>https://</code> か <code>http://localhost</code> で開ける場所に置きます。ファイルを直接ダブルクリックして開いた状態（file://）ではGoogleのサインインが使えません。手元で試すならフォルダで <code>python -m http.server 8000</code> を実行し <code>http://localhost:8000</code> で開きます。</span></div>
+          <div><b>2</b><span>Google Cloud コンソールでプロジェクトを作り、APIとサービス＞ライブラリ から Google Sheets API、Google Drive API、Google Calendar API を有効にします。</span></div>
+          <div><b>3</b><span>OAuth同意画面を「外部」で作成し、公開ステータスは「テスト」のまま、テストユーザーに自分のGoogleアカウントを追加します。</span></div>
+          <div><b>4</b><span>認証情報＞OAuthクライアントID＞ウェブアプリケーション を作成し、承認済みJavaScript生成元に手順1のURL（例 <code>http://localhost:8000</code>）を登録します。</span></div>
+          <div><b>5</b><span>発行されたクライアントIDを左の欄に貼り、サインインします。</span></div>
+        </div>
+        <p class="note">求める権限は、このアプリが作った／指定したスプレッドシートの読み書き（drive.file・spreadsheets）と、カレンダーへの予定追加（calendar.events）だけです。ほかのファイルには触れません。</p>
+      </div>
+      <div class="card">
+        <h3>シートの構成</h3>
+        <p class="sub" style="margin:0">同期すると「ハウス」「調査記録」「液肥」「環境時別」の4シートに書き込まれます。シート上で直接直した内容も「シートから取り込む」で戻せます。環境時別は直近180日分だけを送ります。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<p class="note">出典：岩手県農業研究センター県北農業研究所 果樹・野菜研究室「施設きゅうりの摘心栽培における生育予測に基づいた栽培管理法導入マニュアル（ver.1.0）」。本アプリは同マニュアルの考え方を試作したもので、県が配布する栽培管理支援ツール（Excel）そのものではありません。かん水量・液肥の提示は目安であり、土壌水分やpFの実測にあわせて調整してください。</p>
 </div>
 
-<footer>🥒 キュウリ施肥設計アプリ prototype</footer>
+<div class="toast" id="toast"></div>
 
 <script>
-const ids = [
-  "fieldName","environment","plants","area","plantingDate","stage","method",
-  "planStart","planEnd","lai","expectedYield",
-  "vigor","leafColor","fruitGrowth","fruitStatus","internode","tendril",
-  "radiation","temperature","humidity","sunshine","rainfall","weather",
-  "waterPerPlant","waterTimes","fertTimes","targetN","fertilizerN","stockRatio",
-  "rawEC","drainEC","targetEC","latitude","longitude","selectedFertilizerId",
-  "female_1","female_2","female_3","female_4","female_5","female_6",
-  "fruitset_1","fruitset_2","fruitset_3","fruitset_4","fruitset_5","fruitset_6"
-];
+/* ================= 状態 ================= */
+const KEY='kyuuri:v3';
+let state={houses:[],records:[],env:[],ferts:[],active:null,
+  auth:{clientId:'',sheetId:'',auto:false,at:''}};
+let wxCache=null, csvFiles=[], csvHead=null, csvRows=null, editingHouse=null, editingFert=null;
+let token=null, tokenClient=null, userEmail='';
 
-/* ===================== 液肥ライブラリ ===================== */
-const BUILTIN_FERTILIZERS=[
-  {id:"preset_veg1",name:"高チッソ型液肥（活着・つる伸長期向け）",n:14,p:8,k:17,type:"vegetative",
-    note:"定植初期やつる伸長を促したい時期、または草勢が落ちて回復させたい時に。チッソ比率が高く栄養成長を後押しします。",builtin:true},
-  {id:"preset_bal1",name:"バランス型液肥（生育中期の基本肥料）",n:10,p:10,k:10,type:"balanced",
-    note:"N-P-Kがおおむね1:1:1の標準的な液肥。生育が安定している時期の基本として。",builtin:true},
-  {id:"preset_rep1",name:"高カリ型液肥（着果安定・果実肥大期向け）",n:8,p:8,k:25,type:"reproductive",
-    note:"カリ比率を上げて果実肥大・品質・草勢維持を両立したい時期に。",builtin:true},
-  {id:"preset_rep2",name:"高リン酸・カリ型液肥（花芽分化・着果促進用）",n:6,p:12,k:20,type:"reproductive",
-    note:"栄養成長に偏り着果不良気味の時、リン酸・カリ主体で生殖成長側へ転換したい時に。",builtin:true},
-  {id:"preset_bal2",name:"微量要素配合液肥（葉色・草勢維持用）",n:10,p:5,k:15,type:"balanced",
-    note:"鉄・マンガンなど微量要素を含み、葉色や草勢を維持したい時に。",builtin:true},
-  {id:"preset_bal3",name:"カルシウム強化液肥（尻腐れ予防・品質向上用）",n:9,p:4,k:12,type:"balanced",
-    note:"カルシウムを強化し、尻腐れ果予防や果実品質向上を狙う液肥。",builtin:true}
-];
-let customFertilizers = JSON.parse(localStorage.getItem("cucumberFertilizerLibraryCustom")||"[]");
-let selectedFertilizerId = null;
-let recommendedFertType = "balanced";
+const $=id=>document.getElementById(id);
+const toast=m=>{const t=$('toast');t.textContent=m;t.classList.add('on');setTimeout(()=>t.classList.remove('on'),2800);};
+const uid=()=>Math.random().toString(36).slice(2,9)+Date.now().toString(36).slice(-4);
+const nums=s=>String(s==null?'':s).split(/[,、\s]+/).map(v=>parseFloat(v)).filter(v=>!isNaN(v));
+const mean=a=>a.reduce((x,y)=>x+y,0)/a.length;
+const median=a=>{const b=[...a].sort((x,y)=>x-y);const m=b.length>>1;return b.length%2?b[m]:(b[m-1]+b[m])/2;};
+const f1=n=>(n==null||isNaN(n))?'—':Number(n).toFixed(1);
+const f2=n=>(n==null||isNaN(n))?'—':Number(n).toFixed(2);
+const d2s=d=>{const z=new Date(d.getTime()-d.getTimezoneOffset()*60000);return z.toISOString().slice(0,10);};
+const addDays=(s,n)=>{const d=new Date(s+'T00:00:00');d.setDate(d.getDate()+n);return d2s(d);};
+const diffDays=(a,b)=>Math.round((new Date(b+'T00:00:00')-new Date(a+'T00:00:00'))/86400000);
+const jp=s=>{const d=new Date(s+'T00:00:00');return (d.getMonth()+1)+'/'+d.getDate();};
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 
-function allFertilizers(){return BUILTIN_FERTILIZERS.concat(customFertilizers);}
-function fertTypeName(t){return t==="vegetative"?"栄養促進型（高チッソ）":t==="reproductive"?"生殖促進型（高リン酸・カリ）":"バランス型";}
+async function loadState(){
+  try{ if(window.storage){const r=await window.storage.get(KEY);if(r&&r.value)return JSON.parse(r.value);} }catch(e){}
+  try{ const s=localStorage.getItem(KEY); if(s) return JSON.parse(s); }catch(e){}
+  return null;
+}
+async function saveState(){
+  const v=JSON.stringify(state);
+  try{ if(window.storage){await window.storage.set(KEY,v);return;} }catch(e){}
+  try{ localStorage.setItem(KEY,v); }catch(e){}
+}
+const house=()=>state.houses.find(h=>h.id===state.active)||null;
+const recs=()=>state.records.filter(r=>r.houseId===state.active).sort((a,b)=>a.date<b.date?-1:1);
+const envH=id=>state.env.filter(e=>e.houseId===(id||state.active));
 
-function renderLibrary(){
-  const el=document.getElementById("libraryList");
-  if(!el)return;
-  const list=allFertilizers().slice().sort((a,b)=>{
-    const ar=a.type===recommendedFertType?0:1, br=b.type===recommendedFertType?0:1;
-    return ar-br;
+/* ================= 生育解析 ================= */
+function agg(r){const f=r.weak?median:mean;
+  return {stem:r.stem&&r.stem.length?f(r.stem):null,node:r.node&&r.node.length?f(r.node):null};}
+function series(list){return (list||recs()).map(r=>Object.assign({date:r.date},agg(r)));}
+function slope(pts,key){
+  const s=pts.filter(p=>p[key]!=null).slice(-3);
+  if(s.length<2) return 0;
+  const x0=s[0].date, xs=s.map(p=>diffDays(x0,p.date)), ys=s.map(p=>p[key]);
+  const mx=mean(xs),my=mean(ys); let a=0,b=0;
+  xs.forEach((x,i)=>{a+=(x-mx)*(ys[i]-my);b+=(x-mx)**2;});
+  return b?a/b:0;
+}
+function analyse(list){
+  const pts=series(list); if(pts.length<3) return null;
+  const gaps=[]; for(let i=1;i<pts.length;i++) gaps.push(diffDays(pts[i-1].date,pts[i].date));
+  const out={points:pts,gap:Math.max(...gaps.slice(-3)),items:{}};
+  const last=pts[pts.length-1];
+  [['stem',16],['node',12]].forEach(([k,cycle])=>{
+    const vals=pts.map(p=>p[k]).filter(v=>v!=null);
+    if(!vals.length||last[k]==null){out.items[k]=null;return;}
+    const base=mean(vals), spread=Math.max(...vals.map(v=>Math.abs(v-base)),0.001);
+    const cur=last[k], dev=(cur-base)/spread, sl=slope(pts,k);
+    const away=(dev>=0&&sl>0)||(dev<0&&sl<0);
+    out.items[k]={base,cur,dev:clamp(dev,-1,1),slope:sl,away,cycle,
+      flatDate:addDays(last.date,cycle),peakDate:addDays(last.date,cycle*2),strength:away?'強':'弱'};
   });
-  const typeName={vegetative:"栄養促進",reproductive:"生殖促進",balanced:"バランス"};
-  const typeClass={vegetative:"veg",reproductive:"rep",balanced:"bal"};
-  el.innerHTML=list.map(item=>{
-    const rec = item.type===recommendedFertType;
-    const sel = item.id===selectedFertilizerId;
-    return `<div class="lib-item ${sel?'selected':''}">
-      <div class="lib-item-head">
-        <span class="type-pill ${typeClass[item.type]}">${typeName[item.type]}</span>
-        ${rec?'<span class="badge">おすすめ</span>':''}
-        ${item.builtin?'':`<button class="danger" style="padding:4px 8px;font-size:.72rem;margin-left:auto" onclick="deleteCustomFertilizer('${item.id}')">削除</button>`}
-      </div>
-      <div class="lib-item-name">${item.name}</div>
-      <div class="small">N：${item.n}%　P：${item.p}%　K：${item.k}%</div>
-      <div class="small">${item.note||""}</div>
-      <button class="${sel?'primary':'secondary'}" onclick="selectFertilizer('${item.id}')">${sel?'✓ 選択中':'この液肥を選択'}</button>
-    </div>`;
-  }).join("");
+  if(!out.items.stem||!out.items.node) return null;
+  out.lastDate=last.date; return out;
 }
-
-function selectFertilizer(id){
-  const item=allFertilizers().find(x=>x.id===id);
-  if(!item)return;
-  selectedFertilizerId=id;
-  document.getElementById("fertilizerN").value=item.n;
-  document.getElementById("selectedFertilizerId").value=id;
-  updateSelectedFertilizerSummary();
-  renderLibrary();
-  updateDerived();
-}
-
-function updateSelectedFertilizerSummary(){
-  const el=document.getElementById("selectedFertilizerSummary");
-  if(!el)return;
-  const item=allFertilizers().find(x=>x.id===selectedFertilizerId);
-  if(!item){el.textContent="液肥が選択されていません。④液肥ライブラリタブから選択してください。";return;}
-  el.innerHTML=`選択中の液肥：<b>${item.name}</b>（N：${item.n}%　P：${item.p}%　K：${item.k}%／${fertTypeName(item.type)}）`;
-}
-
-function addCustomFertilizer(){
-  const name=val("custName").trim();
-  if(!name){alert("液肥名を入力してください。");return;}
-  const item={id:"custom_"+Date.now(),name,n:num("custN"),p:num("custP"),k:num("custK"),type:val("custType"),note:val("custNote"),builtin:false};
-  customFertilizers.push(item);
-  saveLibrary();
-  renderLibrary();
-  ["custName","custNote"].forEach(id=>document.getElementById(id).value="");
-}
-function deleteCustomFertilizer(id){
-  if(!confirm("このライブラリ項目を削除しますか？"))return;
-  customFertilizers=customFertilizers.filter(x=>x.id!==id);
-  if(selectedFertilizerId===id){
-    selectedFertilizerId=null;
-    document.getElementById("selectedFertilizerId").value="";
-    updateSelectedFertilizerSummary();
-  }
-  saveLibrary();
-  renderLibrary();
-}
-function saveLibrary(){localStorage.setItem("cucumberFertilizerLibraryCustom",JSON.stringify(customFertilizers));}
-
-/* ===================== 栄養成長・生殖成長 診断 ===================== */
-function diagnose(){
-  let veg=0, rep=0;
-  const vigor=val("vigor"); if(vigor==="強い") veg+=2; else if(vigor==="弱い") rep+=2;
-  const leaf=val("leafColor"); if(leaf==="濃い") veg+=1; else if(leaf==="淡い") rep+=1;
-  const fg=val("fruitGrowth"); if(fg==="旺盛") veg+=1; else if(fg==="遅い") rep+=1;
-  const fs=val("fruitStatus"); if(fs==="多い") rep+=1; else if(fs==="少ない") veg+=1;
-  const rate=avgNum("avgFruitSetRate"); if(rate>=85) rep+=1; else if(rate>0 && rate<=50) veg+=1;
-  const flowers=avgNum("avgFemaleFlowers"); if(flowers>=15) rep+=1; else if(flowers>0 && flowers<3) veg+=1;
-  const inter=val("internode"); if(inter==="長い") veg+=2; else if(inter==="短い") rep+=2;
-  const tendril=val("tendril");
-  if(tendril==="長く上向き（勢い旺盛）") veg+=2;
-  else if(tendril==="短く下向き（着果型）") rep+=2;
-  const diff=veg-rep;
-  let label,desc,recommend,cls;
-  if(diff>=2){
-    label="栄養成長型";
-    desc="つるの伸長や葉の茂りといった栄養成長が優勢で、開花・着果などの生殖成長がやや抑えられている可能性があります。";
-    recommend="reproductive"; cls="diag-veg";
-  }else if(diff<=-2){
-    label="生殖成長型（着果過多気味）";
-    desc="着果負担が大きく、草勢や栄養成長がやや消耗気味の可能性があります。";
-    recommend="vegetative"; cls="diag-rep";
-  }else{
-    label="バランス型";
-    desc="栄養成長と生殖成長がおおむね均衡しています。";
-    recommend="balanced"; cls="diag-bal";
-  }
-  return {veg,rep,diff,label,desc,recommend,cls};
-}
-
-function updateDiagnosis(){
-  const d=diagnose();
-  recommendedFertType=d.recommend;
-  const full=document.getElementById("diagnosisBox");
-  if(full){
-    full.className="note "+d.cls;
-    full.innerHTML=`<b>診断結果：${d.label}</b>（栄養成長スコア ${d.veg} ／ 生殖成長スコア ${d.rep}）<br>${d.desc}<br>推奨する液肥タイプ：<b>${fertTypeName(d.recommend)}</b>`;
-  }
-  const short=`現在の生育診断：<b>${d.label}</b>　→　推奨液肥タイプ：<b>${fertTypeName(d.recommend)}</b>`;
-  const libBox=document.getElementById("diagnosisBoxLib");
-  if(libBox){libBox.className="note "+d.cls; libBox.innerHTML=short;}
-  const miniBox=document.getElementById("diagnosisBoxMini");
-  if(miniBox){miniBox.className="note "+d.cls; miniBox.innerHTML=short;}
-  renderLibrary();
-}
-
-/* ===================== 生育・着果（6株平均） ===================== */
-function updateGrowthAverages(){
-  let sumF=0, sumRate=0, cnt=0;
-  for(let i=1;i<=6;i++){
-    const f=num(`female_${i}`), s=num(`fruitset_${i}`);
-    const rate = f>0 ? Math.min(100,(s/f*100)) : 0;
-    const rateEl=document.getElementById(`rate_${i}`);
-    if(rateEl) rateEl.textContent = f>0 ? rate.toFixed(1) : "-";
-    sumF+=f; sumRate+=rate; cnt++;
-  }
-  const avgF = cnt>0 ? sumF/cnt : 0;
-  const avgRate = cnt>0 ? sumRate/cnt : 0;
-  const avgFEl=document.getElementById("avgFemaleFlowers");
-  const avgREl=document.getElementById("avgFruitSetRate");
-  if(avgFEl) avgFEl.textContent=avgF.toFixed(1);
-  if(avgREl) avgREl.textContent=avgRate.toFixed(1);
-  updateDiagnosis();
-}
-function avgNum(id){const el=document.getElementById(id); return el ? (parseFloat(el.textContent)||0) : 0;}
-
-/* ===================== Open-Meteo 気象取得 ===================== */
-function classifyWeather(code,tmax){
-  let cat="曇り";
-  if([0,1].includes(code)) cat="晴れ";
-  else if([2,3,45,48].includes(code)) cat="曇り";
-  else if([51,53,55,56,57,61,63,65,66,67,71,73,75,77,80,81,82,85,86,95,96,99].includes(code)) cat="雨";
-  if(tmax!=null && tmax>=35) cat="猛暑";
-  return cat;
-}
-async function fetchOpenMeteo(){
-  const status=document.getElementById("weatherStatus");
-  const lat=num("latitude"), lon=num("longitude");
-  if(!lat && lat!==0 || !lon && lon!==0 || (lat===0 && lon===0)){
-    status.textContent="緯度・経度が未設定です。①基本情報タブで現在地を取得するか、緯度・経度を入力してください。";
-    return;
-  }
-  status.textContent="Open-Meteoから気象データを取得中…";
-  try{
-    const params=[
-      "latitude="+encodeURIComponent(lat),
-      "longitude="+encodeURIComponent(lon),
-      "timezone=auto",
-      "forecast_days=1",
-      "daily=temperature_2m_mean,temperature_2m_max,relative_humidity_2m_mean,relative_humidity_2m_max,relative_humidity_2m_min,precipitation_sum,shortwave_radiation_sum,sunshine_duration,weather_code"
-    ].join("&");
-    const url="https://api.open-meteo.com/v1/forecast?"+params;
-    const res=await fetch(url);
-    if(!res.ok) throw new Error("HTTP "+res.status);
-    const data=await res.json();
-    const d=data.daily||{};
-    const temp = d.temperature_2m_mean ? d.temperature_2m_mean[0] : null;
-    let hum = d.relative_humidity_2m_mean ? d.relative_humidity_2m_mean[0] : null;
-    if(hum==null && d.relative_humidity_2m_max && d.relative_humidity_2m_min){
-      hum=(d.relative_humidity_2m_max[0]+d.relative_humidity_2m_min[0])/2;
-    }
-    const rad = d.shortwave_radiation_sum ? d.shortwave_radiation_sum[0] : null;
-    const sun = d.sunshine_duration ? d.sunshine_duration[0]/3600 : null;
-    const rain = d.precipitation_sum ? d.precipitation_sum[0] : null;
-    const code = d.weather_code ? d.weather_code[0] : null;
-    const tmax = d.temperature_2m_max ? d.temperature_2m_max[0] : null;
-    if(temp!=null) document.getElementById("temperature").value=temp.toFixed(1);
-    if(hum!=null) document.getElementById("humidity").value=Math.round(hum);
-    if(rad!=null) document.getElementById("radiation").value=rad.toFixed(1);
-    if(sun!=null) document.getElementById("sunshine").value=sun.toFixed(1);
-    if(rain!=null) document.getElementById("rainfall").value=rain.toFixed(1);
-    if(code!=null) document.getElementById("weather").value=classifyWeather(code,tmax);
-    status.textContent="Open-Meteoから本日の気象データを取得しました（"+(data.timezone||"")+"）。必要に応じて手動で修正してください。";
-    updateDerived();
-  }catch(e){
-    status.textContent="気象データの取得に失敗しました："+e.message+"（手動入力してください）";
-  }
-}
-
-/* ===================== タブ制御 ===================== */
-document.addEventListener("DOMContentLoaded",()=>{
-  const today = new Date();
-  const iso = today.toISOString().slice(0,10);
-  if(!document.getElementById("plantingDate").value)
-    document.getElementById("plantingDate").value = iso;
-  if(!document.getElementById("planStart").value)
-    document.getElementById("planStart").value = iso;
-  if(!document.getElementById("planEnd").value){
-    const end = new Date(today); end.setDate(end.getDate()+13);
-    document.getElementById("planEnd").value = end.toISOString().slice(0,10);
-  }
-  document.querySelectorAll(".tab").forEach(btn=>{
-    btn.addEventListener("click",()=>nextTab(btn.dataset.tab));
-  });
-  document.querySelectorAll("input,select").forEach(el=>{
-    el.addEventListener("input", updateDerived);
-    el.addEventListener("change", updateDerived);
-  });
-  renderLibrary();
-  updateDerived();
-});
-
-function nextTab(id){
-  document.querySelectorAll(".panel").forEach(p=>p.classList.remove("active"));
-  document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
-  document.getElementById(id).classList.add("active");
-  document.querySelector(`[data-tab="${id}"]`).classList.add("active");
-  window.scrollTo({top:0,behavior:"smooth"});
-}
-
-function updateDerived(){
-  const plants = num("plants"), area = num("area");
-  document.getElementById("densityM2").value = area>0 ? (plants/area).toFixed(2) : "";
-  document.getElementById("densityTsubo").value = area>0 ? (plants/area*3.305785).toFixed(2) : "";
-  const s = document.getElementById("planStart").value;
-  const e = document.getElementById("planEnd").value;
-  if(s && e){
-    const days = Math.floor((new Date(e)-new Date(s))/86400000)+1;
-    document.getElementById("planDays").value = days>0 ? days : 0;
-  }else document.getElementById("planDays").value="";
-  updateGrowthAverages();
-}
-
-function num(id){const el=document.getElementById(id); return el ? (parseFloat(el.value)||0) : 0;}
-function val(id){const el=document.getElementById(id); return el ? el.value : "";}
-function managements(){
-  return [...document.querySelectorAll('input[name="management"]:checked')].map(x=>x.value);
-}
-
-/* ===================== 位置情報 ===================== */
-async function lookupPlaceName(lat,lon){
-  const status = document.getElementById("locationStatus");
-  try{
-    const url=`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lon}&accept-language=ja`;
-    const res=await fetch(url,{headers:{"Accept":"application/json"}});
-    const data=await res.json();
-    const a=data.address||{};
-    const place=[a.state,a.city||a.town||a.village,a.suburb||a.neighbourhood||a.hamlet]
-      .filter(Boolean).join(" ");
-    document.getElementById("placeName").textContent=place||data.display_name||"地名不明";
-    status.textContent="地名を取得しました。";
-  }catch(e){
-    document.getElementById("placeName").textContent="地名取得失敗";
-    status.textContent="地名取得に失敗しました。";
-  }
-}
-function getLocation(){
-  const status = document.getElementById("locationStatus");
-  if(!navigator.geolocation){
-    status.textContent="このブラウザは位置情報取得に対応していません。";
-    return;
-  }
-  status.textContent="位置情報を取得中です…";
-  navigator.geolocation.getCurrentPosition(pos=>{
-    const lat=pos.coords.latitude, lon=pos.coords.longitude;
-    document.getElementById("latitude").value=lat.toFixed(6);
-    document.getElementById("longitude").value=lon.toFixed(6);
-    status.textContent="位置情報を取得しました。地名を検索しています…";
-    lookupPlaceName(lat,lon);
-  },err=>{
-    status.textContent="位置情報を取得できませんでした："+err.message;
-  },{enableHighAccuracy:true,timeout:15000,maximumAge:600000});
-}
-function manualLookupPlace(){
-  const lat=num("latitude"), lon=num("longitude");
-  if(!lat && !lon){alert("緯度・経度を入力してください。");return;}
-  lookupPlaceName(lat,lon);
-}
-
-/* ===================== 施肥計算 ===================== */
-function factors(){
-  const stageFactor={
-    "活着後":.7,"つる伸長期":.9,"開花・着果期":1.0,
-    "収穫初期":1.1,"収穫盛期":1.2,"終盤":.8
-  }[val("stage")]||1;
-  const weatherFactor={"晴れ":1.1,"曇り":.9,"雨":.6,"猛暑":1.2}[val("weather")]||1;
-  const vigorFactor={"弱い":1.1,"適正":1.0,"強い":.8}[val("vigor")]||1;
-  let fruitFactor={"少ない":.9,"適正":1.0,"多い":1.1}[val("fruitStatus")]||1;
-  const rate=avgNum("avgFruitSetRate");
-  if(rate>=90) fruitFactor*=1.05; else if(rate>0 && rate<=50) fruitFactor*=0.95;
-  const laiFactor = num("lai")>4 ? .95 : num("lai")<1.5 ? .9 : 1;
-  const radiationFactor = num("radiation")>18 ? 1.1 : num("radiation")<7 ? .85 : 1;
-  let ecFactor=1, ecMsg="EC補正なし";
-  if(num("drainEC") > num("targetEC") + .2){ecFactor=.85;ecMsg="排液ECが目標より高いため、施肥量を15%減らす補正";}
-  else if(num("drainEC") < num("targetEC") - .2){ecFactor=1.1;ecMsg="排液ECが目標より低いため、施肥量を10%増やす補正";}
-  if(num("rawEC")>.8){ecFactor*=.9;ecMsg+=" 原水ECが高いため、追加で10%減らす補正";}
-  return {stageFactor,weatherFactor,vigorFactor,fruitFactor,laiFactor,radiationFactor,ecFactor,ecMsg};
-}
-
-function calculate(){
-  const f=factors();
-  const dailyWater=num("plants")*num("waterPerPlant")*num("waterTimes");
-  const baseN=num("targetN");
-  const correctedN=baseN*f.stageFactor*f.weatherFactor*f.vigorFactor*f.fruitFactor*
-    f.laiFactor*f.radiationFactor*f.ecFactor;
-  const nGrams=dailyWater*correctedN/1000;
-  const productGrams=num("fertilizerN")>0 ? nGrams/(num("fertilizerN")/100) : 0;
-  const stockLiters=productGrams/num("stockRatio");
-  const times=Math.max(1,Math.round(num("fertTimes")));
-  return {f,dailyWater,correctedN,nGrams,productGrams,stockLiters,times,
-    perWater:dailyWater/Math.max(1,Math.round(num("waterTimes"))),
-    perStock:stockLiters/times};
-}
-
-function calculateAndShow(){
-  const r=calculate();
-  const d=diagnose();
-  const fertItem=allFertilizers().find(x=>x.id===selectedFertilizerId);
-  const cards=[
-    ["生育診断",d.label],
-    ["使用液肥",fertItem?fertItem.name:"未選択（N"+num("fertilizerN")+"%で計算）"],
-    ["日総灌水量",`${r.dailyWater.toFixed(1)} L/日`],
-    ["推奨目標N濃度",`${r.correctedN.toFixed(1)} mg/L`],
-    ["必要N量",`${r.nGrams.toFixed(2)} g/日`],
-    ["液肥製品量",`${r.productGrams.toFixed(1)} g/日`],
-    ["原液必要量",`${r.stockLiters.toFixed(3)} L/日`],
-    ["1回あたり原液量",`${r.perStock.toFixed(3)} L/回`]
-  ];
-  document.getElementById("resultSummary").innerHTML=cards.map(c=>
-    `<div class="result"><div class="label">${c[0]}</div><div class="value">${c[1]}</div></div>`
-  ).join("");
-  const f=r.f;
-  document.getElementById("factorMessage").innerHTML=
-    `<b>補正係数：</b> 生育 ${f.stageFactor.toFixed(2)} × 天候 ${f.weatherFactor.toFixed(2)} × 草勢 ${f.vigorFactor.toFixed(2)} × 着果 ${f.fruitFactor.toFixed(2)} × LAI ${f.laiFactor.toFixed(2)} × 放射 ${f.radiationFactor.toFixed(2)} × EC ${f.ecFactor.toFixed(2)}<br>${f.ecMsg}<br>平均雌花数：${avgNum("avgFemaleFlowers").toFixed(1)} 花/日／株　平均着果率：${avgNum("avgFruitSetRate").toFixed(1)} %<br>生育診断：<b>${d.label}</b>（推奨液肥タイプ：${fertTypeName(d.recommend)}）`;
-  createPlan(r,fertItem);
-  nextTab("result");
-}
-
-function createPlan(r,fertItem){
-  const start=new Date(val("planStart"));
-  const days=Math.max(1,parseInt(document.getElementById("planDays").value)||1);
-  const rows=[];
-  const maxRows=Math.min(days*r.times,200);
-  const fertName = fertItem ? fertItem.name : "液肥未選択";
-  let count=0;
-  for(let d=0;d<days && count<maxRows;d++){
-    const date=new Date(start);date.setDate(start.getDate()+d);
-    for(let t=1;t<=r.times && count<maxRows;t++){
-      rows.push(`<tr><td>${date.toISOString().slice(0,10)}</td><td>${t}</td><td>${r.perWater.toFixed(1)} L</td><td>${r.perStock.toFixed(3)} L</td><td>${fertName}／${val("method")}・${managements().join("／")}</td></tr>`);
-      count++;
-    }
-  }
-  document.getElementById("planTable").innerHTML=rows.join("");
-}
-
-/* ===================== データ保存・入出力 ===================== */
-function collectData(){
-  const data={};
-  ids.forEach(id=>{const el=document.getElementById(id); if(el) data[id]=el.value;});
-  data.managements=managements();
-  data.placeName=document.getElementById("placeName").textContent;
-  data.customFertilizers=customFertilizers;
-  return data;
-}
-function applyData(data){
-  ids.forEach(id=>{if(data[id]!==undefined){const el=document.getElementById(id); if(el) el.value=data[id];}});
-  document.querySelectorAll('input[name="management"]').forEach(x=>x.checked=(data.managements||[]).includes(x.value));
-  if(data.placeName) document.getElementById("placeName").textContent=data.placeName;
-  if(Array.isArray(data.customFertilizers)){
-    customFertilizers=data.customFertilizers;
-    saveLibrary();
-  }
-  selectedFertilizerId = data.selectedFertilizerId || null;
-  updateSelectedFertilizerSummary();
-  renderLibrary();
-  updateDerived();
-}
-function saveData(){
-  localStorage.setItem("cucumberFertigationState",JSON.stringify(collectData()));
-  alert("パラメータを保存しました。");
-}
-function loadData(){
-  const raw=localStorage.getItem("cucumberFertigationState");
-  if(!raw){alert("保存データがありません。");return}
-  applyData(JSON.parse(raw));alert("保存データを復元しました。");
-}
-function downloadJSON(){
-  const blob=new Blob([JSON.stringify(collectData(),null,2)],{type:"application/json"});
-  downloadBlob(blob,"cucumber-fertigation-parameters.json");
-}
-function readJSON(event){
-  const file=event.target.files[0];if(!file)return;
-  const reader=new FileReader();
-  reader.onload=()=>{try{applyData(JSON.parse(reader.result));alert("JSONを読み込みました。")}catch(e){alert("JSON形式が正しくありません。")}};
-  reader.readAsText(file);
-}
-function downloadCSV(){
-  const r=calculate();
-  const d=diagnose();
-  const fertItem=allFertilizers().find(x=>x.id===selectedFertilizerId);
+function plan(a){
+  const s=a.items.stem,n=a.items.node;
+  const vigor=s.slope>0?'weaken':'strengthen';
+  const balance=n.slope>0?'toRepro':'toVeg';
+  const strong=s.strength==='強',strongN=n.strength==='強';
+  const t=(x,y)=>strong?x:y, tn=(x,y)=>strongN?x:y;
   const rows=[
-    ["項目","値"],
-    ["圃場名",val("fieldName")],["栽培環境",val("environment")],
-    ["株数",num("plants")+" 株"],["面積",num("area")+" m²"],
-    ["株数密度",document.getElementById("densityM2").value+" 株/m²"],
-    ["生育ステージ",val("stage")],["施肥方式",val("method")],
-    ["計画期間",val("planStart")+" ～ "+val("planEnd")],
-    ["LAI",num("lai")],
-    ["平均雌花数（6株平均）",avgNum("avgFemaleFlowers").toFixed(1)+" 花/日/株"],
-    ["平均着果率（6株平均）",avgNum("avgFruitSetRate").toFixed(1)+" %"],
-    ["生育診断",d.label],["推奨液肥タイプ",fertTypeName(d.recommend)],
-    ["使用液肥",fertItem?fertItem.name:"未選択"],
-    ["液肥N-P-K",fertItem?`N${fertItem.n}-P${fertItem.p}-K${fertItem.k}`:""],
-    ["期間内予定収量",num("expectedYield")+" kg"],
-    ["短波放射",num("radiation")+" MJ/m²/日"],["平均気温",num("temperature")+" ℃"],
-    ["平均湿度",num("humidity")+" %"],["日総灌水量",r.dailyWater.toFixed(1)+" L/日"],
-    ["推奨目標N濃度",r.correctedN.toFixed(1)+" mg/L"],
-    ["必要N量",r.nGrams.toFixed(2)+" g/日"],["液肥製品量",r.productGrams.toFixed(1)+" g/日"],
-    ["原液必要量",r.stockLiters.toFixed(3)+" L/日"],["1回あたり原液量",r.perStock.toFixed(3)+" L/回"]
+    ['平均気温',vigor==='strengthen'?t('下げる（低め）','やや下げる'):t('上げる（高め）','やや上げる')],
+    ['昼夜温差 DIF',(vigor==='strengthen'?'夜温を低く':'夜温を高く')+'／'+(balance==='toVeg'?tn('DIF小（夜高め）','DIFやや小'):tn('DIF大（夜低め）','DIFやや大'))],
+    ['夕方の温度変化',balance==='toVeg'?'緩徐降温（ゆっくり下げる）':'急速降温（クイックドロップ）'],
+    ['CO₂施用',vigor==='strengthen'?'閉切時700〜1,000ppm、早朝側窓閉切時500〜600ppm':'外気並み400ppmを維持'],
+    ['かん水時間',balance==='toVeg'?'日出直前から開始し午前〜昼中心':'やや遅めに開始し午前後半〜午後中心'],
+    ['追肥 N/K比',vigor==='strengthen'?'N多K少（1.2〜1.5）':'N少K多（0.6〜0.9）'],
+    ['給液 EC',balance==='toVeg'?'1.2以上1.5未満（薄め）':'1.8〜2.2（濃いめ・数日単位で）'],
+    ['摘果・摘葉',vigor==='strengthen'?'摘果を軽度に行い着果負担を下げる／摘葉は控えめ':'摘果はしない／摘葉を多頻度（週5〜6枚）']
   ];
-  const csv="\uFEFF"+rows.map(row=>row.map(v=>`"${String(v).replaceAll('"','""')}"`).join(",")).join("\n");
-  downloadBlob(new Blob([csv],{type:"text/csv;charset=utf-8"}),"cucumber-fertigation-plan.csv");
+  const sv=vigor==='strengthen'; let model;
+  if(Math.abs(n.dev)<0.34) model=sv?{no:'Ⅲ',name:'節展開促進＋転流促進',t:'平均17.9℃／DIF 11.8℃・午前高温・夕方緩徐降温'}
+                               :{no:'Ⅳ',name:'佐賀県慣行管理',t:'平均19.9℃／DIF 8.6℃・午前高温・夕方急速降温'};
+  else if(balance==='toVeg') model=sv?{no:'Ⅰ',name:'節展開促進＋草勢強化',t:'平均18.8℃／DIF 7.3℃・午前高温・夕方緩徐降温'}
+                                    :{no:'Ⅱ',name:'節展開促進＋草勢抑制',t:'平均20.0℃／DIF 7.9℃・午前高温・夕方緩徐降温'};
+  else model=sv?{no:'Ⅴ',name:'PMHT・QD＋草勢強化',t:'平均18.1℃／DIF 12.2℃・午後高温・夕方急速降温'}
+               :{no:'Ⅵ',name:'佐賀県 PMHT・QD',t:'平均19.8℃／DIF 8.9℃・午後高温・夕方急速降温'};
+  return {rows,model,vigor,balance,strong,strongN};
 }
-function downloadBlob(blob,name){
-  const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=name;a.click();
+
+/* ================= 環境（1時間値） ================= */
+function vpdOf(t,rh){ // 飽差 g/m3
+  const es=6.1078*Math.pow(10,(7.5*t)/(237.3+t));
+  return (217*es/(t+273.15))*(1-rh/100);
+}
+function envDaily(id){
+  const by={};
+  envH(id).forEach(e=>{ const d=e.ts.slice(0,10); (by[d]=by[d]||[]).push(e); });
+  return Object.keys(by).sort().map(date=>{
+    const a=by[date];
+    const T=a.filter(x=>x.t!=null), H=a.filter(x=>x.h!=null), C=a.filter(x=>x.c!=null), R=a.filter(x=>x.r!=null);
+    const hr=x=>Number(x.ts.slice(11,13));
+    const day=T.filter(x=>hr(x)>=6&&hr(x)<18), night=T.filter(x=>hr(x)<6||hr(x)>=18);
+    const tday=day.length?mean(day.map(x=>x.t)):null, tnight=night.length?mean(night.map(x=>x.t)):null;
+    const pair=a.filter(x=>x.t!=null&&x.h!=null);
+    const dayPair=pair.filter(x=>hr(x)>=6&&hr(x)<18);
+    return {date,
+      tmean:T.length?mean(T.map(x=>x.t)):null,
+      tmax:T.length?Math.max(...T.map(x=>x.t)):null,
+      tmin:T.length?Math.min(...T.map(x=>x.t)):null,
+      tday,tnight,dif:(tday!=null&&tnight!=null)?tday-tnight:null,
+      rh:H.length?mean(H.map(x=>x.h)):null,
+      vpd:pair.length?mean(pair.map(x=>vpdOf(x.t,x.h))):null,
+      vpdDay:dayPair.length?mean(dayPair.map(x=>vpdOf(x.t,x.h))):null,
+      co2:C.length?mean(C.map(x=>x.c)):null,
+      rad:R.length?R.reduce((s,x)=>s+x.r,0)*3600/1e6:null,
+      n:a.length, hours:a.length};
+  });
+}
+function recentVpd(){
+  const d=envDaily().filter(x=>x.vpdDay!=null);
+  return d.length?mean(d.slice(-7).map(x=>x.vpdDay)):null;
+}
+
+/* ================= かん水計算 ================= */
+function irrigationCoef(a){
+  // 表2-3をもとに、草勢の方向と管理強度から mL/株/MJ を決める
+  if(!a) return {coef:110,label:'基本'};
+  const p=plan(a), s=a.items.stem;
+  if(p.vigor==='strengthen') return s.strength==='強'?{coef:150,label:'草勢を強める（強）'}:{coef:130,label:'草勢を強める（弱）'};
+  return s.strength==='強'?{coef:80,label:'草勢を弱める（強）'}:{coef:95,label:'草勢を弱める（弱）'};
+}
+function vpdFactor(v){ // 飽差 g/m3 → 補正係数
+  if(v==null) return {f:1,label:'飽差データなし'};
+  const f=clamp(1+(v-4.5)*0.06,0.85,1.20);
+  const s=v<3?'低め（過湿ぎみ）':v>6?'高め（乾きぎみ）':'適正範囲';
+  return {f,label:'飽差 '+f1(v)+' g/m³・'+s};
+}
+function irrigationPlan(){
+  const a=analyse(), h=house();
+  if(!wxCache) return null;
+  const base=irrigationCoef(a), v=vpdFactor(recentVpd());
+  const coef=base.coef*v.f;
+  const today=d2s(new Date());
+  const days=wxCache.filter(d=>d.date>=today).slice(0,14).map(d=>{
+    const perPlant=coef*d.rad;                       // mL/株/日
+    const times=clamp(Math.round(d.rad/1.2),1,14);
+    const each=perPlant/times;
+    const total=h&&h.density?perPlant*Number(h.density)/1000:null; // L/10a
+    return {date:d.date,rad:d.rad,rain:d.rain,perPlant,times,each,total};
+  });
+  return {base,v,coef,days,a};
+}
+
+/* ================= 液肥の選定 ================= */
+function nkRatio(f){ const n=Number(f.n),k=Number(f.k); return (n>0&&k>0)?n/k:null; }
+function fertPick(a){
+  if(!state.ferts.length) return null;
+  const p=a?plan(a):null;
+  const wantHigh=p?p.vigor==='strengthen':null;      // 草勢を強める→N/K高め
+  const targetNK=wantHigh===null?1.05:(wantHigh?1.35:0.75);
+  const wantTag=p?(p.vigor==='strengthen'?'strong':'weak'):'base';
+  const balTag=p?(p.balance==='toVeg'?'veg':'repro'):'base';
+  const ecTarget=p?(p.balance==='toVeg'?[1.2,1.5]:[1.8,2.2]):[1.4,1.6];
+  const scored=state.ferts.map(f=>{
+    const r=nkRatio(f);
+    let s=0;
+    if(r!=null) s+=Math.max(0,3-Math.abs(r-targetNK)*3);
+    const tg=f.tags||[];
+    if(tg.includes(wantTag)) s+=2.5;
+    if(tg.includes(balTag)) s+=1.5;
+    if(tg.includes('base')) s+=0.5;
+    return {f,r,s};
+  }).sort((x,y)=>y.s-x.s);
+  return {list:scored,targetNK,ecTarget,wantTag,balTag};
+}
+
+/* ================= 描画：いまの生育 ================= */
+function setMeter(pin,arrow,dev,sl){
+  const pct=50+dev*46;
+  pin.style.left=pct+'%'; arrow.style.left=clamp(pct-2,2,94)+'%';
+  arrow.textContent=sl>0.001?'▶':(sl<-0.001?'◀':'■');
+}
+function renderNow(){
+  const a=analyse();
+  if(!a){
+    $('asof').textContent=house()?(recs().length+'回の記録。3回そろうと予測を表示します。'):'ハウスを登録してください。';
+    ['stemVal','nodeVal'].forEach(i=>$(i).textContent='—');
+    ['stemVerdict','nodeVerdict'].forEach(i=>$(i).textContent='');
+    setMeter($('stemPin'),$('stemArrow'),0,0); setMeter($('nodePin'),$('nodeArrow'),0,0);
+    $('forecast').innerHTML='<p class="empty">生育調査が3回そろうと予測を表示します。</p>';
+    $('plan').innerHTML='<p class="empty">予測が出ると管理内容を提示します。</p>';
+  }else{
+    $('asof').innerHTML='<span class="tagline'+(a.gap>7?' hi':'')+'">調査間隔 '+a.gap+'日</span>最終調査 '+jp(a.lastDate)+'／記録 '+a.points.length+'回';
+    const s=a.items.stem,n=a.items.node;
+    $('stemVal').textContent=f1(s.cur)+' mm（平準点 '+f1(s.base)+'）';
+    $('nodeVal').textContent=f1(n.cur)+' cm（平準点 '+f1(n.base)+'）';
+    setMeter($('stemPin'),$('stemArrow'),s.dev,s.slope);
+    setMeter($('nodePin'),$('nodeArrow'),n.dev,n.slope);
+    $('stemVerdict').innerHTML='<em>'+(s.slope>0?'太くなりつつある':'細くなりつつある')+'</em>：'+
+      (s.away?'平準点から離れる方向':'平準点へ戻る方向')+'。'+jp(s.flatDate)+'ごろに'+
+      (s.slope>0?'草勢弱へ切り替わり、'+jp(s.peakDate)+'ごろが草勢弱のピーク':'草勢強へ切り替わり、'+jp(s.peakDate)+'ごろが草勢強のピーク')+'。';
+    $('nodeVerdict').innerHTML='<em>'+(n.slope>0?'長くなりつつある':'短くなりつつある')+'</em>：'+
+      (n.away?'平準点から離れる方向':'平準点へ戻る方向')+'。'+jp(n.flatDate)+'ごろに'+
+      (n.slope>0?'生殖成長へ切り替わり、'+jp(n.peakDate)+'ごろが生殖成長のピーク':'栄養成長へ切り替わり、'+jp(n.peakDate)+'ごろが栄養成長のピーク')+'。';
+
+    let h='<div class="scroll"><table><tr><th>指標</th><th>いまの向き</th><th>平準点に戻る</th><th>逆の状態のピーク</th><th>管理強度</th></tr>';
+    [['stem','茎径（草勢）'],['node','節間長（バランス）']].forEach(([k,lb])=>{const i=a.items[k];
+      h+='<tr><td>'+lb+'</td><td>'+(i.slope>0?'増加中':'減少中')+'（'+(i.slope>=0?'+':'')+i.slope.toFixed(2)+'/日）</td><td>'+jp(i.flatDate)+'（'+i.cycle+'日後）</td><td>'+jp(i.peakDate)+'（'+i.cycle*2+'日後）</td><td>'+i.strength+'</td></tr>';});
+    h+='</table></div>';
+    if(a.gap>7) h+='<p class="note warn">直近の調査間隔が'+a.gap+'日です。8日以上あくと予測精度が下がります。7日以内に次の調査を。</p>';
+    h+='<p class="note">収量は茎径・節間長の変化から最短7日遅れで動きます。環境設定を変えても生育に表れるまで7〜14日かかるため、設定変更は14日間隔を目安に。</p>';
+    $('forecast').innerHTML=h;
+
+    const p=plan(a), ip=irrigationPlan();
+    const wrow=ip?['かん水量',Math.round(ip.coef)+' mL/株/MJ（'+ip.base.label+'・'+ip.v.label+'）']
+                 :['かん水量',p.vigor==='strengthen'?'日射比例140〜160 mL/株/MJ':'日射比例70〜90 mL/株/MJ'];
+    const rows=p.rows.slice(); rows.splice(4,0,wrow);
+    $('plan').innerHTML='<p style="font-size:14px;margin:0 0 14px">向こう14日は<b>草勢を'+(p.vigor==='strengthen'?'強める':'弱める')+
+      '</b>、<b>'+(p.balance==='toVeg'?'栄養成長':'生殖成長')+'に傾ける</b>方向で管理します。</p>'+
+      '<div class="model"><b>変温管理モデル '+p.model.no+'：'+p.model.name+'</b>'+p.model.t+'</div>'+
+      '<div class="plan">'+rows.map(r=>'<div><b>'+r[0]+'</b><span>'+r[1]+'</span></div>').join('')+'</div>';
+  }
+  renderRecords();
+}
+function renderRecords(){
+  const el=$('records'), rs=recs().slice().reverse();
+  $('recSub').textContent=rs.length?(house()?house().name:'')+'：'+rs.length+'件':'まだ記録がありません。';
+  if(!rs.length){el.innerHTML='<p class="empty">左のフォームから最初の調査を記録してください。</p>';return;}
+  let h='<table><tr><th>調査日</th><th class="num">茎径 mm</th><th class="num">節間長 cm</th><th class="num">開花</th><th class="num">着果</th><th class="num">収量</th><th></th></tr>';
+  rs.forEach(r=>{const g=agg(r);
+    h+='<tr><td>'+r.date+(r.weak?'<br><span style="font-size:11px;color:var(--mute)">中央値</span>':'')+'</td>'+
+      '<td class="num">'+f1(g.stem)+'</td><td class="num">'+f1(g.node)+'</td>'+
+      '<td class="num">'+(r.flower==null?'—':r.flower)+'</td><td class="num">'+(r.fruit==null?'—':r.fruit)+'</td>'+
+      '<td class="num">'+(r.yield==null?'—':r.yield)+'</td>'+
+      '<td style="text-align:right"><button class="ghost small" data-del="'+r.id+'">削除</button></td></tr>';
+    if(r.memo) h+='<tr><td colspan="7" style="color:var(--mute);font-size:12.5px">'+esc(r.memo)+'</td></tr>';});
+  el.innerHTML=h+'</table>';
+  el.querySelectorAll('[data-del]').forEach(b=>b.onclick=async()=>{
+    state.records=state.records.filter(r=>r.id!==b.dataset.del);
+    await saveState(); renderAll(); toast('記録を削除しました');});
+}
+
+/* ================= 描画：かん水 ================= */
+function renderWater(){
+  const ip=irrigationPlan(), a=analyse(), h=house();
+  const sub=$('wtSub');
+  if(!ip){
+    $('wtToday').innerHTML='<p class="empty">'+(wxCache?'生育調査が3回そろうと計算します。':'「外の気象」タブで予報を取得してください。')+'</p>';
+    $('wtTable').innerHTML='<p class="empty">気象データを取得すると表示します。</p>';
+  }else{
+    const d=ip.days[0];
+    sub.textContent=(h?h.name:'')+'／'+jp(d.date)+'の日射予報 '+f1(d.rad)+' MJ/m²';
+    $('wtToday').innerHTML=
+      '<div class="big"><div class="k">株あたりの総かん水量</div><div class="v">'+Math.round(d.perPlant)+'<span class="u">mL/株</span></div></div>'+
+      '<div class="plan">'+
+      '<div><b>1回あたり</b><span>'+Math.round(d.each)+' mL/株 ×'+d.times+'回</span></div>'+
+      '<div><b>10aあたり</b><span>'+(d.total!=null?Math.round(d.total).toLocaleString()+' L（'+h.density+'株）':'株数を登録すると表示します')+'</span></div>'+
+      '<div><b>日射比例係数</b><span>'+Math.round(ip.coef)+' mL/株/MJ</span></div>'+
+      '<div><b>もとの係数</b><span>'+ip.base.coef+' mL/株/MJ（'+ip.base.label+'）</span></div>'+
+      '<div><b>飽差の補正</b><span>×'+ip.v.f.toFixed(2)+'（'+ip.v.label+'）</span></div>'+
+      '<div><b>かん水時間帯</b><span>'+(plan(a).balance==='toVeg'?'日出直前から開始し午前〜昼中心':'やや遅めに開始し午前後半〜午後中心')+'</span></div>'+
+      '</div>'+
+      (d.rain>3?'<p class="note warn">雨予報 '+f1(d.rain)+' mm。ハウス内でも湿度が上がるため、実際は控えめに。</p>':'');
+    let t='<table><tr><th>日付</th><th class="num">日射 MJ</th><th class="num">雨 mm</th><th class="num">mL/株・日</th><th class="num">回数</th><th class="num">1回 mL/株</th><th class="num">L/10a</th></tr>';
+    ip.days.forEach((x,i)=>{
+      t+='<tr'+(i===0?' class="pick"':'')+'><td>'+jp(x.date)+'</td><td class="num">'+f1(x.rad)+'</td><td class="num">'+f1(x.rain)+'</td>'+
+        '<td class="num">'+Math.round(x.perPlant)+'</td><td class="num">'+x.times+'</td><td class="num">'+Math.round(x.each)+'</td>'+
+        '<td class="num">'+(x.total!=null?Math.round(x.total).toLocaleString():'—')+'</td></tr>';});
+    $('wtTable').innerHTML=t+'</table><p class="note">日射量は Open-Meteo の短波放射予報です。飽差の補正は直近7日の昼間（6〜18時）実測平均から計算しています。</p>';
+  }
+  // 液肥候補
+  const fp=fertPick(a), el=$('fertPick');
+  if(!fp){el.innerHTML='<p class="empty">「液肥ライブラリ」タブに登録すると候補を出します。</p>';}
+  else{
+    const p=a?plan(a):null;
+    let t='<p style="font-size:14px;margin:0 0 12px">'+(p?'いまの方針は<b>草勢を'+(p.vigor==='strengthen'?'強める':'弱める')+'</b>・<b>'+(p.balance==='toVeg'?'栄養成長へ':'生殖成長へ')+'</b>。N/K比 '+fp.targetNK.toFixed(2)+' 前後、給液EC '+fp.ecTarget[0]+'〜'+fp.ecTarget[1]+' が目安です。':'生育調査が3回そろうと方針に合わせて並べ替えます。')+'</p>';
+    t+='<div class="scroll"><table><tr><th>製品</th><th class="num">N-P-K</th><th class="num">N/K</th><th class="num">標準希釈</th><th>使いどころ</th></tr>';
+    fp.list.slice(0,6).forEach((x,i)=>{
+      t+='<tr'+(i===0&&a?' class="pick"':'')+'><td>'+esc(x.f.name)+(i===0&&a?'<br><span style="font-size:11.5px;color:var(--leaf)">いまの方針に最も近い</span>':'')+'</td>'+
+        '<td class="num">'+[x.f.n,x.f.p,x.f.k].map(v=>v===''||v==null?'—':v).join('-')+'</td>'+
+        '<td class="num">'+(x.r==null?'—':x.r.toFixed(2))+'</td>'+
+        '<td class="num">'+(x.f.dil?x.f.dil+'倍':'—')+(x.f.ec?'<br>EC '+x.f.ec:'')+'</td>'+
+        '<td>'+tagChips(x.f.tags)+'</td></tr>';});
+    el.innerHTML=t+'</table></div>'+
+      (a?'<p class="note">EC は水源の値を含めた最終値で合わせてください。2.6を超えないこと、高める期間は数日にとどめることが条件です。</p>':'');
+  }
+}
+const TAGNAME={strong:'草勢強',weak:'草勢弱',veg:'栄養成長',repro:'生殖成長',base:'基本'};
+function tagChips(tags){return (tags||[]).map(t=>'<span class="chip '+t+'">'+TAGNAME[t]+'</span>').join('');}
+
+/* ================= 描画：ハウス・液肥 ================= */
+function renderLib(){
+  const el=$('lib');
+  if(!state.houses.length){el.innerHTML='<p class="empty">左のフォームからハウスを登録してください。</p>';return;}
+  el.innerHTML=state.houses.map(h=>{
+    const rs=state.records.filter(r=>r.houseId===h.id).sort((a,b)=>a.date<b.date?-1:1);
+    const a=analyse(rs), last=rs.length?rs[rs.length-1].date:null;
+    const over=last?diffDays(last,d2s(new Date())):null;
+    const bars=a?('<div class="bar"><span class="z"></span><i style="left:calc('+(50+a.items.stem.dev*46)+'% - 1px)"></i></div>'+
+      '<div class="bar"><span class="z"></span><i style="left:calc('+(50+a.items.node.dev*46)+'% - 1px)"></i></div>'):'';
+    const ed=envDaily(h.id);
+    return '<div class="house'+(h.id===state.active?' active':'')+'"><h4>'+esc(h.name)+'</h4>'+
+      '<div class="meta">'+esc(h.type||'')+(h.variety?'・'+esc(h.variety):'')+(h.plant?'／定植 '+jp(h.plant):'')+'</div>'+
+      '<dl><dt>調査回数</dt><dd>'+rs.length+'</dd>'+
+      '<dt>最終調査</dt><dd>'+(last?jp(last)+(over>7?'（'+over+'日前）':''):'—')+'</dd>'+
+      '<dt>草勢</dt><dd>'+(a?f1(a.items.stem.cur)+' mm':'—')+'</dd>'+
+      '<dt>節間長</dt><dd>'+(a?f1(a.items.node.cur)+' cm':'—')+'</dd>'+
+      '<dt>環境データ</dt><dd>'+ed.length+' 日分</dd></dl>'+bars+
+      (a?'<p style="font-size:12.5px;margin:0 0 12px;color:var(--mute)">'+(a.items.stem.slope>0?'草勢は強まる向き':'草勢は弱まる向き')+'／'+(a.items.node.slope>0?'栄養成長へ':'生殖成長へ')+'</p>':'')+
+      '<div class="btnrow"><button class="small'+(h.id===state.active?' ghost':'')+'" data-use="'+h.id+'"'+(h.id===state.active?' disabled':'')+'>'+(h.id===state.active?'表示中':'このハウスを見る')+'</button>'+
+      '<button class="ghost small" data-edit="'+h.id+'">編集</button><button class="ghost small" data-rm="'+h.id+'">削除</button></div></div>';
+  }).join('');
+  el.querySelectorAll('[data-use]').forEach(b=>b.onclick=async()=>{state.active=b.dataset.use;await saveState();renderAll();show('now');});
+  el.querySelectorAll('[data-edit]').forEach(b=>b.onclick=()=>editHouse(b.dataset.edit));
+  el.querySelectorAll('[data-rm]').forEach(b=>b.onclick=async()=>{
+    const h=state.houses.find(x=>x.id===b.dataset.rm);
+    if(!confirm(h.name+' と、その調査記録・環境データをすべて削除します。よろしいですか。')) return;
+    state.houses=state.houses.filter(x=>x.id!==h.id);
+    state.records=state.records.filter(r=>r.houseId!==h.id);
+    state.env=state.env.filter(e=>e.houseId!==h.id);
+    if(state.active===h.id) state.active=state.houses.length?state.houses[0].id:null;
+    await saveState(); renderAll(); toast('削除しました');});
+}
+function editHouse(id){
+  const h=state.houses.find(x=>x.id===id); if(!h) return;
+  editingHouse=id; $('hfTitle').textContent='ハウスを編集';
+  $('hName').value=h.name||'';$('hType').value=h.type||'早熟';$('hVariety').value=h.variety||'';
+  $('hLat').value=h.lat||'';$('hLon').value=h.lon||'';$('hPlant').value=h.plant||'';$('hEnd').value=h.end||'';
+  $('hDensity').value=h.density||'';$('hArea').value=h.area||'';$('hFacility').value=h.facility||'';$('hMemo').value=h.memo||'';
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function clearHouseForm(){
+  editingHouse=null; $('hfTitle').textContent='ハウスを追加';
+  ['hName','hVariety','hLat','hLon','hPlant','hEnd','hDensity','hArea','hFacility','hMemo'].forEach(i=>$(i).value='');
+  $('hType').value='早熟';
+}
+function renderHouseSel(){
+  $('houseSel').innerHTML=state.houses.length
+    ?state.houses.map(h=>'<option value="'+h.id+'"'+(h.id===state.active?' selected':'')+'>'+esc(h.name)+'</option>').join('')
+    :'<option value="">ハウス未登録</option>';
+}
+function renderFert(){
+  const el=$('fertTable');
+  $('fertSub').textContent=state.ferts.length?state.ferts.length+'件':'まだ登録がありません。';
+  if(!state.ferts.length){el.innerHTML='<p class="empty">左のフォームから登録してください。「よく使う3種を入れる」で例を入れることもできます。</p>';return;}
+  el.innerHTML='<table><tr><th>製品</th><th class="num">N-P-K</th><th class="num">N/K</th><th class="num">標準希釈</th><th>使いどころ</th><th></th></tr>'+
+    state.ferts.map(f=>{const r=nkRatio(f);
+      return '<tr><td>'+esc(f.name)+(f.memo?'<br><span style="font-size:11.5px;color:var(--mute)">'+esc(f.memo)+'</span>':'')+'</td>'+
+      '<td class="num">'+[f.n,f.p,f.k].map(v=>v===''||v==null?'—':v).join('-')+'</td>'+
+      '<td class="num">'+(r==null?'—':r.toFixed(2))+'</td>'+
+      '<td class="num">'+(f.dil?f.dil+'倍':'—')+(f.ec?'<br>EC '+f.ec:'')+'</td>'+
+      '<td>'+tagChips(f.tags)+'</td>'+
+      '<td style="text-align:right"><button class="ghost small" data-fe="'+f.id+'">編集</button> <button class="ghost small" data-fr="'+f.id+'">削除</button></td></tr>';}).join('')+'</table>';
+  el.querySelectorAll('[data-fe]').forEach(b=>b.onclick=()=>editFert(b.dataset.fe));
+  el.querySelectorAll('[data-fr]').forEach(b=>b.onclick=async()=>{
+    state.ferts=state.ferts.filter(f=>f.id!==b.dataset.fr); await saveState(); renderAll(); toast('削除しました');});
+}
+function editFert(id){
+  const f=state.ferts.find(x=>x.id===id); if(!f) return;
+  editingFert=id; $('ffTitle').textContent='液肥を編集';
+  $('pName').value=f.name||'';$('pN').value=f.n||'';$('pP').value=f.p||'';$('pK').value=f.k||'';
+  $('pDil').value=f.dil||'';$('pEc').value=f.ec||'';$('pMemo').value=f.memo||'';
+  document.querySelectorAll('.ftag').forEach(c=>c.checked=(f.tags||[]).includes(c.value));
+  updateRatio(); window.scrollTo({top:0,behavior:'smooth'});
+}
+function clearFertForm(){
+  editingFert=null; $('ffTitle').textContent='液肥を登録';
+  ['pName','pN','pP','pK','pDil','pEc','pMemo'].forEach(i=>$(i).value='');
+  document.querySelectorAll('.ftag').forEach(c=>c.checked=false); updateRatio();
+}
+function updateRatio(){
+  const n=parseFloat($('pN').value),k=parseFloat($('pK').value);
+  const r=(n>0&&k>0)?n/k:null;
+  $('pRatio').textContent='N/K 比：'+(r==null?'—':r.toFixed(2)+
+    (r>=1.2?'（草勢を強める側）':r<=0.9?'（草勢を弱める側）':'（基本に近い）'));
+}
+
+/* ================= 描画：環境 ================= */
+function renderEnv(){
+  const d=envDaily();
+  $('envSub').textContent=d.length?(house()?house().name:'')+'：'+d.length+'日分（'+jp(d[0].date)+'〜'+jp(d[d.length-1].date)+'）／時別 '+envH().length+'点':'環境データがありません。';
+  const el=$('envTable');
+  if(!d.length){el.innerHTML='<p class="empty">左からCSVを読み込んでください。</p>';return;}
+  el.innerHTML='<table><tr><th>日付</th><th class="num">平均</th><th class="num">最高</th><th class="num">最低</th><th class="num">昼温</th><th class="num">夜温</th><th class="num">DIF</th><th class="num">湿度%</th><th class="num">飽差</th><th class="num">CO₂</th><th class="num">時数</th></tr>'+
+    d.slice(-30).reverse().map(x=>'<tr><td>'+x.date+'</td><td class="num">'+f1(x.tmean)+'</td><td class="num">'+f1(x.tmax)+'</td><td class="num">'+f1(x.tmin)+'</td><td class="num">'+f1(x.tday)+'</td><td class="num">'+f1(x.tnight)+'</td><td class="num">'+f1(x.dif)+'</td><td class="num">'+f1(x.rh)+'</td><td class="num">'+f1(x.vpd)+'</td><td class="num">'+(x.co2==null?'—':Math.round(x.co2))+'</td><td class="num">'+x.hours+'</td></tr>').join('')+'</table>'+
+    (d.length>30?'<p class="note">直近30日を表示しています。全期間はCSVで書き出せます。</p>':'')+
+    (d[d.length-1].vpd==null?'<p class="note">湿度のCSVを読み込むと飽差が計算され、かん水量の補正に使われます。</p>':'');
+  renderLag();
+}
+function renderLag(){
+  const el=$('lagTable'), d=envDaily(), rs=recs();
+  if(!d.length||rs.length<2){el.innerHTML='<p class="empty">環境データと調査記録がそろうと表示します。</p>';return;}
+  const map={}; d.forEach(x=>map[x.date]=x);
+  const win=(end,n)=>{const a=[];for(let i=0;i<n;i++){const x=map[addDays(end,-i)];if(x)a.push(x);}return a;};
+  let h='<table><tr><th>調査日</th><th class="num">茎径</th><th class="num">節間長</th><th class="num">直前14日 平均気温</th><th class="num">平均DIF</th><th class="num">平均湿度</th><th class="num">平均飽差</th></tr>';
+  rs.slice(-8).reverse().forEach(r=>{
+    const g=agg(r), w=win(addDays(r.date,-1),14);
+    const pick=k=>{const a=w.filter(x=>x[k]!=null);return a.length?f1(mean(a.map(x=>x[k]))):'—';};
+    h+='<tr><td>'+r.date+'</td><td class="num">'+f1(g.stem)+'</td><td class="num">'+f1(g.node)+'</td>'+
+      '<td class="num">'+pick('tmean')+'</td><td class="num">'+pick('dif')+'</td><td class="num">'+pick('rh')+'</td><td class="num">'+pick('vpd')+'</td></tr>';});
+  el.innerHTML=h+'</table><p class="note">気温の変化は14日前後で茎径に、9〜19日で節間長に表れます。</p>';
+}
+
+/* ================= 回帰分析 ================= */
+const REGY_LABEL={stem:'茎径 mm',node:'節間長 cm',flower:'開花数',fruit:'着果数',yield:'収量 kg/10a'};
+const REGX_LABEL={tmean:'平均気温 ℃',tday:'昼温 ℃',tnight:'夜温 ℃',dif:'DIF ℃',rh:'相対湿度 %',vpd:'飽差 g/m³',co2:'CO₂ ppm'};
+function regressionPairs(xKey,yKey,lag){
+  const d=envDaily(); if(!d.length) return [];
+  const map={}; d.forEach(x=>map[x.date]=x);
+  const winMean=end=>{const a=[];for(let i=0;i<3;i++){const v=map[addDays(end,-i)];if(v&&v[xKey]!=null)a.push(v[xKey]);}return a.length?mean(a):null;};
+  const pts=[];
+  recs().forEach(r=>{
+    const g=agg(r);
+    const y=(yKey==='stem'||yKey==='node')?g[yKey]:r[yKey];
+    if(y==null) return;
+    const x=winMean(addDays(r.date,-lag));
+    if(x==null) return;
+    pts.push({date:r.date,x,y});
+  });
+  return pts;
+}
+function linreg(pts){
+  const n=pts.length; if(n<3) return null;
+  const mx=mean(pts.map(p=>p.x)), my=mean(pts.map(p=>p.y));
+  let sxy=0,sxx=0,syy=0;
+  pts.forEach(p=>{sxy+=(p.x-mx)*(p.y-my);sxx+=(p.x-mx)**2;syy+=(p.y-my)**2;});
+  const b=sxx?sxy/sxx:0, a=my-b*mx, r=(sxx&&syy)?sxy/Math.sqrt(sxx*syy):0;
+  return {n,a,b,r,r2:r*r,mx,my,minx:Math.min(...pts.map(p=>p.x)),maxx:Math.max(...pts.map(p=>p.x)),
+    miny:Math.min(...pts.map(p=>p.y)),maxy:Math.max(...pts.map(p=>p.y))};
+}
+function scanLags(xKey,yKey){
+  const out=[];
+  for(let lag=0;lag<=30;lag++){const reg=linreg(regressionPairs(xKey,yKey,lag)); if(reg) out.push({lag,r:reg.r,n:reg.n});}
+  return out;
+}
+function scatterSVG(pts,reg,xLabel,yLabel){
+  const W=420,H=260,pad={l:46,r:14,t:14,b:34};
+  const xr=[reg.minx,reg.maxx], yr=[reg.miny,reg.maxy];
+  const xspan=Math.max(xr[1]-xr[0],0.001)*1.12, yspan=Math.max(yr[1]-yr[0],0.001)*1.2;
+  const x0=xr[0]-(xspan-(xr[1]-xr[0]))/2, y0=yr[0]-(yspan-(yr[1]-yr[0]))/2;
+  const sx=v=>pad.l+((v-x0)/xspan)*(W-pad.l-pad.r);
+  const sy=v=>H-pad.b-((v-y0)/yspan)*(H-pad.t-pad.b);
+  const lx1=x0, lx2=x0+xspan, ly1=reg.a+reg.b*lx1, ly2=reg.a+reg.b*lx2;
+  let s='<svg viewBox="0 0 '+W+' '+H+'" xmlns="http://www.w3.org/2000/svg">';
+  s+='<rect x="0" y="0" width="'+W+'" height="'+H+'" fill="#fff"/>';
+  s+='<line x1="'+pad.l+'" y1="'+pad.t+'" x2="'+pad.l+'" y2="'+(H-pad.b)+'" stroke="#12271C" stroke-width="2"/>';
+  s+='<line x1="'+pad.l+'" y1="'+(H-pad.b)+'" x2="'+(W-pad.r)+'" y2="'+(H-pad.b)+'" stroke="#12271C" stroke-width="2"/>';
+  s+='<line x1="'+sx(lx1)+'" y1="'+sy(ly1)+'" x2="'+sx(lx2)+'" y2="'+sy(ly2)+'" stroke="#FF5A45" stroke-width="3"/>';
+  pts.forEach(p=>{s+='<circle cx="'+sx(p.x).toFixed(1)+'" cy="'+sy(p.y).toFixed(1)+'" r="5.5" fill="#2F8FD1" stroke="#12271C" stroke-width="1.5"/>';});
+  s+='<text x="'+pad.l+'" y="'+(H-8)+'" font-size="11" fill="#5C6E60">'+esc(xLabel)+' →</text>';
+  s+='<text x="8" y="'+(pad.t+10)+'" font-size="11" fill="#5C6E60" transform="rotate(-90 8 '+(pad.t+10)+')">'+esc(yLabel)+' →</text>';
+  s+='</svg>';
+  return s;
+}
+function runRegression(){
+  const xKey=$('regX').value, yKey=$('regY').value, auto=$('regAuto').checked;
+  let lag=+$('regLag').value, scan=null;
+  if(auto){ scan=scanLags(xKey,yKey);
+    if(scan.length){ const best=scan.reduce((a,b)=>Math.abs(b.r)>Math.abs(a.r)?b:a); lag=best.lag; $('regLag').value=lag; $('regLagVal').textContent=lag+'日'; } }
+  const pts=regressionPairs(xKey,yKey,lag), reg=linreg(pts);
+  const el=$('regResult');
+  if(!reg){
+    el.innerHTML='<p class="empty">組になるデータが3組未満です。環境データ（CSV取込）と生育調査記録をこのハウスに増やしてください。</p>';
+    $('regScatterCard').style.display='none'; $('regScanCard').style.display='none'; return;
+  }
+  const strength=Math.abs(reg.r)>=0.7?'強い関係':Math.abs(reg.r)>=0.5?'関係あり':Math.abs(reg.r)>=0.3?'弱い関係':'関係は弱い';
+  el.innerHTML='<h3>結果</h3><p class="sub">'+REGX_LABEL[xKey]+'（'+lag+'日前・3日平均）と'+REGY_LABEL[yKey]+'</p>'+
+    '<div class="big"><div class="k">相関係数 r</div><div class="v">'+reg.r.toFixed(2)+'<span class="u">（'+strength+'・R²='+reg.r2.toFixed(2)+'・n='+reg.n+'）</span></div></div>'+
+    '<div class="plan"><div><b>回帰式</b><span>Y = '+reg.a.toFixed(3)+' + '+reg.b.toFixed(3)+' × X</span></div>'+
+    '<div><b>傾きの意味</b><span>'+REGX_LABEL[xKey]+'が1上がると、'+REGY_LABEL[yKey]+'は'+(reg.b>=0?'+':'')+reg.b.toFixed(3)+' 変わる</span></div>'+
+    '<div><b>採用ラグ</b><span>'+lag+'日'+(auto?'（自動探索で選択）':'')+'</span></div></div>'+
+    (reg.n<5?'<p class="note warn">組の数が'+reg.n+'件と少ないため、参考程度に見てください。記録が増えるほど信頼できます。</p>':'');
+  $('regScatterCard').style.display='block';
+  $('regScatter').innerHTML=scatterSVG(pts,reg,REGX_LABEL[xKey],REGY_LABEL[yKey]);
+  if(scan&&scan.length){
+    $('regScanCard').style.display='block';
+    const maxAbs=Math.max(...scan.map(s=>Math.abs(s.r)),0.01);
+    $('regScanTable').innerHTML='<table><tr><th>ラグ</th><th class="num">r</th><th>強さ</th></tr>'+
+      scan.map(s=>'<tr'+(s.lag===lag?' class="pick"':'')+'><td>'+s.lag+'日</td><td class="num">'+s.r.toFixed(2)+'</td>'+
+        '<td><div class="bar" style="margin:0"><i style="left:calc(50% + '+((s.r/maxAbs)*46)+'% - 2px)"></i><span class="z"></span></div></td></tr>').join('')+'</table>';
+  } else { $('regScanCard').style.display='none'; }
+}
+function csvRegression(){
+  const xKey=$('regX').value, yKey=$('regY').value, lag=+$('regLag').value;
+  const pts=regressionPairs(xKey,yKey,lag); if(!pts.length) return null;
+  return toCSV([['調査日','ラグ日数','X:'+REGX_LABEL[xKey],'Y:'+REGY_LABEL[yKey]],
+    ...pts.map(p=>[p.date,lag,f2(p.x),f2(p.y)])]);
+}
+
+/* ================= CSV取込 ================= */
+function parseCSV(text){
+  const rows=[]; let row=[],cell='',q=false;
+  text=text.replace(/^\uFEFF/,'');
+  for(let i=0;i<text.length;i++){
+    const c=text[i];
+    if(q){ if(c==='"'){ if(text[i+1]==='"'){cell+='"';i++;} else q=false; } else cell+=c; }
+    else if(c==='"') q=true;
+    else if(c===','||c==='\t'){row.push(cell);cell='';}
+    else if(c==='\n'){row.push(cell);rows.push(row);row=[];cell='';}
+    else if(c!=='\r') cell+=c;
+  }
+  if(cell!==''||row.length){row.push(cell);rows.push(row);}
+  return rows.filter(r=>r.some(c=>String(c).trim()!==''));
+}
+function toNum(v){
+  if(v==null) return null;
+  const m=String(v).replace(/,/g,'').match(/-?\d+(\.\d+)?/);
+  return m?parseFloat(m[0]):null;
+}
+function parseDT(s){
+  if(s instanceof Date) return {date:d2s(s),hour:s.getHours()};
+  s=String(s).trim().replace(/\//g,'-');
+  let m=s.match(/(\d{4})-(\d{1,2})-(\d{1,2})[ T]?(\d{1,2})?:?(\d{1,2})?/);
+  if(m) return {date:m[1]+'-'+String(m[2]).padStart(2,'0')+'-'+String(m[3]).padStart(2,'0'),hour:m[4]?Number(m[4]):12};
+  const d=new Date(s); return isNaN(d)?null:{date:d2s(d),hour:d.getHours()};
+}
+function sniffUnit(col){ // 値の単位から項目を推測
+  const sample=csvRows.slice(0,30).map(r=>String(r[col]||''));
+  const joined=sample.join(' ');
+  if(/°?C|℃/.test(joined)) return 't';
+  if(/ppm/i.test(joined)) return 'c';
+  if(/W\/?m|W·m/i.test(joined)) return 'r';
+  if(/%/.test(joined)) return 'h';
+  return null;
+}
+function buildMapUI(){
+  const opts=(sel)=>{sel.innerHTML='<option value="-1">使わない</option>'+
+    csvHead.map((h,i)=>'<option value="'+i+'">'+esc((h||('列'+(i+1))).slice(0,40))+'</option>').join('');};
+  ['colDT','colT','colH','colC','colR'].forEach(id=>opts($(id)));
+  const find=re=>csvHead.findIndex(h=>re.test(h));
+  // 日時
+  let dt=find(/日時|日付|時刻|time|date/i); if(dt<0) dt=0;
+  $('colDT').value=dt;
+  const set={};
+  csvHead.forEach((h,i)=>{
+    if(i===dt) return;
+    let k=null;
+    if(/気温|温度|temp/i.test(h)) k='t';
+    else if(/湿度|humid|rh/i.test(h)) k='h';
+    else if(/co2|炭酸|二酸化/i.test(h)) k='c';
+    else if(/日射|放射|rad|solar/i.test(h)) k='r';
+    if(!k) k=sniffUnit(i);
+    if(k&&set[k]==null) set[k]=i;
+  });
+  $('colT').value=set.t!=null?set.t:-1;
+  $('colH').value=set.h!=null?set.h:-1;
+  $('colC').value=set.c!=null?set.c:-1;
+  $('colR').value=set.r!=null?set.r:-1;
+  const names={t:'気温',h:'相対湿度',c:'CO₂',r:'日射'};
+  const got=Object.keys(set).map(k=>names[k]);
+  $('csvGuess').textContent=csvRows.length+'行を読み込みました。'+(got.length?got.join('・')+'の列と判定しました。違っていれば選び直してください。':'項目を選んでください。');
+  $('csvMap').style.display='block';
+}
+function mergeHourly(rows){ // rows: {date,hour,t,h,c,r}
+  const by={};
+  rows.forEach(x=>{const ts=x.date+'T'+String(x.hour).padStart(2,'0');(by[ts]=by[ts]||[]).push(x);});
+  const idx={}; state.env.forEach((e,i)=>{if(e.houseId===state.active) idx[e.ts]=i;});
+  let added=0,updated=0;
+  Object.keys(by).forEach(ts=>{
+    const a=by[ts], v={};
+    ['t','h','c','r'].forEach(k=>{const s=a.map(x=>x[k]).filter(x=>x!=null); if(s.length) v[k]=mean(s);});
+    if(idx[ts]!=null){ Object.assign(state.env[idx[ts]],v); updated++; }
+    else{ state.env.push(Object.assign({houseId:state.active,ts},v)); added++; }
+  });
+  return {added,updated,hours:Object.keys(by).length};
+}
+
+/* ================= 外気象 ================= */
+async function getWeather(){
+  const h=house();
+  if(!h||!h.lat||!h.lon){toast('ハウスの緯度経度を設定してください');show('lib');return;}
+  $('wx').innerHTML='<p class="empty">取得しています…</p>';
+  try{
+    const u='https://api.open-meteo.com/v1/forecast?latitude='+h.lat+'&longitude='+h.lon+
+      '&hourly=temperature_2m,relative_humidity_2m,shortwave_radiation,precipitation'+
+      '&timezone=Asia%2FTokyo&past_days=7&forecast_days=14';
+    const j=await (await fetch(u)).json();
+    if(!j.hourly) throw new Error('no data');
+    const by={};
+    j.hourly.time.forEach((t,i)=>{
+      const date=t.slice(0,10), hour=Number(t.slice(11,13));
+      (by[date]=by[date]||[]).push({hour,t:j.hourly.temperature_2m[i],rh:j.hourly.relative_humidity_2m[i],
+        rad:j.hourly.shortwave_radiation[i],pr:j.hourly.precipitation[i]});
+    });
+    wxCache=Object.keys(by).sort().map(date=>{
+      const a=by[date], T=a.map(x=>x.t).filter(v=>v!=null);
+      const day=a.filter(x=>x.hour>=6&&x.hour<18).map(x=>x.t).filter(v=>v!=null);
+      const night=a.filter(x=>x.hour<6||x.hour>=18).map(x=>x.t).filter(v=>v!=null);
+      return {date,tmean:T.length?mean(T):null,tmax:T.length?Math.max(...T):null,tmin:T.length?Math.min(...T):null,
+        tday:day.length?mean(day):null,tnight:night.length?mean(night):null,
+        rh:mean(a.map(x=>x.rh).filter(v=>v!=null)),
+        rad:a.reduce((s,x)=>s+(x.rad||0),0)*3600/1e6,
+        rain:a.reduce((s,x)=>s+(x.pr||0),0)};
+    });
+    const today=d2s(new Date());
+    $('wx').innerHTML='<div class="wx">'+wxCache.map(d=>
+      '<div class="day'+(d.date<today?' past':'')+'"><div class="d">'+jp(d.date)+'</div>'+
+      '<div class="hi">'+d.tmax.toFixed(0)+'°</div><div class="lo">'+d.tmin.toFixed(0)+'°</div>'+
+      '<div class="rh">'+d.rh.toFixed(0)+'%</div><div class="rad">'+d.rad.toFixed(1)+'</div>'+
+      '<div class="rain">'+d.rain.toFixed(1)+'</div></div>').join('')+'</div>'+
+      '<p class="note">上から順に 最高気温／最低気温／平均相対湿度／短波放射 MJ・m⁻²／雨量 mm。薄い背景は実績、白は予報です。</p>';
+    renderWxIn(); renderWater(); renderNow();
+    toast('気象データを取得しました');
+  }catch(e){ $('wx').innerHTML='<p class="empty">取得できませんでした。通信環境を確認してください。</p>'; }
+}
+function offsets(){
+  const d=envDaily(); if(!d.length||!wxCache) return {day:5.5,night:1.5,src:'既定値'};
+  const map={}; wxCache.forEach(w=>map[w.date]=w);
+  const ds=[],ns=[];
+  d.slice(-14).forEach(x=>{const w=map[x.date]; if(!w) return;
+    if(x.tday!=null&&w.tday!=null) ds.push(x.tday-w.tday);
+    if(x.tnight!=null&&w.tnight!=null) ns.push(x.tnight-w.tnight);});
+  if(ds.length<3) return {day:5.5,night:1.5,src:'既定値'};
+  return {day:mean(ds),night:ns.length?mean(ns):1.5,src:'実測'+ds.length+'日から補正'};
+}
+function renderWxIn(){
+  if(!wxCache){$('wxIn').innerHTML='<p class="empty">先に外気象を取得してください。</p>';return;}
+  const o=offsets(), today=d2s(new Date()), fut=wxCache.filter(d=>d.date>=today);
+  const difs=fut.map(d=>(d.tday+o.day)-(d.tnight+o.night));
+  $('wxIn').innerHTML='<div class="wx">'+fut.map(d=>{
+    const day=d.tday+o.day, night=d.tnight+o.night;
+    return '<div class="day"><div class="d">'+jp(d.date)+'</div><div class="hi">'+day.toFixed(0)+'°</div>'+
+      '<div class="lo">'+night.toFixed(0)+'°</div><div class="rh">DIF '+(day-night).toFixed(0)+'</div></div>';}).join('')+'</div>'+
+    '<p class="note">昼温（6〜18時）＝外気+'+o.day.toFixed(1)+'℃、夜温＝外気+'+o.night.toFixed(1)+'℃（'+o.src+'）。期間平均DIFは約'+mean(difs).toFixed(1)+'℃。</p>';
+}
+
+/* ================= 書き出し ================= */
+function dl(name,text,type){
+  const b=new Blob([type==='text/calendar'?text:'\uFEFF'+text],{type:(type||'text/csv')+';charset=utf-8'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download=name; a.click();
   setTimeout(()=>URL.revokeObjectURL(a.href),1000);
 }
-function resetForm(){
-  if(!confirm("入力内容をリセットしますか？"))return;
-  location.reload();
+const q=v=>'"'+String(v==null?'':v).replace(/"/g,'""')+'"';
+const toCSV=rows=>rows.map(r=>r.map(q).join(',')).join('\n');
+const hname=()=>{const m={};state.houses.forEach(h=>m[h.id]=h.name);return m;};
+function csvRecords(){
+  const hn=hname();
+  return toCSV([['ハウス','調査日','茎径平均mm','節間長平均cm','集計','茎径生データ','節間長生データ','開花数','着果数','収量','メモ'],
+    ...state.records.slice().sort((a,b)=>(hn[a.houseId]+a.date)<(hn[b.houseId]+b.date)?-1:1).map(r=>{const g=agg(r);
+      return [hn[r.houseId]||'',r.date,f2(g.stem),f2(g.node),r.weak?'中央値':'平均値',
+        (r.stem||[]).join(' '),(r.node||[]).join(' '),r.flower,r.fruit,r.yield,r.memo||''];})]);
 }
+function csvEnvDaily(){
+  const hn=hname(), rows=[];
+  state.houses.forEach(h=>envDaily(h.id).forEach(d=>rows.push([hn[h.id],d.date,f2(d.tmean),f2(d.tmax),f2(d.tmin),
+    f2(d.tday),f2(d.tnight),f2(d.dif),f2(d.rh),f2(d.vpd),d.co2==null?'':Math.round(d.co2),d.hours])));
+  return toCSV([['ハウス','日付','平均気温','最高気温','最低気温','昼温','夜温','DIF','相対湿度','飽差g/m3','CO2ppm','時数'],...rows]);
+}
+function csvHouses(){
+  return toCSV([['ハウス名','作型','品種','緯度','経度','定植日','終了予定','株数','面積a','設備','メモ','調査回数','環境時数'],
+    ...state.houses.map(h=>[h.name,h.type,h.variety,h.lat,h.lon,h.plant,h.end,h.density,h.area,h.facility,h.memo,
+      state.records.filter(r=>r.houseId===h.id).length,envH(h.id).length])]);
+}
+function csvFerts(){
+  return toCSV([['製品名','N','P','K','N/K比','標準希釈倍率','EC','使いどころ','メモ'],
+    ...state.ferts.map(f=>[f.name,f.n,f.p,f.k,nkRatio(f)==null?'':nkRatio(f).toFixed(2),f.dil,f.ec,
+      (f.tags||[]).map(t=>TAGNAME[t]).join('・'),f.memo])]);
+}
+function csvWater(){
+  const ip=irrigationPlan(); if(!ip) return null;
+  const h=house();
+  return toCSV([['ハウス','日付','日射MJ','雨mm','mL/株/日','回数','1回mL/株','L/10a','係数mL/株/MJ'],
+    ...ip.days.map(x=>[h?h.name:'',x.date,f1(x.rad),f1(x.rain),Math.round(x.perPlant),x.times,Math.round(x.each),
+      x.total==null?'':Math.round(x.total),Math.round(ip.coef)])]);
+}
+function csvWx(){
+  if(!wxCache) return null;
+  return toCSV([['日付','平均気温','最高気温','最低気温','昼温','夜温','平均相対湿度','短波放射MJ','雨量mm'],
+    ...wxCache.map(d=>[d.date,f2(d.tmean),f2(d.tmax),f2(d.tmin),f2(d.tday),f2(d.tnight),f2(d.rh),f2(d.rad),f2(d.rain)])]);
+}
+
+/* ================= カレンダー ================= */
+function events(){
+  const rs=recs(); if(!rs.length) return [];
+  const r=rs[rs.length-1], g=agg(r), a=analyse(), hn=house()?house().name:'', ip=irrigationPlan();
+  let d='【'+hn+'／生育調査】\n茎径 '+f1(g.stem)+'mm（'+(r.stem||[]).join(', ')+'）\n節間長 '+f1(g.node)+'cm（'+(r.node||[]).join(', ')+'）\n'+
+    (r.weak?'弱小枝を含むため中央値で集計\n':'')+(r.flower!=null?'開花数 '+r.flower+'\n':'')+
+    (r.fruit!=null?'着果数 '+r.fruit+'\n':'')+(r.yield!=null?'収量 '+r.yield+'\n':'')+(r.memo?'メモ：'+r.memo+'\n':'');
+  if(a){const p=plan(a);
+    d+='\n【予測】草勢：'+jp(a.items.stem.flatDate)+'に平準点／バランス：'+jp(a.items.node.flatDate)+'に平準点\n'+
+       '【方針】草勢を'+(p.vigor==='strengthen'?'強める':'弱める')+'・'+(p.balance==='toVeg'?'栄養成長':'生殖成長')+'へ／変温モデル'+p.model.no+'\n'+
+       p.rows.map(x=>'・'+x[0]+'：'+x[1]).join('\n');
+    if(ip){const t=ip.days[0];
+      d+='\n・かん水：'+Math.round(t.perPlant)+' mL/株/日（'+Math.round(t.each)+' mL×'+t.times+'回、係数'+Math.round(ip.coef)+' mL/株/MJ）';
+      const fp=fertPick(a); if(fp&&fp.list.length) d+='\n・液肥：'+fp.list[0].f.name+'（N/K '+(fp.list[0].r==null?'—':fp.list[0].r.toFixed(2))+'、EC '+fp.ecTarget[0]+'〜'+fp.ecTarget[1]+'）';
+    }}
+  const list=[{title:'['+hn+'] 生育調査 '+f1(g.stem)+'mm / '+f1(g.node)+'cm',date:r.date,details:d}];
+  const next=[{title:'['+hn+'] 生育調査（7日間隔）',date:addDays(r.date,7),
+      details:'開花節直下の茎径と節間長を中庸な4〜6株で測定。摘心後は1株3か所以上。8日以上あけると予測精度が落ちます。'},
+    {title:'['+hn+'] 生育予測と環境設定の見直し',date:addDays(r.date,14),details:'アプリで生育予測を更新し、向こう1か月の環境設定を決める。'}];
+  if(a){
+    next.push({title:'['+hn+'] 草勢が平準点を通過する見込み',date:a.items.stem.flatDate,details:'茎径の傾向が切り替わる予測日。管理強度を切り替える。'});
+    next.push({title:'['+hn+'] 成長バランスが平準点を通過する見込み',date:a.items.node.flatDate,details:'節間長の傾向が切り替わる予測日。管理強度を切り替える。'});
+  }
+  return {last:list[0],next};
+}
+function gcalUrl(e){
+  const p=new URLSearchParams({action:'TEMPLATE',text:e.title,
+    dates:e.date.replace(/-/g,'')+'/'+addDays(e.date,1).replace(/-/g,''),details:e.details||''});
+  if(house()) p.set('location',house().name);
+  return 'https://calendar.google.com/calendar/render?'+p.toString();
+}
+async function calInsert(list){
+  for(const e of list){
+    const r=await api('https://www.googleapis.com/calendar/v3/calendars/primary/events','POST',
+      {summary:e.title,description:e.details,location:house()?house().name:'',
+       start:{date:e.date},end:{date:addDays(e.date,1)}});
+    if(!r) throw new Error('登録できませんでした');
+  }
+}
+function ics(list){
+  const dt=new Date().toISOString().replace(/[-:]|\.\d{3}/g,'');
+  return 'BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//kyuuri-note//JP\r\nCALSCALE:GREGORIAN\r\n'+
+    list.map((e,i)=>'BEGIN:VEVENT\r\nUID:kyuuri-'+dt+'-'+i+'@local\r\nDTSTAMP:'+dt+'\r\n'+
+      'DTSTART;VALUE=DATE:'+e.date.replace(/-/g,'')+'\r\nDTEND;VALUE=DATE:'+addDays(e.date,1).replace(/-/g,'')+'\r\n'+
+      'SUMMARY:'+e.title.replace(/[,;]/g,' ')+'\r\n'+
+      'DESCRIPTION:'+String(e.details||'').replace(/\\/g,'').replace(/\n/g,'\\n').replace(/[,;]/g,' ')+'\r\n'+
+      (house()?'LOCATION:'+house().name+'\r\n':'')+'END:VEVENT\r\n').join('')+'END:VCALENDAR\r\n';
+}
+
+/* ================= Google 認証・Sheets ================= */
+const SCOPES='https://www.googleapis.com/auth/drive.file '+
+  'https://www.googleapis.com/auth/spreadsheets '+
+  'https://www.googleapis.com/auth/calendar.events';
+function signIn(){
+  const cid=$('gClient').value.trim();
+  if(!cid){toast('クライアントIDを入れてください');return;}
+  if(location.protocol==='file:'){
+    $('authNote').innerHTML='<span class="warn">この画面は file:// で開かれています。Googleのサインインは https:// か http://localhost でないと使えません。右の手順1を参照してください。</span>';
+    return;}
+  if(!window.google||!google.accounts){toast('Googleのスクリプトがまだ読み込まれていません。少し待って再度お試しください');return;}
+  state.auth.clientId=cid; saveState();
+  tokenClient=google.accounts.oauth2.initTokenClient({
+    client_id:cid, scope:SCOPES,
+    callback:async res=>{
+      if(res.error){$('authNote').innerHTML='<span class="warn">サインインできませんでした：'+esc(res.error)+'</span>';return;}
+      token=res.access_token;
+      try{
+        const u=await (await fetch('https://www.googleapis.com/oauth2/v3/userinfo',
+          {headers:{Authorization:'Bearer '+token}})).json();
+        userEmail=u.email||'';
+      }catch(e){}
+      renderAuth(); toast('サインインしました');
+      if(state.auth.sheetId) pull();
+    }});
+  tokenClient.requestAccessToken({prompt:token?'':'consent'});
+}
+function signOut(){
+  if(token&&window.google) google.accounts.oauth2.revoke(token,()=>{});
+  token=null; userEmail=''; renderAuth(); toast('サインアウトしました');
+}
+async function api(url,method,body){
+  if(!token){toast('先にサインインしてください');show('sync');return null;}
+  const r=await fetch(url,{method:method||'GET',
+    headers:{Authorization:'Bearer '+token,'Content-Type':'application/json'},
+    body:body?JSON.stringify(body):undefined});
+  if(r.status===401){token=null;renderAuth();throw new Error('サインインの有効期限が切れました。もう一度サインインしてください');}
+  const j=await r.json().catch(()=>null);
+  if(!r.ok) throw new Error((j&&j.error&&j.error.message)||('通信エラー '+r.status));
+  return j;
+}
+const SH={
+  ハウス:['id','name','type','variety','lat','lon','plant','end','density','area','facility','memo'],
+  調査記録:['id','houseId','date','stem','node','weak','flower','fruit','yield','memo'],
+  液肥:['id','name','n','p','k','dil','ec','tags','memo'],
+  環境時別:['houseId','ts','t','h','c','r']
+};
+const SHKEY={ハウス:'houses',調査記録:'records',液肥:'ferts',環境時別:'env'};
+async function makeSheet(){
+  try{
+    const j=await api('https://sheets.googleapis.com/v4/spreadsheets','POST',
+      {properties:{title:'きゅうり生育予測ノート '+d2s(new Date())},
+       sheets:Object.keys(SH).map(t=>({properties:{title:t}}))});
+    if(!j) return;
+    state.auth.sheetId=j.spreadsheetId; $('gSheet').value=j.spreadsheetId;
+    await saveState(); toast('スプレッドシートを作りました'); push();
+  }catch(e){ $('syncNote').innerHTML='<span class="warn">'+esc(e.message)+'</span>'; }
+}
+function cellOut(v){
+  if(Array.isArray(v)) return v.join(' ');
+  if(v==null) return '';
+  if(typeof v==='boolean') return v?'TRUE':'FALSE';
+  return v;
+}
+async function push(){
+  const id=state.auth.sheetId||$('gSheet').value.trim();
+  if(!id){toast('スプレッドシートを作るかIDを入れてください');return;}
+  state.auth.sheetId=id;
+  $('syncNote').textContent='送信しています…';
+  try{
+    const cut=addDays(d2s(new Date()),-180);
+    const data=Object.keys(SH).map(title=>{
+      const cols=SH[title];
+      let list=state[SHKEY[title]]||[];
+      if(title==='環境時別') list=list.filter(e=>e.ts>=cut);
+      return {range:"'"+title+"'!A1",
+        values:[cols,...list.map(o=>cols.map(c=>cellOut(o[c])))]};
+    });
+    await api('https://sheets.googleapis.com/v4/spreadsheets/'+id+'/values:batchClear','POST',
+      {ranges:Object.keys(SH).map(t=>"'"+t+"'")});
+    await api('https://sheets.googleapis.com/v4/spreadsheets/'+id+'/values:batchUpdate','POST',
+      {valueInputOption:'RAW',data});
+    state.auth.at=new Date().toLocaleString('ja-JP'); await saveState();
+    $('syncNote').textContent='送信しました：'+state.auth.at+'（ハウス'+state.houses.length+'・記録'+state.records.length+'・液肥'+state.ferts.length+'・環境'+state.env.length+'点）';
+    toast('スプレッドシートへ送りました'); renderAuth();
+  }catch(e){ $('syncNote').innerHTML='<span class="warn">'+esc(e.message)+'</span>'; }
+}
+function cellIn(col,v){
+  if(col==='stem'||col==='node') return String(v).split(/[\s,]+/).map(Number).filter(n=>!isNaN(n));
+  if(col==='tags') return String(v).split(/[\s,・]+/).filter(x=>x);
+  if(col==='weak') return String(v).toUpperCase()==='TRUE';
+  if(['t','h','c','r','flower','fruit','yield'].includes(col)) return (v===''||v==null)?null:Number(v);
+  return v==null?'':String(v);
+}
+async function pull(){
+  const id=state.auth.sheetId||$('gSheet').value.trim();
+  if(!id){toast('スプレッドシートIDを入れてください');return;}
+  $('syncNote').textContent='取り込んでいます…';
+  try{
+    const qs=Object.keys(SH).map(t=>'ranges='+encodeURIComponent("'"+t+"'")).join('&');
+    const j=await api('https://sheets.googleapis.com/v4/spreadsheets/'+id+'/values:batchGet?'+qs);
+    if(!j) return;
+    j.valueRanges.forEach((vr,i)=>{
+      const title=Object.keys(SH)[i], cols=SH[title], rows=vr.values||[];
+      if(rows.length<2){ state[SHKEY[title]]=[]; return; }
+      const head=rows[0].map(String);
+      state[SHKEY[title]]=rows.slice(1).filter(r=>r.some(c=>String(c).trim()!=='')).map(r=>{
+        const o={}; cols.forEach(c=>{const k=head.indexOf(c); o[c]=cellIn(c,k>=0?r[k]:'');}); return o;});
+    });
+    if(!state.houses.find(h=>h.id===state.active)) state.active=state.houses.length?state.houses[0].id:null;
+    state.auth.at=new Date().toLocaleString('ja-JP'); await saveState(); renderAll();
+    $('syncNote').textContent='取り込みました：'+state.auth.at;
+    toast('スプレッドシートから取り込みました');
+  }catch(e){ $('syncNote').innerHTML='<span class="warn">'+esc(e.message)+'</span>'; }
+}
+function renderAuth(){
+  const w=$('who');
+  if(token){ w.innerHTML='<b>'+esc(userEmail||'サインイン中')+'</b>';
+    $('authNote').textContent='サインイン中：'+(userEmail||'')+(state.auth.at?'／最終同期 '+state.auth.at:'');
+    $('calSub').textContent='Googleカレンダーへ直接登録します。';}
+  else{ w.textContent='未サインイン';
+    $('authNote').textContent='サインインしていません。'+(location.protocol==='file:'?'（この画面は file:// のためGoogleサインインは使えません）':'');
+    $('calSub').textContent='調査結果と次の予定を終日予定として書き出します。サインインすると直接登録できます。';}
+}
+
+/* ================= 画面 ================= */
+function show(t){
+  document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.tab===t));
+  document.querySelectorAll('.tab').forEach(s=>s.classList.toggle('on',s.id==='tab-'+t));
+}
+function renderAll(){renderHouseSel();renderNow();renderWater();renderLib();renderFert();renderEnv();renderAuth();runRegression();}
+
+/* ================= イベント ================= */
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>show(b.dataset.tab));
+$('houseSel').onchange=async()=>{state.active=$('houseSel').value;await saveState();renderAll();};
+
+$('btnHouseSave').onclick=async()=>{
+  const name=$('hName').value.trim(); if(!name){toast('ハウス名を入れてください');return;}
+  const o={name,type:$('hType').value,variety:$('hVariety').value.trim(),lat:$('hLat').value,lon:$('hLon').value,
+    plant:$('hPlant').value,end:$('hEnd').value,density:$('hDensity').value,area:$('hArea').value,
+    facility:$('hFacility').value.trim(),memo:$('hMemo').value.trim()};
+  if(editingHouse) Object.assign(state.houses.find(h=>h.id===editingHouse),o);
+  else{o.id=uid();state.houses.push(o);state.active=o.id;}
+  await saveState(); clearHouseForm(); renderAll(); toast('保存しました');
+};
+$('btnHouseNew').onclick=clearHouseForm;
+$('btnGeo').onclick=()=>{
+  if(!navigator.geolocation){toast('位置情報が使えません');return;}
+  navigator.geolocation.getCurrentPosition(p=>{
+    $('hLat').value=p.coords.latitude.toFixed(4);$('hLon').value=p.coords.longitude.toFixed(4);toast('現在地を入れました');},
+    ()=>toast('位置情報を取得できませんでした'));
+};
+
+['pN','pK'].forEach(i=>$(i).oninput=updateRatio);
+$('btnFertSave').onclick=async()=>{
+  const name=$('pName').value.trim(); if(!name){toast('製品名を入れてください');return;}
+  const o={name,n:$('pN').value,p:$('pP').value,k:$('pK').value,dil:$('pDil').value,ec:$('pEc').value,
+    tags:[...document.querySelectorAll('.ftag')].filter(c=>c.checked).map(c=>c.value),memo:$('pMemo').value.trim()};
+  if(editingFert) Object.assign(state.ferts.find(f=>f.id===editingFert),o);
+  else{o.id=uid();state.ferts.push(o);}
+  await saveState(); clearFertForm(); renderAll(); toast('保存しました');
+};
+$('btnFertNew').onclick=clearFertForm;
+$('btnFertSeed').onclick=async()=>{
+  const seed=[
+    {id:uid(),name:'住友液肥1号',n:'10',p:'5',k:'4',dil:'500',ec:'',tags:['strong','veg'],memo:'N/K 2.5・栄養成長へ寄せたいとき'},
+    {id:uid(),name:'くみあい液肥2号',n:'10',p:'4',k:'8',dil:'500',ec:'',tags:['base'],memo:'N/K 1.25・標準'},
+    {id:uid(),name:'高K液肥（例）',n:'6',p:'4',k:'8',dil:'500',ec:'',tags:['weak','repro'],memo:'N/K 0.75・草勢を抑え生殖成長へ'}];
+  seed.forEach(s=>{if(!state.ferts.find(f=>f.name===s.name)) state.ferts.push(s);});
+  await saveState(); renderAll(); toast('例を登録しました。成分は実際の製品にあわせて直してください');
+};
+
+function plantVals(cls){return [...document.querySelectorAll('.'+cls)].map(i=>i.value).filter(v=>v!=='').map(Number).filter(v=>!isNaN(v));}
+function clearPlantGrid(){document.querySelectorAll('.pstem,.pnode,.pflower,.pfruit').forEach(i=>i.value='');}
+function sumOrNull(a){return a.length?a.reduce((x,y)=>x+y,0):null;}
+$('btnAdd').onclick=async()=>{
+  if(!house()){toast('先にハウスを登録してください');show('lib');return;}
+  const date=$('fDate').value;
+  const stem=plantVals('pstem'), node=plantVals('pnode');
+  const flower=sumOrNull(plantVals('pflower')), fruit=sumOrNull(plantVals('pfruit'));
+  if(!date){toast('調査日を入れてください');return;}
+  if(!stem.length&&!node.length){toast('株の茎径か節間長を入れてください');return;}
+  const rec={id:uid(),houseId:state.active,date,stem,node,weak:$('fWeak').checked,
+    flower,fruit,yield:$('fYield').value===''?null:Number($('fYield').value),memo:$('fMemo').value.trim()};
+  state.records=state.records.filter(r=>!(r.houseId===state.active&&r.date===date)).concat(rec);
+  await saveState(); renderAll();
+  clearPlantGrid(); ['fYield','fMemo'].forEach(i=>$(i).value='');
+  $('fWeak').checked=false; $('fDate').value=addDays(date,7);
+  toast('記録を保存しました（'+Math.max(stem.length,node.length)+'株分）');
+  if(state.auth.auto&&token&&state.auth.sheetId) push();
+};
+$('btnClearForm').onclick=()=>{clearPlantGrid();['fYield','fMemo'].forEach(i=>$(i).value='');$('fWeak').checked=false;};
+
+$('csvFile').onchange=e=>{
+  csvFiles=[...e.target.files]; if(!csvFiles.length) return;
+  const rd=new FileReader();
+  rd.onload=()=>{
+    const rows=parseCSV(rd.result);
+    if(rows.length<2){toast('読み取れる行がありません');return;}
+    csvHead=rows[0].map(s=>String(s).trim()); csvRows=rows.slice(1);
+    buildMapUI();
+    if(csvFiles.length>1) $('csvGuess').textContent+='（'+csvFiles.length+'ファイルを同じ列指定で取り込みます）';
+  };
+  rd.readAsText(csvFiles[0],'UTF-8');
+};
+$('btnCsvImport').onclick=async()=>{
+  if(!house()){toast('先にハウスを選んでください');return;}
+  if(!csvRows){toast('CSVを選んでください');return;}
+  const iDT=+$('colDT').value, idx={t:+$('colT').value,h:+$('colH').value,c:+$('colC').value,r:+$('colR').value};
+  const collect=rows=>{
+    const out=[];
+    rows.forEach(r=>{
+      const dt=parseDT(r[iDT]); if(!dt) return;
+      const o={date:dt.date,hour:dt.hour};
+      let any=false;
+      Object.keys(idx).forEach(k=>{ if(idx[k]>=0){const v=toNum(r[idx[k]]); if(v!=null){o[k]=v;any=true;}} });
+      if(any) out.push(o);
+    });
+    return out;
+  };
+  let all=collect(csvRows);
+  // 2ファイル目以降
+  for(let i=1;i<csvFiles.length;i++){
+    const txt=await csvFiles[i].text();
+    const rows=parseCSV(txt); if(rows.length<2) continue;
+    all=all.concat(collect(rows.slice(1)));
+  }
+  if(!all.length){toast('値を読み取れませんでした。列の指定を確認してください');return;}
+  const res=mergeHourly(all);
+  await saveState(); renderAll(); renderWater();
+  $('csvInfo').textContent=res.hours+'時間分を反映しました（新規'+res.added+'・上書き'+res.updated+'）。';
+  $('csvMap').style.display='none'; $('csvFile').value=''; csvRows=null; csvFiles=[];
+  toast(res.hours+'時間分を取り込みました');
+  if(state.auth.auto&&token&&state.auth.sheetId) push();
+};
+$('btnEnvClear').onclick=async()=>{
+  if(!confirm('このハウスの環境データをすべて消します。よろしいですか。')) return;
+  state.env=state.env.filter(e=>e.houseId!==state.active);
+  await saveState(); renderAll(); toast('消しました');
+};
+$('btnEnvCsv').onclick=()=>{ if(!envDaily().length){toast('環境データがありません');return;} dl('env-daily.csv',csvEnvDaily()); };
+
+$('btnWx').onclick=getWeather;
+$('btnWxCsv').onclick=()=>{const c=csvWx(); if(!c){toast('先に気象データを取得してください');return;} dl('weather.csv',c);};
+$('btnWtCsv').onclick=()=>{const c=csvWater(); if(!c){toast('先に気象データを取得してください');return;} dl('irrigation-plan.csv',c);};
+
+$('regLag').oninput=()=>{$('regLagVal').textContent=$('regLag').value+'日';};
+$('regLag').addEventListener('change',()=>{$('regAuto').checked=false;});
+$('btnRegRun').onclick=runRegression;
+['regX','regY'].forEach(id=>$(id).onchange=runRegression);
+$('btnRegCsv').onclick=()=>{const c=csvRegression(); if(!c){toast('組になるデータがありません');return;} dl('regression-data.csv',c);};
+
+$('btnGcalLast').onclick=async()=>{
+  const e=events(); if(!e.last){toast('先に調査を記録してください');return;}
+  if(token){ try{ await calInsert([e.last]); toast('カレンダーに登録しました'); }catch(err){ toast(err.message); } }
+  else window.open(gcalUrl(e.last),'_blank','noopener');
+};
+$('btnGcalNext').onclick=async()=>{
+  const e=events(); if(!e.next||!e.next.length){toast('先に調査を記録してください');return;}
+  if(token){ try{ await calInsert(e.next); toast(e.next.length+'件を登録しました'); }catch(err){ toast(err.message); } }
+  else e.next.slice(0,2).forEach(x=>window.open(gcalUrl(x),'_blank','noopener'));
+};
+$('btnIcs').onclick=()=>{
+  const e=events(); if(!e.last){toast('先に調査を記録してください');return;}
+  dl('kyuuri-'+d2s(new Date())+'.ics',ics([e.last,...e.next]),'text/calendar'); toast('.icsを書き出しました');
+};
+
+$('exRec').onclick=()=>{if(!state.records.length){toast('記録がありません');return;}dl('records.csv',csvRecords());};
+$('exEnv').onclick=()=>{if(!state.env.length){toast('環境データがありません');return;}dl('env-daily.csv',csvEnvDaily());};
+$('exHouse').onclick=()=>{if(!state.houses.length){toast('ハウスがありません');return;}dl('houses.csv',csvHouses());};
+$('exFert').onclick=()=>{if(!state.ferts.length){toast('液肥がありません');return;}dl('fertilizers.csv',csvFerts());};
+$('exJson').onclick=()=>dl('kyuuri-backup-'+d2s(new Date())+'.json',JSON.stringify(state,null,1),'application/json');
+$('impJson').onchange=e=>{
+  const f=e.target.files[0]; if(!f) return;
+  const rd=new FileReader();
+  rd.onload=async()=>{
+    try{const j=JSON.parse(rd.result);
+      if(!j.houses) throw new Error('形式が違います');
+      if(!confirm('いまのデータを、このファイルの内容で置き換えます。よろしいですか。')) return;
+      state=Object.assign(state,j); await saveState(); renderAll(); toast('復元しました');
+    }catch(err){toast('読み込めませんでした');}};
+  rd.readAsText(f);
+};
+
+$('btnSignIn').onclick=signIn;
+$('btnSignOut').onclick=signOut;
+$('btnMakeSheet').onclick=makeSheet;
+$('btnOpenSheet').onclick=()=>{
+  const id=state.auth.sheetId||$('gSheet').value.trim();
+  if(!id){toast('スプレッドシートIDがありません');return;}
+  window.open('https://docs.google.com/spreadsheets/d/'+id,'_blank','noopener');
+};
+$('btnPush').onclick=push;
+$('btnPull').onclick=pull;
+['gClient','gSheet','syncAuto'].forEach(id=>$(id).onchange=async()=>{
+  state.auth.clientId=$('gClient').value.trim(); state.auth.sheetId=$('gSheet').value.trim();
+  state.auth.auto=$('syncAuto').checked; await saveState();});
+
+/* ================= 起動 ================= */
+(async()=>{
+  const s=await loadState(); if(s) state=Object.assign(state,s);
+  if(!state.auth) state.auth={clientId:'',sheetId:'',auto:false,at:''};
+  if(!state.ferts) state.ferts=[];
+  if(!state.houses.length){
+    state.houses=[{id:uid(),name:'第1ハウス',type:'早熟',variety:'',lat:'',lon:'',plant:'',end:'',
+      density:'1111',area:'',facility:'',memo:''}];
+    state.active=state.houses[0].id; await saveState();
+  }
+  if(!state.active||!state.houses.find(h=>h.id===state.active)) state.active=state.houses[0].id;
+  $('gClient').value=state.auth.clientId||''; $('gSheet').value=state.auth.sheetId||'';
+  $('syncAuto').checked=!!state.auth.auto;
+  const rs=recs();
+  $('fDate').value=rs.length?addDays(rs[rs.length-1].date,7):d2s(new Date());
+  renderAll();
+})();
 </script>
 </body>
 </html>
