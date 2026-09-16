@@ -3,9 +3,6 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="google-site-verification" content="xxxxxxx" />
-<script src="https://accounts.google.com/gsi/client" async defer></script>
-
 <title>きゅうり生育予測ノート</title>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
@@ -187,7 +184,7 @@ details table{margin-top:10px}
     <button data-tab="lib">ハウス一覧</button>
     <button data-tab="fert">液肥ライブラリ</button>
     <button data-tab="env">ハウス内環境</button>
-    <button data-tab="wx">外の気象</button>
+    <button data-tab="wx">外気象</button>
     <button data-tab="sync">同期と書き出し</button>
   </nav>
 </header>
@@ -296,7 +293,7 @@ details table{margin-top:10px}
       <div class="card">
         <h3>14日間のかん水計画</h3>
         <p class="sub">日射予報に応じて日ごとに変わります。天気が変わったら取り直してください。</p>
-        <div class="scroll" id="wtTable"><p class="empty">「外の気象」タブで予報を取得してください。</p></div>
+        <div class="scroll" id="wtTable"><p class="empty">「外気象」タブで予報を取得してください。</p></div>
         <div class="btnrow" style="margin-top:14px"><button class="ghost small" id="btnWtCsv">計画をCSVで書き出す</button></div>
       </div>
       <div class="card">
@@ -327,9 +324,17 @@ details table{margin-top:10px}
         <div class="check"><input type="checkbox" id="regAuto" checked><label for="regAuto" style="margin:0">0〜30日を自動で探索し、最も相関が強いラグ日数を使う</label></div>
         <div class="btnrow"><button id="btnRegRun">計算する</button><button class="ghost" id="btnRegCsv">組データをCSVで書き出す</button></div>
       </div>
+      <div class="card pop-sun">
+        <h3>重回帰：気温 × DIF</h3>
+        <p class="sub">平均気温とDIF（昼夜温差）を同時に使い、Yを説明します。単回帰より実際の管理判断に近づきます。Yは上の欄と共通です。</p>
+        <label><span>ラグ日数：<b id="mlrLagVal">7日</b></span>
+          <input type="range" id="mlrLag" min="0" max="30" value="7" step="1"></label>
+        <div class="check"><input type="checkbox" id="mlrAuto" checked><label for="mlrAuto" style="margin:0">R²が最大になるラグ日数を自動で探す</label></div>
+        <div class="btnrow"><button id="btnMlrRun">重回帰を計算する</button><button class="ghost" id="btnMlrCsv">組データをCSVで書き出す</button></div>
+      </div>
       <div class="card">
         <h3>読み方</h3>
-        <p class="sub" style="margin:0">環境の変化が生育に表れるまで7〜14日かかることが分かっています（マニュアル追補1）。まずは自動探索でどのラグが強く効いているかを見て、そこから茎径は気温・DIFとの関係を、節間長は湿度・飽差との関係を確認するのがおすすめです。r（相関係数）は−1〜1、絶対値が0.5を超えると関係ありとみなせます。n（組の数）が少ないと数値がぶれやすいので、5組未満のときは参考程度に。</p>
+        <p class="sub" style="margin:0">環境の変化が生育に表れるまで7〜14日かかることが分かっています（マニュアル追補1）。まずは自動探索でどのラグが強く効いているかを見て、そこから茎径は気温・DIFとの関係を、節間長は湿度・飽差との関係を確認するのがおすすめです。r（相関係数）は−1〜1、絶対値が0.5を超えると関係ありとみなせます。n（組の数）が少ないと数値がぶれやすいので、5組未満のときは参考程度に。重回帰のR²は、気温とDIFの両方を使ったときにYのばらつきをどれだけ説明できるかを示し、単回帰のr²と見比べると、DIFを加える意味があるかどうかが分かります。</p>
       </div>
     </div>
     <div>
@@ -340,9 +345,14 @@ details table{margin-top:10px}
         <div class="reglegend"><span><i style="background:var(--sky)"></i>記録</span><span><i style="background:var(--coral);border-radius:2px"></i>回帰直線</span></div>
       </div>
       <div class="card" id="regScanCard" style="display:none">
-        <h3>ラグ日数ごとの相関</h3>
+        <h3>ラグ日数ごとの相関（単回帰）</h3>
         <p class="sub">0〜30日、それぞれのラグでの相関係数 r です。山になっているところが「効き始めるまでの日数」の目安です。</p>
         <div class="scroll" id="regScanTable"></div>
+      </div>
+      <div class="card" id="mlrResult"><p class="empty">環境データと生育調査データが4組以上そろうと重回帰を計算できます。</p></div>
+      <div class="card" id="mlrScanCard" style="display:none">
+        <h3>ラグ日数ごとのR²（重回帰）</h3>
+        <div class="scroll" id="mlrScanTable"></div>
       </div>
     </div>
   </div>
@@ -467,11 +477,11 @@ details table{margin-top:10px}
   </div>
 </section>
 
-<!-- ============ 外の気象 ============ -->
+<!-- ============ 外気象 ============ -->
 <section class="tab" id="tab-wx">
   <div class="card">
     <h3>外気象の実績と予報</h3>
-    <p class="sub">Open-Meteoから、過去7日と先14日の気温・相対湿度・短波放射・雨量を取得します。</p>
+    <p class="sub">Open-Meteoから、過去60日と先14日の気温・相対湿度・短波放射・雨量を取得します。</p>
     <div class="btnrow" style="margin-bottom:16px">
       <button id="btnWx">取得する</button><button class="ghost" id="btnWxCsv">CSVで書き出す</button>
     </div>
@@ -521,7 +531,7 @@ details table{margin-top:10px}
           <button class="ghost" id="exEnv">環境日別</button>
           <button class="ghost" id="exHouse">ハウス一覧</button>
           <button class="ghost" id="exFert">液肥</button>
-          <button class="ghost" id="exJson">全データJSON</button>
+          <button class="ghost" id="exJson">5種類統合JSON</button>
         </div>
         <label style="margin-top:18px"><span>JSONから復元</span><input type="file" id="impJson" accept=".json" style="font-size:13px"></label>
       </div>
@@ -555,7 +565,7 @@ details table{margin-top:10px}
 <script>
 /* ================= 状態 ================= */
 const KEY='kyuuri:v3';
-let state={houses:[],records:[],env:[],ferts:[],active:null,
+let state={houses:[],records:[],env:[],ferts:[],active:null,wxCache:null,
   auth:{clientId:'',sheetId:'',auto:false,at:''}};
 let wxCache=null, csvFiles=[], csvHead=null, csvRows=null, editingHouse=null, editingFert=null;
 let token=null, tokenClient=null, userEmail='';
@@ -802,7 +812,7 @@ function renderWater(){
   const ip=irrigationPlan(), a=analyse(), h=house();
   const sub=$('wtSub');
   if(!ip){
-    $('wtToday').innerHTML='<p class="empty">'+(wxCache?'生育調査が3回そろうと計算します。':'「外の気象」タブで予報を取得してください。')+'</p>';
+    $('wtToday').innerHTML='<p class="empty">'+(wxCache?'生育調査が3回そろうと計算します。':'「外気象」タブで予報を取得してください。')+'</p>';
     $('wtTable').innerHTML='<p class="empty">気象データを取得すると表示します。</p>';
   }else{
     const d=ip.days[0];
@@ -1044,6 +1054,104 @@ function csvRegression(){
     ...pts.map(p=>[p.date,lag,f2(p.x),f2(p.y)])]);
 }
 
+/* ---- 重回帰（気温 × DIF） ---- */
+function multiPairs(yKey,lag){
+  const d=envDaily(); if(!d.length) return [];
+  const map={}; d.forEach(x=>map[x.date]=x);
+  const winMean=(end,key)=>{const a=[];for(let i=0;i<3;i++){const v=map[addDays(end,-i)];if(v&&v[key]!=null)a.push(v[key]);}return a.length?mean(a):null;};
+  const pts=[];
+  recs().forEach(r=>{
+    const g=agg(r);
+    const y=(yKey==='stem'||yKey==='node')?g[yKey]:r[yKey];
+    if(y==null) return;
+    const base=addDays(r.date,-lag);
+    const x1=winMean(base,'tmean'), x2=winMean(base,'dif');
+    if(x1==null||x2==null) return;
+    pts.push({date:r.date,x1,x2,y});
+  });
+  return pts;
+}
+function det3(m){return m[0][0]*(m[1][1]*m[2][2]-m[1][2]*m[2][1])-m[0][1]*(m[1][0]*m[2][2]-m[1][2]*m[2][0])+m[0][2]*(m[1][0]*m[2][1]-m[1][1]*m[2][0]);}
+function solve3(A,b){
+  const D=det3(A); if(Math.abs(D)<1e-9) return null;
+  const swap=(A,col)=>A.map((row,i)=>row.map((v,j)=>j===col?b[i]:v));
+  return [det3(swap(A,0))/D,det3(swap(A,1))/D,det3(swap(A,2))/D];
+}
+function multReg(pts){
+  const n=pts.length; if(n<4) return null;
+  let Sx1=0,Sx2=0,Sy=0,Sx1x1=0,Sx2x2=0,Sx1x2=0,Sx1y=0,Sx2y=0;
+  pts.forEach(p=>{Sx1+=p.x1;Sx2+=p.x2;Sy+=p.y;Sx1x1+=p.x1*p.x1;Sx2x2+=p.x2*p.x2;Sx1x2+=p.x1*p.x2;Sx1y+=p.x1*p.y;Sx2y+=p.x2*p.y;});
+  const sol=solve3([[n,Sx1,Sx2],[Sx1,Sx1x1,Sx1x2],[Sx2,Sx1x2,Sx2x2]],[Sy,Sx1y,Sx2y]);
+  if(!sol) return null;
+  const [a,b1,b2]=sol, my=Sy/n;
+  let ssres=0,sstot=0;
+  const preds=pts.map(p=>{const pred=a+b1*p.x1+b2*p.x2; ssres+=(p.y-pred)**2; sstot+=(p.y-my)**2; return {actual:p.y,pred};});
+  return {n,a,b1,b2,r2:sstot?Math.max(0,1-ssres/sstot):0,preds};
+}
+function scanLagsMulti(yKey){
+  const out=[];
+  for(let lag=0;lag<=30;lag++){const m=multReg(multiPairs(yKey,lag)); if(m) out.push({lag,r2:m.r2,n:m.n});}
+  return out;
+}
+function fitSVG(preds){
+  const W=420,H=260,pad={l:46,r:14,t:14,b:34};
+  const all=preds.flatMap(p=>[p.actual,p.pred]);
+  const mn=Math.min(...all),mx=Math.max(...all);
+  const span=Math.max(mx-mn,0.001)*1.2, base=mn-(span-(mx-mn))/2;
+  const sx=v=>pad.l+((v-base)/span)*(W-pad.l-pad.r);
+  const sy=v=>H-pad.b-((v-base)/span)*(H-pad.t-pad.b);
+  let s='<svg viewBox="0 0 '+W+' '+H+'" xmlns="http://www.w3.org/2000/svg">';
+  s+='<rect width="'+W+'" height="'+H+'" fill="#fff"/>';
+  s+='<line x1="'+pad.l+'" y1="'+pad.t+'" x2="'+pad.l+'" y2="'+(H-pad.b)+'" stroke="#1B2E22" stroke-width="1.5"/>';
+  s+='<line x1="'+pad.l+'" y1="'+(H-pad.b)+'" x2="'+(W-pad.r)+'" y2="'+(H-pad.b)+'" stroke="#1B2E22" stroke-width="1.5"/>';
+  s+='<line x1="'+sx(base).toFixed(1)+'" y1="'+sy(base).toFixed(1)+'" x2="'+sx(base+span).toFixed(1)+'" y2="'+sy(base+span).toFixed(1)+'" stroke="#B8873A" stroke-width="2" stroke-dasharray="5 4"/>';
+  preds.forEach(p=>{s+='<circle cx="'+sx(p.actual).toFixed(1)+'" cy="'+sy(p.pred).toFixed(1)+'" r="5.5" fill="#3C6E93" fill-opacity=".85" stroke="#1B2E22" stroke-width="1.2"/>';});
+  s+='<text x="'+pad.l+'" y="'+(H-8)+'" font-size="11" fill="#6D7A70">実測 →</text>';
+  s+='<text x="8" y="'+(pad.t+10)+'" font-size="11" fill="#6D7A70" transform="rotate(-90 8 '+(pad.t+10)+')">予測 →</text>';
+  s+='</svg>';
+  return s;
+}
+function runMulti(){
+  const yKey=$('regY').value, auto=$('mlrAuto').checked;
+  let lag=+$('mlrLag').value, scan=null;
+  if(auto){ scan=scanLagsMulti(yKey);
+    if(scan.length){ const best=scan.reduce((a,b)=>b.r2>a.r2?b:a); lag=best.lag; $('mlrLag').value=lag; $('mlrLagVal').textContent=lag+'日'; } }
+  const pts=multiPairs(yKey,lag), model=multReg(pts);
+  const el=$('mlrResult');
+  if(!model){
+    el.innerHTML='<p class="empty">組になるデータが4組未満です。重回帰は係数が3つあるため、環境データと生育調査記録が増えるまでお待ちください。</p>';
+    $('mlrScanCard').style.display='none'; return;
+  }
+  const strength=model.r2>=0.6?'よく説明できる':model.r2>=0.35?'ある程度説明できる':'説明力は弱い';
+  const singleT=linreg(regressionPairs('tmean',yKey,lag)), singleD=linreg(regressionPairs('dif',yKey,lag));
+  el.innerHTML='<h3>結果（重回帰）</h3><p class="sub">平均気温とDIF（'+lag+'日前・3日平均）で'+REGY_LABEL[yKey]+'を説明</p>'+
+    '<div class="big"><div class="k">決定係数 R²</div><div class="v">'+model.r2.toFixed(2)+'<span class="u">（'+strength+'・n='+model.n+'）</span></div></div>'+
+    '<div class="plan">'+
+    '<div><b>回帰式</b><span>Y = '+model.a.toFixed(3)+' + '+model.b1.toFixed(3)+'×気温 + '+model.b2.toFixed(3)+'×DIF</span></div>'+
+    '<div><b>気温の効き</b><span>DIFが同じなら、平均気温が1℃上がるとYは'+(model.b1>=0?'+':'')+model.b1.toFixed(3)+' 変わる</span></div>'+
+    '<div><b>DIFの効き</b><span>気温が同じなら、DIFが1℃上がるとYは'+(model.b2>=0?'+':'')+model.b2.toFixed(3)+' 変わる</span></div>'+
+    '<div><b>採用ラグ</b><span>'+lag+'日'+(auto?'（自動探索で選択）':'')+'</span></div>'+
+    (singleT?'<div><b>参考：気温のみ</b><span>単回帰 r²='+singleT.r2.toFixed(2)+'</span></div>':'')+
+    (singleD?'<div><b>参考：DIFのみ</b><span>単回帰 r²='+singleD.r2.toFixed(2)+'</span></div>':'')+
+    '</div>'+
+    '<div class="scatter" style="margin-top:14px">'+fitSVG(model.preds)+'</div>'+
+    '<div class="reglegend"><span><i style="background:var(--sky)"></i>実測×予測の組</span><span><i style="background:var(--sun);border-radius:2px"></i>実測＝予測の線</span></div>'+
+    (model.n<8?'<p class="note warn">組の数が'+model.n+'件です。係数を3つ推定するため、8組以上あると安定します。</p>':'');
+  if(scan&&scan.length){
+    $('mlrScanCard').style.display='block';
+    const maxR2=Math.max(...scan.map(s=>s.r2),0.01);
+    $('mlrScanTable').innerHTML='<table><tr><th>ラグ</th><th class="num">R²</th><th>強さ</th></tr>'+
+      scan.map(s=>'<tr'+(s.lag===lag?' class="pick"':'')+'><td>'+s.lag+'日</td><td class="num">'+s.r2.toFixed(2)+'</td>'+
+        '<td><div class="bar" style="margin:0"><i style="left:calc('+((s.r2/maxR2)*92).toFixed(1)+'% - 5px)"></i></div></td></tr>').join('')+'</table>';
+  } else { $('mlrScanCard').style.display='none'; }
+}
+function csvRegressionMulti(){
+  const yKey=$('regY').value, lag=+$('mlrLag').value;
+  const pts=multiPairs(yKey,lag); if(!pts.length) return null;
+  return toCSV([['調査日','ラグ日数','X1:平均気温','X2:DIF','Y:'+REGY_LABEL[yKey]],
+    ...pts.map(p=>[p.date,lag,f2(p.x1),f2(p.x2),f2(p.y)])]);
+}
+
 /* ================= CSV取込 ================= */
 function parseCSV(text){
   const rows=[]; let row=[],cell='',q=false;
@@ -1130,7 +1238,7 @@ async function getWeather(){
   try{
     const u='https://api.open-meteo.com/v1/forecast?latitude='+h.lat+'&longitude='+h.lon+
       '&hourly=temperature_2m,relative_humidity_2m,shortwave_radiation,precipitation'+
-      '&timezone=Asia%2FTokyo&past_days=7&forecast_days=14';
+      '&timezone=Asia%2FTokyo&past_days=60&forecast_days=14';
     const j=await (await fetch(u)).json();
     if(!j.hourly) throw new Error('no data');
     const by={};
@@ -1149,6 +1257,8 @@ async function getWeather(){
         rad:a.reduce((s,x)=>s+(x.rad||0),0)*3600/1e6,
         rain:a.reduce((s,x)=>s+(x.pr||0),0)};
     });
+    state.wxCache=wxCache;
+    await saveState();
     const today=d2s(new Date());
     $('wx').innerHTML='<div class="wx">'+wxCache.map(d=>
       '<div class="day'+(d.date<today?' past':'')+'"><div class="d">'+jp(d.date)+'</div>'+
@@ -1354,7 +1464,7 @@ async function push(){
         values:[cols,...list.map(o=>cols.map(c=>cellOut(o[c])))]};
     });
     await api('https://sheets.googleapis.com/v4/spreadsheets/'+id+'/values:batchClear','POST',
-      {ranges:Object.keys(SH).map(t=>"'"+t+"'")});
+      {ranges:Object.keys(SH).map(t=>"'"+t+"'!A:Z")});
     await api('https://sheets.googleapis.com/v4/spreadsheets/'+id+'/values:batchUpdate','POST',
       {valueInputOption:'RAW',data});
     state.auth.at=new Date().toLocaleString('ja-JP'); await saveState();
@@ -1374,7 +1484,7 @@ async function pull(){
   if(!id){toast('スプレッドシートIDを入れてください');return;}
   $('syncNote').textContent='取り込んでいます…';
   try{
-    const qs=Object.keys(SH).map(t=>'ranges='+encodeURIComponent("'"+t+"'")).join('&');
+    const qs=Object.keys(SH).map(t=>'ranges='+encodeURIComponent("'"+t+"'!A:Z")).join('&');
     const j=await api('https://sheets.googleapis.com/v4/spreadsheets/'+id+'/values:batchGet?'+qs);
     if(!j) return;
     j.valueRanges.forEach((vr,i)=>{
@@ -1405,7 +1515,7 @@ function show(t){
   document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.tab===t));
   document.querySelectorAll('.tab').forEach(s=>s.classList.toggle('on',s.id==='tab-'+t));
 }
-function renderAll(){renderHouseSel();renderNow();renderWater();renderLib();renderFert();renderEnv();renderAuth();runRegression();}
+function renderAll(){renderHouseSel();renderNow();renderWater();renderLib();renderFert();renderEnv();renderAuth();runRegression();runMulti();}
 
 /* ================= イベント ================= */
 document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>show(b.dataset.tab));
@@ -1524,8 +1634,13 @@ $('btnWtCsv').onclick=()=>{const c=csvWater(); if(!c){toast('先に気象デー�
 $('regLag').oninput=()=>{$('regLagVal').textContent=$('regLag').value+'日';};
 $('regLag').addEventListener('change',()=>{$('regAuto').checked=false;});
 $('btnRegRun').onclick=runRegression;
-['regX','regY'].forEach(id=>$(id).onchange=runRegression);
+['regX','regY'].forEach(id=>$(id).onchange=()=>{runRegression();runMulti();});
 $('btnRegCsv').onclick=()=>{const c=csvRegression(); if(!c){toast('組になるデータがありません');return;} dl('regression-data.csv',c);};
+
+$('mlrLag').oninput=()=>{$('mlrLagVal').textContent=$('mlrLag').value+'日';};
+$('mlrLag').addEventListener('change',()=>{$('mlrAuto').checked=false;});
+$('btnMlrRun').onclick=runMulti;
+$('btnMlrCsv').onclick=()=>{const c=csvRegressionMulti(); if(!c){toast('組になるデータがありません');return;} dl('regression-multi-data.csv',c);};
 
 $('btnGcalLast').onclick=async()=>{
   const e=events(); if(!e.last){toast('先に調査を記録してください');return;}
@@ -1546,7 +1661,19 @@ $('exRec').onclick=()=>{if(!state.records.length){toast('記録がありませ�
 $('exEnv').onclick=()=>{if(!state.env.length){toast('環境データがありません');return;}dl('env-daily.csv',csvEnvDaily());};
 $('exHouse').onclick=()=>{if(!state.houses.length){toast('ハウスがありません');return;}dl('houses.csv',csvHouses());};
 $('exFert').onclick=()=>{if(!state.ferts.length){toast('液肥がありません');return;}dl('fertilizers.csv',csvFerts());};
-$('exJson').onclick=()=>dl('kyuuri-backup-'+d2s(new Date())+'.json',JSON.stringify(state,null,1),'application/json');
+$('exJson').onclick=()=>{
+  const backup={
+    format:'kyuuri-saibai-kanri-backup',
+    version:2,
+    exportedAt:new Date().toISOString(),
+    houses:state.houses||[],
+    records:state.records||[],
+    env:state.env||[],
+    ferts:state.ferts||[],
+    weather:wxCache||state.wxCache||[]
+  };
+  dl('kyuuri-backup-'+d2s(new Date())+'.json',JSON.stringify(backup,null,1),'application/json');
+};
 $('impJson').onchange=e=>{
   const f=e.target.files[0]; if(!f) return;
   const rd=new FileReader();
@@ -1554,7 +1681,13 @@ $('impJson').onchange=e=>{
     try{const j=JSON.parse(rd.result);
       if(!j.houses) throw new Error('形式が違います');
       if(!confirm('いまのデータを、このファイルの内容で置き換えます。よろしいですか。')) return;
-      state=Object.assign(state,j); await saveState(); renderAll(); toast('復元しました');
+      state=Object.assign(state,j);
+      wxCache=Array.isArray(j.weather)?j.weather:(Array.isArray(j.wxCache)?j.wxCache:null);
+      state.wxCache=wxCache;
+      await saveState(); renderAll();
+      toast('復元しました');
+      if(wxCache) $('wx').innerHTML='<p class="empty">保存済みの外気象データを復元しました。必要なら「取得する」で更新できます。</p>';
+
     }catch(err){toast('読み込めませんでした');}};
   rd.readAsText(f);
 };
@@ -1578,6 +1711,8 @@ $('btnPull').onclick=pull;
   const s=await loadState(); if(s) state=Object.assign(state,s);
   if(!state.auth) state.auth={clientId:'',sheetId:'',auto:false,at:''};
   if(!state.ferts) state.ferts=[];
+  if(!Array.isArray(state.wxCache)) state.wxCache=null;
+  wxCache=state.wxCache||null;
   if(!state.houses.length){
     state.houses=[{id:uid(),name:'第1ハウス',type:'早熟',variety:'',lat:'',lon:'',plant:'',end:'',
       density:'1111',area:'',facility:'',memo:''}];
