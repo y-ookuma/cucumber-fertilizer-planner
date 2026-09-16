@@ -338,6 +338,26 @@ details table{margin-top:10px}
         <p class="sub">登録した液肥から、いまの方針に合うものを選びます。</p>
         <div id="fertPick"><p class="empty">液肥ライブラリに登録すると候補を出します。</p></div>
       </div>
+      <div class="card">
+        <h3>収量予測に基づく液肥必要量</h3>
+        <p class="sub">見込みの収量から持ち出されるN・P₂O₅・K₂O量を計算し、登録した液肥ごとに必要量を比べます。かん水量（水の量）とは別の計算です。</p>
+        <div class="row">
+          <label><span>見込み収量（kg）</span><input type="number" id="npkYield" min="0" step="0.1" placeholder="120"></label>
+          <label><span>対象期間の目安</span><select id="npkPeriod"><option value="7">向こう7日</option><option value="14" selected>向こう14日</option><option value="30">向こう30日</option></select></label>
+        </div>
+        <div class="btnrow" style="margin-bottom:14px"><button class="ghost small" id="btnNpkFromRecord">直近の収量記録から入れる</button></div>
+        <details>
+          <summary>養分吸収量の目安を調整する</summary>
+          <p class="note" style="margin-top:8px">きゅうりの収量100kgあたりに持ち出される養分量の一般的な目安です。マニュアルには記載がなく、本アプリで別途設定した参考値です。地域のJA施肥基準等がある場合はそちらに合わせて調整してください。</p>
+          <div class="row3">
+            <label><span>N（kg/100kg収量）</span><input type="number" id="npkCoefN" step="0.01" value="0.25"></label>
+            <label><span>P₂O₅（kg/100kg収量）</span><input type="number" id="npkCoefP" step="0.01" value="0.10"></label>
+            <label><span>K₂O（kg/100kg収量）</span><input type="number" id="npkCoefK" step="0.01" value="0.30"></label>
+          </div>
+        </details>
+        <div id="npkResult"><p class="empty">見込み収量を入れると計算します。</p></div>
+        <div class="btnrow" style="margin-top:14px"><button class="ghost small" id="btnNpkCsv">この結果をCSVで書き出す</button></div>
+      </div>
     </div>
   </div>
 </section>
@@ -964,6 +984,59 @@ function renderWater(){
 }
 const TAGNAME={strong:'草勢強',weak:'草勢弱',veg:'栄養成長',repro:'生殖成長',base:'基本'};
 function tagChips(tags){return (tags||[]).map(t=>'<span class="chip '+t+'">'+TAGNAME[t]+'</span>').join('');}
+
+/* ---- 収量予測に基づく液肥必要量 ---- */
+function npkYieldSuggestion(periodDays){
+  const rs=recs().filter(r=>r.yield!=null).sort((a,b)=>a.date<b.date?-1:1);
+  if(!rs.length) return null;
+  if(rs.length<2) return {value:rs[0].yield, note:'収量の記録が1件のみのため、その値をそのまま入れました。'};
+  let totalKg=0,totalDays=0;
+  for(let i=1;i<rs.length;i++){
+    const days=diffDays(rs[i-1].date,rs[i].date);
+    if(days>0){ totalKg+=rs[i].yield; totalDays+=days; }
+  }
+  if(!totalDays) return {value:rs[rs.length-1].yield, note:'記録の日付間隔を計算できなかったため、直近の値をそのまま入れました。'};
+  const perDay=totalKg/totalDays;
+  return {value:perDay*periodDays, note:'直近の収量記録から1日あたり約'+perDay.toFixed(1)+'kgと見積もり、'+periodDays+'日分として入れました。'};
+}
+function renderNpk(){
+  const el=$('npkResult'); if(!el) return;
+  const y=Number($('npkYield').value);
+  if(!y||y<=0){ el.innerHTML='<p class="empty">見込み収量を入れると計算します。</p>'; return; }
+  const cn=Number($('npkCoefN').value)||0, cp=Number($('npkCoefP').value)||0, ck=Number($('npkCoefK').value)||0;
+  const needN=y/100*cn, needP=y/100*cp, needK=y/100*ck;
+  let h='<div class="big"><div class="k">見込み収量 '+y+' kgからの持ち出しNPK（目安）</div>'+
+    '<div class="v" style="font-size:21px">N '+needN.toFixed(2)+'<span class="u"> kg</span>　P₂O₅ '+needP.toFixed(2)+'<span class="u"> kg</span>　K₂O '+needK.toFixed(2)+'<span class="u"> kg</span></div></div>';
+  if(!state.ferts.length){
+    h+='<p class="empty">「液肥ライブラリ」タブに製品を登録すると、必要量を製品ごとに比べられます。</p>';
+    el.innerHTML=h; return;
+  }
+  const a=analyse(), fp=fertPick(a);
+  const topF=(fp&&fp.list.length)?fp.list[0].f:null;
+  const rows=state.ferts.map(f=>{
+    const nPct=Number(f.n)||0, pPct=Number(f.p)||0, kPct=Number(f.k)||0;
+    if(nPct<=0) return {f,na:true};
+    const need=needN/(nPct/100);
+    const suppP=need*(pPct/100), suppK=need*(kPct/100);
+    const pRate=needP>0?suppP/needP*100:null, kRate=needK>0?suppK/needK*100:null;
+    return {f,need,suppP,suppK,pRate,kRate};
+  });
+  let t='<div class="scroll"><table><tr><th>製品</th><th class="num">必要量（N基準）</th><th class="num">供給P₂O₅</th><th class="num">P充足率</th><th class="num">供給K₂O</th><th class="num">K充足率</th></tr>';
+  rows.forEach(r=>{
+    const pick=topF&&r.f===topF;
+    if(r.na){ t+='<tr><td>'+esc(r.f.name)+'</td><td colspan="5" style="color:var(--mute)">N成分が未登録のため計算できません</td></tr>'; return; }
+    const offP=r.pRate!=null&&(r.pRate<70||r.pRate>150), offK=r.kRate!=null&&(r.kRate<70||r.kRate>150);
+    t+='<tr'+(pick?' class="pick"':'')+'><td>'+esc(r.f.name)+(pick?'<br><span style="font-size:11.5px;color:var(--leaf)">いまの方針に最も近い</span>':'')+'</td>'+
+      '<td class="num">'+r.need.toFixed(1)+' L</td>'+
+      '<td class="num">'+r.suppP.toFixed(2)+' kg</td>'+
+      '<td class="num'+(offP?' warn':'')+'">'+(r.pRate==null?'—':Math.round(r.pRate)+'%')+'</td>'+
+      '<td class="num">'+r.suppK.toFixed(2)+' kg</td>'+
+      '<td class="num'+(offK?' warn':'')+'">'+(r.kRate==null?'—':Math.round(r.kRate)+'%')+'</td></tr>';
+  });
+  t+='</table></div>';
+  h+=t+'<p class="note">必要量は<b>Nを基準</b>に、その製品だけで持ち出しN分を満たすのに必要な原液量です（比重1kg≒1Lとみなした概算。実際の製品の比重はラベルで確認してください）。P充足率・K充足率は、その量を使ったときにP₂O₅・K₂Oがどれだけ過不足するか（100%で過不足なし）。100%から離れている（<span class="warn">赤字</span>）ほど、その製品だけでは偏りが出ることを示します。複数の液肥を使い分けている場合は、それぞれの供給量を差し引いて考えてください。株あたりの水の量（かん水量）とは別の計算です。</p>';
+  el.innerHTML=h;
+}
 
 /* ================= 描画：ハウス・液肥 ================= */
 function renderLib(){
