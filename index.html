@@ -227,6 +227,7 @@ details table{margin-top:10px}
           <div class="prow"><span>株6</span><input type="number" step="0.1" class="pstem"><input type="number" step="0.1" class="pnode"><input type="number" step="1" min="0" class="pflower"><input type="number" step="1" min="0" class="pfruit"></div>
         </div>
         <div class="check"><input type="checkbox" id="fWeak"><label for="fWeak" style="margin:0">弱小枝（節間長4cm未満）を含む<br><span style="display:inline;color:var(--mute)">集計を中央値に切り替えます</span></label></div>
+        <label><span>LAI（葉面積指数・任意）</span><input type="number" id="fLAI" min="0" step="0.01" placeholder="例：2.5"></label>
         <label><span>収量 kg/10a（任意）</span><input type="number" id="fYield" min="0" step="0.1"></label>
         <label><span>メモ（任意）</span><textarea id="fMemo" placeholder="摘心、摘葉、天候など"></textarea></label>
         <div class="btnrow"><button id="btnAdd">記録を保存</button><button class="ghost" id="btnClearForm">入力を消す</button></div>
@@ -530,7 +531,7 @@ details table{margin-top:10px}
           <button class="ghost" id="exRec">調査記録</button>
           <button class="ghost" id="exEnv">環境日別</button>
           <button class="ghost" id="exHouse">ハウス一覧</button>
-          <button class="ghost" id="exFert">液肥</button>
+          <button class="ghost" id="exFert">液肥</button><button class="ghost" id="exDaily">日計CSV</button><button class="ghost" id="exMinute">1分環境CSV</button>
           <button class="ghost" id="exJson">5種類統合JSON</button>
         </div>
         <label style="margin-top:18px"><span>JSONから復元</span><input type="file" id="impJson" accept=".json" style="font-size:13px"></label>
@@ -551,7 +552,7 @@ details table{margin-top:10px}
       </div>
       <div class="card">
         <h3>シートの構成</h3>
-        <p class="sub" style="margin:0">同期すると「ハウス」「調査記録」「液肥」「環境時別」の4シートに書き込まれます。シート上で直接直した内容も「シートから取り込む」で戻せます。環境時別は直近180日分だけを送ります。</p>
+        <p class="sub" style="margin:0">同期すると「ハウス」「調査記録」「液肥」「環境時別」「日計」の5シートに書き込まれます。シート上で直接直した内容も「シートから取り込む」で戻せます。環境時別は直近180日分を1分間隔（元データから補間）で送ります。飽差を計算し、「日計」には日別集計を書き出します。</p>
       </div>
     </div>
   </div>
@@ -596,6 +597,7 @@ async function saveState(){
   try{ localStorage.setItem(KEY,v); }catch(e){}
 }
 const house=()=>state.houses.find(h=>h.id===state.active)||null;
+const houseById=id=>state.houses.find(h=>h.id===id)||null;
 const recs=()=>state.records.filter(r=>r.houseId===state.active).sort((a,b)=>a.date<b.date?-1:1);
 const envH=id=>state.env.filter(e=>e.houseId===(id||state.active));
 
@@ -761,6 +763,7 @@ function renderNow(){
     const s=a.items.stem,n=a.items.node;
     $('stemVal').textContent=f1(s.cur)+' mm（平準点 '+f1(s.base)+'）';
     $('nodeVal').textContent=f1(n.cur)+' cm（平準点 '+f1(n.base)+'）';
+    const lr=recs().slice(-1)[0]; $('asof').innerHTML += (lr&&lr.lai!=null?'／LAI '+f2(lr.lai):'／LAI 未入力');
     setMeter($('stemPin'),$('stemArrow'),s.dev,s.slope);
     setMeter($('nodePin'),$('nodeArrow'),n.dev,n.slope);
     $('stemVerdict').innerHTML='<em>'+(s.slope>0?'太くなりつつある':'細くなりつつある')+'</em>：'+
@@ -793,14 +796,14 @@ function renderRecords(){
   const el=$('records'), rs=recs().slice().reverse();
   $('recSub').textContent=rs.length?(house()?house().name:'')+'：'+rs.length+'件':'まだ記録がありません。';
   if(!rs.length){el.innerHTML='<p class="empty">左のフォームから最初の調査を記録してください。</p>';return;}
-  let h='<table><tr><th>調査日</th><th class="num">茎径 mm</th><th class="num">節間長 cm</th><th class="num">開花</th><th class="num">着果</th><th class="num">収量</th><th></th></tr>';
+  let h='<table><tr><th>調査日</th><th class="num">茎径 mm</th><th class="num">節間長 cm</th><th class="num">開花</th><th class="num">着果</th><th class="num">LAI</th><th class="num">収量</th><th></th></tr>';
   rs.forEach(r=>{const g=agg(r);
     h+='<tr><td>'+r.date+(r.weak?'<br><span style="font-size:11px;color:var(--mute)">中央値</span>':'')+'</td>'+
       '<td class="num">'+f1(g.stem)+'</td><td class="num">'+f1(g.node)+'</td>'+
       '<td class="num">'+(r.flower==null?'—':r.flower)+'</td><td class="num">'+(r.fruit==null?'—':r.fruit)+'</td>'+
-      '<td class="num">'+(r.yield==null?'—':r.yield)+'</td>'+
+      '<td class="num">'+(r.lai==null?'—':f2(r.lai))+'</td><td class="num">'+(r.yield==null?'—':r.yield)+'</td>'+
       '<td style="text-align:right"><button class="ghost small" data-del="'+r.id+'">削除</button></td></tr>';
-    if(r.memo) h+='<tr><td colspan="7" style="color:var(--mute);font-size:12.5px">'+esc(r.memo)+'</td></tr>';});
+    if(r.memo) h+='<tr><td colspan="8" style="color:var(--mute);font-size:12.5px">'+esc(r.memo)+'</td></tr>';});
   el.innerHTML=h+'</table>';
   el.querySelectorAll('[data-del]').forEach(b=>b.onclick=async()=>{
     state.records=state.records.filter(r=>r.id!==b.dataset.del);
@@ -1237,7 +1240,7 @@ async function getWeather(){
   $('wx').innerHTML='<p class="empty">取得しています…</p>';
   try{
     const u='https://api.open-meteo.com/v1/forecast?latitude='+h.lat+'&longitude='+h.lon+
-      '&hourly=temperature_2m,relative_humidity_2m,shortwave_radiation,precipitation'+
+      '&hourly=temperature_2m,relative_humidity_2m,shortwave_radiation,direct_radiation,diffuse_radiation,precipitation'+
       '&timezone=Asia%2FTokyo&past_days=60&forecast_days=14';
     const j=await (await fetch(u)).json();
     if(!j.hourly) throw new Error('no data');
@@ -1245,7 +1248,7 @@ async function getWeather(){
     j.hourly.time.forEach((t,i)=>{
       const date=t.slice(0,10), hour=Number(t.slice(11,13));
       (by[date]=by[date]||[]).push({hour,t:j.hourly.temperature_2m[i],rh:j.hourly.relative_humidity_2m[i],
-        rad:j.hourly.shortwave_radiation[i],pr:j.hourly.precipitation[i]});
+        rad:j.hourly.shortwave_radiation[i],direct:j.hourly.direct_radiation[i],diffuse:j.hourly.diffuse_radiation[i],pr:j.hourly.precipitation[i]});
     });
     wxCache=Object.keys(by).sort().map(date=>{
       const a=by[date], T=a.map(x=>x.t).filter(v=>v!=null);
@@ -1255,6 +1258,10 @@ async function getWeather(){
         tday:day.length?mean(day):null,tnight:night.length?mean(night):null,
         rh:mean(a.map(x=>x.rh).filter(v=>v!=null)),
         rad:a.reduce((s,x)=>s+(x.rad||0),0)*3600/1e6,
+        direct:a.reduce((s,x)=>s+(x.direct||0),0)*3600/1e6,
+        diffuse:a.reduce((s,x)=>s+(x.diffuse||0),0)*3600/1e6,
+        parDirect:a.reduce((s,x)=>s+(x.direct||0),0)*3600/1e6*0.45*4.57,
+        parDiffuse:a.reduce((s,x)=>s+(x.diffuse||0),0)*3600/1e6*0.50*4.57,
         rain:a.reduce((s,x)=>s+(x.pr||0),0)};
     });
     state.wxCache=wxCache;
@@ -1291,6 +1298,48 @@ function renderWxIn(){
     '<p class="note">昼温（6〜18時）＝外気+'+o.day.toFixed(1)+'℃、夜温＝外気+'+o.night.toFixed(1)+'℃（'+o.src+'）。期間平均DIFは約'+mean(difs).toFixed(1)+'℃。</p>';
 }
 
+/* ================= 日計・1分データ ================= */
+function minuteEnvRows(id){
+  const src=envH(id).slice().sort((a,b)=>a.ts.localeCompare(b.ts)), out=[];
+  for(let i=0;i<src.length;i++){
+    const a=src[i], b=src[i+1];
+    const t0=new Date(a.ts+':00');
+    const t1=b?new Date(b.ts+':00'):new Date(t0.getTime()+3600000);
+    const span=Math.max(1,Math.round((t1-t0)/60000));
+    for(let m=0;m<span;m++){
+      const f=m/span, d=new Date(t0.getTime()+m*60000);
+      const iso=d.toISOString().slice(0,16);
+      const val=k=>a[k]!=null&&b&&b[k]!=null?a[k]+(b[k]-a[k])*f:(a[k]!=null?a[k]:null);
+      const row={houseId:id,ts:iso,t:val('t'),h:val('h'),c:val('c'),r:val('r')};
+      row.vpd=row.t!=null&&row.h!=null?vpdOf(row.t,row.h):null; out.push(row);
+    }
+  }
+  return out;
+}
+function laiForDate(id,date){
+  const a=state.records.filter(r=>r.houseId===id&&r.date<=date&&r.lai!=null).sort((x,y)=>x.date.localeCompare(y.date));
+  return a.length?Number(a[a.length-1].lai):null;
+}
+function dailyRows(id){
+  const h=houseById(id), e=envDaily(id), wx=wxCache||[];
+  const wm={}; wx.forEach(x=>wm[x.date]=x);
+  return e.map(d=>{
+    const w=wm[d.date]||{};
+    const lai=laiForDate(id,d.date);
+    const vpd=d.vpd;
+    // LAI・飽差・日射からの簡易推定。実測蒸散計がない場合の目安。
+    const transp=(lai!=null&&w.rad!=null&&vpd!=null)?Math.max(0,w.rad*0.35*(1-Math.exp(-0.6*lai))*(0.65+0.08*vpd)):null;
+    return {house:h?h.name:'',houseId:id,date:d.date,tmax:d.tmax,tmean:d.tmean,tmin:d.tmin,vpd:d.vpd,tday:d.tday,tnight:d.tnight,dif:d.dif,rh:d.rh,co2:d.co2,rad:w.rad,direct:w.direct,diffuse:w.diffuse,parDirect:w.parDirect,parDiffuse:w.parDiffuse,transp,rain:w.rain,extTmax:w.tmax,extTmean:w.tmean,extTmin:w.tmin,extRh:w.rh,lai};
+  });
+}
+function csvDaily(){
+  const rows=[]; state.houses.forEach(h=>dailyRows(h.id).forEach(d=>rows.push([d.house,d.date,f2(d.tmax),f2(d.tmean),f2(d.tmin),f2(d.vpd),f2(d.tday),f2(d.tnight),f2(d.dif),f2(d.rh),f2(d.co2),f2(d.rad),f2(d.direct),f2(d.diffuse),f2(d.parDirect),f2(d.parDiffuse),f2(d.transp),f2(d.rain),f2(d.extTmax),f2(d.extTmean),f2(d.extTmin),f2(d.extRh),f2(d.lai)])));
+  return toCSV([['ハウス','日付','ハウス内最高気温','ハウス内平均気温','ハウス内最低気温','飽差g/m3','昼温','夜温','DIF','湿度%','CO2ppm','外気象短波放射MJ/m2','直達日射MJ/m2','散乱日射MJ/m2','PAR直達mol/m2/日','PAR散乱mol/m2/日','群落蒸散量L/m2/日(推定)','外気象雨量mm','外気象最高気温','外気象平均気温','外気象最低気温','外気象湿度%','LAI'],...rows]);
+}
+function csvEnvMinute(){
+  const rows=[]; state.houses.forEach(h=>minuteEnvRows(h.id).forEach(x=>rows.push([h.name,x.ts,f2(x.t),f2(x.h),f2(x.vpd),f2(x.c),f2(x.r)])));
+  return toCSV([['ハウス','日時(1分)','気温℃','湿度%','飽差g/m3','CO2ppm','日射W/m2'],...rows]);
+}
 /* ================= 書き出し ================= */
 function dl(name,text,type){
   const b=new Blob([type==='text/calendar'?text:'\uFEFF'+text],{type:(type||'text/csv')+';charset=utf-8'});
@@ -1428,11 +1477,12 @@ async function api(url,method,body){
 }
 const SH={
   ハウス:['id','name','type','variety','lat','lon','plant','end','density','area','facility','memo'],
-  調査記録:['id','houseId','date','stem','node','weak','flower','fruit','yield','memo'],
+  調査記録:['id','houseId','date','stem','node','weak','flower','fruit','lai','yield','memo'],
   液肥:['id','name','n','p','k','dil','ec','tags','memo'],
-  環境時別:['houseId','ts','t','h','c','r']
+  環境時別:['houseId','ts','t','h','vpd','c','r'],
+  日計:['house','date','tmax','tmean','tmin','vpd','tday','tnight','dif','rh','co2','rad','direct','diffuse','parDirect','parDiffuse','transp','rain','extTmax','extTmean','extTmin','extRh','lai']
 };
-const SHKEY={ハウス:'houses',調査記録:'records',液肥:'ferts',環境時別:'env'};
+const SHKEY={ハウス:'houses',調査記録:'records',液肥:'ferts',環境時別:'env',日計:'daily'};
 async function makeSheet(){
   try{
     const j=await api('https://sheets.googleapis.com/v4/spreadsheets','POST',
@@ -1459,7 +1509,8 @@ async function push(){
     const data=Object.keys(SH).map(title=>{
       const cols=SH[title];
       let list=state[SHKEY[title]]||[];
-      if(title==='環境時別') list=list.filter(e=>e.ts>=cut);
+      if(title==='環境時別') { list=state.houses.flatMap(h=>minuteEnvRows(h.id)).filter(e=>e.ts>=cut); }
+      if(title==='日計') { list=state.houses.flatMap(h=>dailyRows(h.id)); }
       return {range:"'"+title+"'!A1",
         values:[cols,...list.map(o=>cols.map(c=>cellOut(o[c])))]};
     });
@@ -1476,7 +1527,7 @@ function cellIn(col,v){
   if(col==='stem'||col==='node') return String(v).split(/[\s,]+/).map(Number).filter(n=>!isNaN(n));
   if(col==='tags') return String(v).split(/[\s,・]+/).filter(x=>x);
   if(col==='weak') return String(v).toUpperCase()==='TRUE';
-  if(['t','h','c','r','flower','fruit','yield'].includes(col)) return (v===''||v==null)?null:Number(v);
+  if(['t','h','c','r','flower','fruit','lai','yield'].includes(col)) return (v===''||v==null)?null:Number(v);
   return v==null?'':String(v);
 }
 async function pull(){
@@ -1568,15 +1619,15 @@ $('btnAdd').onclick=async()=>{
   if(!date){toast('調査日を入れてください');return;}
   if(!stem.length&&!node.length){toast('株の茎径か節間長を入れてください');return;}
   const rec={id:uid(),houseId:state.active,date,stem,node,weak:$('fWeak').checked,
-    flower,fruit,yield:$('fYield').value===''?null:Number($('fYield').value),memo:$('fMemo').value.trim()};
+    flower,fruit,yield:$('fYield').value===''?null:Number($('fYield').value),lai:$('fLAI').value===''?null:Number($('fLAI').value),memo:$('fMemo').value.trim()};
   state.records=state.records.filter(r=>!(r.houseId===state.active&&r.date===date)).concat(rec);
   await saveState(); renderAll();
-  clearPlantGrid(); ['fYield','fMemo'].forEach(i=>$(i).value='');
+  clearPlantGrid(); ['fLAI','fYield','fMemo'].forEach(i=>$(i).value='');
   $('fWeak').checked=false; $('fDate').value=addDays(date,7);
   toast('記録を保存しました（'+Math.max(stem.length,node.length)+'株分）');
   if(state.auth.auto&&token&&state.auth.sheetId) push();
 };
-$('btnClearForm').onclick=()=>{clearPlantGrid();['fYield','fMemo'].forEach(i=>$(i).value='');$('fWeak').checked=false;};
+$('btnClearForm').onclick=()=>{clearPlantGrid();['fLAI','fYield','fMemo'].forEach(i=>$(i).value='');$('fWeak').checked=false;};
 
 $('csvFile').onchange=e=>{
   csvFiles=[...e.target.files]; if(!csvFiles.length) return;
@@ -1661,6 +1712,8 @@ $('exRec').onclick=()=>{if(!state.records.length){toast('記録がありませ�
 $('exEnv').onclick=()=>{if(!state.env.length){toast('環境データがありません');return;}dl('env-daily.csv',csvEnvDaily());};
 $('exHouse').onclick=()=>{if(!state.houses.length){toast('ハウスがありません');return;}dl('houses.csv',csvHouses());};
 $('exFert').onclick=()=>{if(!state.ferts.length){toast('液肥がありません');return;}dl('fertilizers.csv',csvFerts());};
+$('exDaily').onclick=()=>{const c=csvDaily(); if(!c||c.split('\n').length<2){toast('日計データがありません');return;}dl('daily.csv',c);};
+$('exMinute').onclick=()=>{const c=csvEnvMinute(); if(!c||c.split('\n').length<2){toast('環境データがありません');return;}dl('environment-1min.csv',c);};
 $('exJson').onclick=()=>{
   const backup={
     format:'kyuuri-saibai-kanri-backup',
@@ -1711,6 +1764,7 @@ $('btnPull').onclick=pull;
   const s=await loadState(); if(s) state=Object.assign(state,s);
   if(!state.auth) state.auth={clientId:'',sheetId:'',auto:false,at:''};
   if(!state.ferts) state.ferts=[];
+  if(!state.daily) state.daily=[];
   if(!Array.isArray(state.wxCache)) state.wxCache=null;
   wxCache=state.wxCache||null;
   if(!state.houses.length){
