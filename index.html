@@ -934,15 +934,6 @@ input[type=date]{min-width:0;max-width:100%}
   <div class="cols">
     <div>
       <div class="card">
-        <h3>表示モード</h3>
-        <p class="sub">ライトモードとダークモードを切り替えます。設定はこの端末に保存されます。</p>
-        <div class="seg" id="themeSeg" data-pos="0" role="group" aria-label="表示モード">
-          <span class="seg-thumb"></span>
-          <button type="button" data-theme-set="light" class="on" aria-pressed="true"><span data-ico="sun" style="display:inline-grid"></span>ライト</button>
-          <button type="button" data-theme-set="dark" aria-pressed="false"><span data-ico="moon" style="display:inline-grid"></span>ダーク</button>
-        </div>
-      </div>
-      <div class="card">
         <h3>Googleアカウントでサインイン</h3>
         <p class="sub">サインインすると、自分のスプレッドシートに記録を保存し、別の端末から同じデータを開けます。カレンダーへの登録も1回の操作で済みます。</p>
         <label><span>OAuth クライアントID</span><input type="text" id="gClient" placeholder="xxxxxxxx.apps.googleusercontent.com"></label>
@@ -1012,6 +1003,15 @@ input[type=date]{min-width:0;max-width:100%}
       </div>
     </div>
   </div>
+  <div class="card" style="margin-top:8px">
+        <h3>表示モード</h3>
+        <p class="sub">ライトモードとダークモードを切り替えます。設定はこの端末に保存されます。</p>
+        <div class="seg" id="themeSeg" data-pos="0" role="group" aria-label="表示モード">
+          <span class="seg-thumb"></span>
+          <button type="button" data-theme-set="light" class="on" aria-pressed="true"><span data-ico="sun" style="display:inline-grid"></span>ライト</button>
+          <button type="button" data-theme-set="dark" aria-pressed="false"><span data-ico="moon" style="display:inline-grid"></span>ダーク</button>
+        </div>
+      </div>
 </section>
 
 <!-- ============ ログアウト ============ -->
