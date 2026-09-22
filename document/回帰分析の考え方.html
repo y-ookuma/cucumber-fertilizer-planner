@@ -239,9 +239,9 @@ footer.pagefoot{max-width:960px;margin:70px auto 0;padding:0 24px;color:var(--mu
   <div class="formula">X の値 = mean( 環境値[調査日 − ラグ], 環境値[調査日 − ラグ − 1], 環境値[調査日 − ラグ − 2] )</div>
   <p class="note">Yに「日次収量」「潅水量」を選んだ場合だけ、日付の基準が生育調査ではなく「毎日の記録」の日付に変わります（それ以外の組み方は同じです）。生育調査は7日おきしかありませんが、毎日の記録は日々つけられるため、収量・潅水と環境の関係はより多くの組数で調べられます。</p>
   <div class="flow">
-    <div class="card">🌤️<h4 style="margin-top:8px">環境</h4><div class="big">気温・DIF など</div></div>
+    <div class="card"><h4>環境</h4><div class="big">気温・DIF など</div></div>
     <div class="arrow">→ ラグ日数だけ後ろ →</div>
-    <div class="card">🌱<h4 style="margin-top:8px">生育</h4><div class="big">茎径・節間長</div></div>
+    <div class="card"><h4>生育</h4><div class="big">茎径・節間長</div></div>
   </div>
 </section>
 
@@ -277,7 +277,7 @@ footer.pagefoot{max-width:960px;margin:70px auto 0;padding:0 24px;color:var(--mu
     <tr><td>r</td><td style="text-align:left">そのラグでの相関係数（−1〜+1）。+ならXが高いほどYも高い、−ならXが高いほどYは低い。0に近いほど関係がない</td></tr>
     <tr><td>強さ</td><td style="text-align:left">rを横棒で示したもの。中央の縦線が r = 0、右へ伸びるほど正の相関、左へ伸びるほど負の相関</td></tr>
   </table>
-  <p class="note">💡 <b>横棒（強さ）の見方の注意。</b> 棒の長さは、その表の中でいちばん大きい|r|を端（約46％）とする<b>相対的な長さ</b>です。r = ±1 を端にしているわけではありません。強さは必ず r の数値で判断してください（目安は |r| が0.7以上で強い関係、0.5以上で関係あり、0.3以上で弱い関係、それ未満は関係が弱い）。</p>
+  <p class="note"><b>横棒（強さ）の見方の注意。</b> 棒の長さは、その表の中でいちばん大きい|r|を端（約46％）とする<b>相対的な長さ</b>です。r = ±1 を端にしているわけではありません。強さは必ず r の数値で判断してください（目安は |r| が0.7以上で強い関係、0.5以上で関係あり、0.3以上で弱い関係、それ未満は関係が弱い）。</p>
 
   <h3>表の形からわかること</h3>
   <table>
@@ -327,7 +327,7 @@ footer.pagefoot{max-width:960px;margin:70px auto 0;padding:0 24px;color:var(--mu
 
   <div class="grid2">
     <div class="panel">
-      <h3 style="margin-top:0">🌤️ 環境データ（抜粋）</h3>
+      <h3 style="margin-top:0">環境データ（抜粋）</h3>
       <table>
         <tr><th style="text-align:left">日付</th><th>平均気温℃</th><th>DIF℃</th></tr>
         <tr><td style="text-align:left">2026-06-01</td><td>22.5</td><td>8.8</td></tr>
@@ -341,7 +341,7 @@ footer.pagefoot{max-width:960px;margin:70px auto 0;padding:0 24px;color:var(--mu
       <p class="note">実際にはこの先も、CSV取込やOpen-Meteoからの取込で日々分が埋まっていきます。</p>
     </div>
     <div class="panel">
-      <h3 style="margin-top:0">🌱 生育調査記録（茎径、6株の平均）</h3>
+      <h3 style="margin-top:0">生育調査記録（茎径、6株の平均）</h3>
       <table>
         <tr><th style="text-align:left">調査日</th><th>茎径 mm</th></tr>
         <tr><td style="text-align:left">2026-07-11</td><td>9.2</td></tr>
@@ -369,7 +369,7 @@ footer.pagefoot{max-width:960px;margin:70px auto 0;padding:0 24px;color:var(--mu
     <div class="arrow">→</div>
     <div class="card" style="background:linear-gradient(135deg,var(--dark),var(--dark3));color:#FBFAF2;border:none"><div class="badge" style="background:linear-gradient(150deg,#6CD897,#38BDF8)">4</div><h4 style="color:#9FD8B4">Xの計算</h4><div class="big">22.40</div></div>
   </div>
-  <div class="callout"><span>✅ この組み合わせ： <b>X = 22.40 ℃ ・ Y = 9.2 mm</b></span><span class="note">残り9回の調査日も同じ手順でX・Yの組を作ります</span></div>
+  <div class="callout"><span>この組み合わせ： <b>X = 22.40 ℃ ・ Y = 9.2 mm</b></span><span class="note">残り9回の調査日も同じ手順でX・Yの組を作ります</span></div>
   <p class="note">日付を7日→8日→…と1日ずつずらして同じ手順を繰り返すと、ラグ日数ごとの組データができます。</p>
 
   <h3>単回帰：ラグ日数ごとの相関（抜粋）</h3>
@@ -398,7 +398,7 @@ footer.pagefoot{max-width:960px;margin:70px auto 0;padding:0 24px;color:var(--mu
     <tr><td style="text-align:left">0日</td><td>+0.05</td></tr>
     <tr><td style="text-align:left">4日</td><td>+0.77</td></tr>
     <tr><td style="text-align:left">6日</td><td>+0.92</td></tr>
-    <tr class="hl"><td style="text-align:left">🏆 7日（採用）</td><td>+0.93</td></tr>
+    <tr class="hl"><td style="text-align:left">7日（採用）</td><td>+0.93</td></tr>
     <tr><td style="text-align:left">8日</td><td>+0.90</td></tr>
     <tr><td style="text-align:left">10日</td><td>+0.78</td></tr>
     <tr><td style="text-align:left">14日</td><td>+0.05</td></tr>
@@ -473,7 +473,7 @@ footer.pagefoot{max-width:960px;margin:70px auto 0;padding:0 24px;color:var(--mu
   <p>決定係数 R² = 0.91、n = 10。参考として、気温だけの単回帰は r² = 0.86、DIFだけの単回帰は r² = 0.03 でした。この例では、気温だけでもかなりの部分（r²=0.86）を説明できており、DIFを加えるとR²は0.86→0.91とわずかに上がる程度です。つまり「このサンプルでは、茎径の変化はほぼ気温で説明でき、DIFの上乗せ効果は小さい」と読み取れます。</p>
 
   <div class="takeaway">
-    <h3>✨ この例から言えること</h3>
+    <h3>この例から言えること</h3>
     <p style="margin-bottom:0">実際のデータでは、ここまできれいな山にはならないことが多く、組の数が少ないうちは山の位置が記録を追加するたびに動きます。この例のように「ある1つのラグ付近ではっきり山になり、そこから離れるほどなだらかに下がる」形が見えたら、その日数だけ環境の変化が遅れて生育に表れている、と考える根拠になります。逆に山がはっきりしない、あちこちに小さな山がある、というときは、まだ判断材料が足りないと捉えて、記録を増やしてから見直してください。</p>
   </div>
 </section>
@@ -485,10 +485,10 @@ footer.pagefoot{max-width:960px;margin:70px auto 0;padding:0 24px;color:var(--mu
     <div><p class="sec-eyebrow">最後に</p><h2>使ううえでの注意点</h2></div>
   </div>
   <div class="warn-list">
-    <div class="item"><h4>📉 組数が少ないとぶれやすい</h4><p>組の数 n が少ないと数値がぶれやすくなります。単回帰は5組未満、重回帰（係数を3つ推定する）は8組未満のとき、画面に注記が出ます。</p></div>
-    <div class="item"><h4>🔗 相関は因果関係の証明ではない</h4><p>相関があっても因果関係を証明するものではありません。他の要因（かん水量、施肥、着果負担など）が同時に動いている可能性を踏まえて解釈してください。</p></div>
-    <div class="item"><h4>⛰️ きれいな山にならないことも多い</h4><p>組数が少ないうちは山の位置が記録を追加するたびに動きます。山がはっきりしなければ、判断材料が足りないと捉えてください。</p></div>
-    <div class="item"><h4>📤 外部ソフトでさらに調べられる</h4><p>「組データをCSVで書き出す」で元データを取り出せるので、Excelなど外部の統計ソフトでさらに詳しく調べることもできます。</p></div>
+    <div class="item"><h4>組数が少ないとぶれやすい</h4><p>組の数 n が少ないと数値がぶれやすくなります。単回帰は5組未満、重回帰（係数を3つ推定する）は8組未満のとき、画面に注記が出ます。</p></div>
+    <div class="item"><h4>相関は因果関係の証明ではない</h4><p>相関があっても因果関係を証明するものではありません。他の要因（かん水量、施肥、着果負担など）が同時に動いている可能性を踏まえて解釈してください。</p></div>
+    <div class="item"><h4>きれいな山にならないことも多い</h4><p>組数が少ないうちは山の位置が記録を追加するたびに動きます。山がはっきりしなければ、判断材料が足りないと捉えてください。</p></div>
+    <div class="item"><h4>外部ソフトでさらに調べられる</h4><p>「組データをCSVで書き出す」で元データを取り出せるので、Excelなど外部の統計ソフトでさらに詳しく調べることもできます。</p></div>
   </div>
 </section>
 
