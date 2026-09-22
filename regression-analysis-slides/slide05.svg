@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 1280 720">
+<rect width="1280" height="720" fill="#FAF8EF"/>
+<rect x="70" y="52" width="74" height="34" rx="17" fill="#15803D"/><text x="107" y="75" text-anchor="middle" font-size="17" font-weight="700" fill="white">5</text>
+<text x="70" y="135" font-family="Yu Gothic, Meiryo, sans-serif" font-size="42" font-weight="700" fill="#17281E">重回帰：気温だけでなくDIFも同時に見る</text>
+<text x="70" y="178" font-family="Yu Gothic, Meiryo, sans-serif" font-size="20" fill="#66756B">複数の環境要因を同時に入れて、Yを説明します。</text>
+
+<rect x="90" y="255" width="280" height="100" rx="20" fill="#E0F2FE"/>
+<text x="230" y="315" text-anchor="middle" font-family="Yu Gothic, Meiryo, sans-serif" font-size="25" font-weight="700" fill="#17281E">平均気温</text>
+<rect x="90" y="405" width="280" height="100" rx="20" fill="#FEF3C7"/>
+<text x="230" y="465" text-anchor="middle" font-family="Yu Gothic, Meiryo, sans-serif" font-size="25" font-weight="700" fill="#17281E">DIF</text>
+<path d="M390 305 C500 305,520 355,650 355" fill="none" stroke="#0EA5E9" stroke-width="6"/>
+<path d="M390 455 C500 455,520 385,650 385" fill="none" stroke="#F59E0B" stroke-width="6"/>
+<rect x="650" y="280" width="480" height="180" rx="24" fill="#DCFCE7"/>
+<text x="890" y="330" text-anchor="middle" font-family="Yu Gothic, Meiryo, sans-serif" font-size="28" font-weight="700" fill="#17281E">Y = a + b₁×気温 + b₂×DIF</text>
+<text x="890" y="380" text-anchor="middle" font-family="Yu Gothic, Meiryo, sans-serif" font-size="19" fill="#17281E">R²が大きいほど、2つを合わせた</text>
+<text x="890" y="412" text-anchor="middle" font-family="Yu Gothic, Meiryo, sans-serif" font-size="19" fill="#17281E">Yのばらつきをよく説明できる</text>
+<rect x="240" y="545" width="800" height="65" rx="16" fill="#FFFFFF" stroke="#E9E4D4"/>
+<text x="640" y="586" text-anchor="middle" font-family="Yu Gothic, Meiryo, sans-serif" font-size="19" fill="#17281E">単回帰の r² と重回帰の R² を比べると「追加した要因の意味」を考えやすい</text>
+<text x="70" y="680" font-family="Yu Gothic, Meiryo, sans-serif" font-size="15" fill="#66756B">きゅうり生育予測ノート｜回帰分析の読み方</text></svg>

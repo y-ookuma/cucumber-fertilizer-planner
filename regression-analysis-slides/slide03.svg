@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 1280 720">
+<rect width="1280" height="720" fill="#FAF8EF"/>
+<rect x="70" y="52" width="74" height="34" rx="17" fill="#15803D"/><text x="107" y="75" text-anchor="middle" font-size="17" font-weight="700" fill="white">3</text>
+<text x="70" y="135" font-family="Yu Gothic, Meiryo, sans-serif" font-size="42" font-weight="700" fill="#17281E">単回帰：点の並びに「一本の線」を引く</text>
+<text x="70" y="178" font-family="Yu Gothic, Meiryo, sans-serif" font-size="20" fill="#66756B">Xが増えるとYがどう変わるかを、最小二乗法で近似します。</text>
+
+<line x1="170" y1="560" x2="700" y2="560" stroke="#66756B" stroke-width="2"/>
+<line x1="170" y1="560" x2="170" y2="220" stroke="#66756B" stroke-width="2"/>
+<text x="435" y="605" text-anchor="middle" font-family="Yu Gothic, Meiryo, sans-serif" font-size="18" fill="#66756B">X：環境</text>
+<text x="105" y="390" text-anchor="middle" transform="rotate(-90 105 390)" font-family="Yu Gothic, Meiryo, sans-serif" font-size="18" fill="#66756B">Y：生育</text>
+<line x1="190" y1="520" x2="675" y2="245" stroke="#F43F5E" stroke-width="6"/>
+<circle cx="225" cy="505" r="8" fill="#0EA5E9"/><circle cx="280" cy="470" r="8" fill="#0EA5E9"/><circle cx="330" cy="450" r="8" fill="#0EA5E9"/><circle cx="380" cy="415" r="8" fill="#0EA5E9"/><circle cx="435" cy="390" r="8" fill="#0EA5E9"/><circle cx="485" cy="350" r="8" fill="#0EA5E9"/><circle cx="540" cy="330" r="8" fill="#0EA5E9"/><circle cx="600" cy="300" r="8" fill="#0EA5E9"/><circle cx="650" cy="270" r="8" fill="#0EA5E9"/>
+<rect x="760" y="250" width="410" height="260" rx="22" fill="#FFFFFF" stroke="#E9E4D4"/>
+<text x="965" y="300" text-anchor="middle" font-family="Yu Gothic, Meiryo, sans-serif" font-size="24" font-weight="700" fill="#17281E">Y = a + b × X</text>
+<text x="800" y="355" font-family="Yu Gothic, Meiryo, sans-serif" font-size="19" fill="#17281E">a：切片</text>
+<text x="800" y="395" font-family="Yu Gothic, Meiryo, sans-serif" font-size="19" fill="#17281E">b：傾き（Xが1増えたときのYの変化）</text>
+<text x="800" y="435" font-family="Yu Gothic, Meiryo, sans-serif" font-size="19" fill="#17281E">r：相関係数（−1〜+1）</text>
+<text x="800" y="475" font-family="Yu Gothic, Meiryo, sans-serif" font-size="19" fill="#17281E">r²：決定係数（説明できる割合の目安）</text>
+<rect x="760" y="535" width="410" height="70" rx="16" fill="#DCFCE7"/>
+<text x="965" y="578" text-anchor="middle" font-family="Yu Gothic, Meiryo, sans-serif" font-size="20" font-weight="700" fill="#17281E">点が線の近くに並ぶほど関係が明瞭</text>
+<text x="70" y="680" font-family="Yu Gothic, Meiryo, sans-serif" font-size="15" fill="#66756B">きゅうり生育予測ノート｜回帰分析の読み方</text></svg>

@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 1280 720">
+<rect width="1280" height="720" fill="#FAF8EF"/>
+<rect x="70" y="52" width="74" height="34" rx="17" fill="#15803D"/><text x="107" y="75" text-anchor="middle" font-size="17" font-weight="700" fill="white">6</text>
+<text x="70" y="135" font-family="Yu Gothic, Meiryo, sans-serif" font-size="42" font-weight="700" fill="#17281E">サンプルを一気に読む</text>
+<text x="70" y="178" font-family="Yu Gothic, Meiryo, sans-serif" font-size="20" fill="#66756B">READMEにある架空データの例です。実在ハウスの結果ではありません。</text>
+
+<rect x="80" y="235" width="1120" height="90" rx="18" fill="#E0F2FE"/>
+<text x="640" y="290" text-anchor="middle" font-family="Yu Gothic, Meiryo, sans-serif" font-size="24" font-weight="700" fill="#17281E">ラグ7日：気温 → 茎径　r = 0.93　／　r² = 0.86　／　n = 10</text>
+<rect x="80" y="350" width="530" height="180" rx="20" fill="#FFFFFF" stroke="#E9E4D4"/>
+<text x="345" y="395" text-anchor="middle" font-family="Yu Gothic, Meiryo, sans-serif" font-size="22" font-weight="700" fill="#17281E">単回帰</text>
+<text x="345" y="440" text-anchor="middle" font-family="Yu Gothic, Meiryo, sans-serif" font-size="23" fill="#17281E">Y = 5.514 + 0.166 × X</text>
+<text x="345" y="485" text-anchor="middle" font-family="Yu Gothic, Meiryo, sans-serif" font-size="18" fill="#66756B">気温が1℃高いと、茎径が約0.166mm高い</text>
+<rect x="650" y="350" width="550" height="180" rx="20" fill="#DCFCE7"/>
+<text x="925" y="395" text-anchor="middle" font-family="Yu Gothic, Meiryo, sans-serif" font-size="22" font-weight="700" fill="#17281E">重回帰</text>
+<text x="925" y="440" text-anchor="middle" font-family="Yu Gothic, Meiryo, sans-serif" font-size="23" fill="#17281E">Y = 4.586 + 0.183×気温 + 0.060×DIF</text>
+<text x="925" y="485" text-anchor="middle" font-family="Yu Gothic, Meiryo, sans-serif" font-size="18" fill="#66756B">R² = 0.91。気温だけの0.86から少し上昇</text>
+<rect x="210" y="555" width="860" height="60" rx="16" fill="#FEF3C7"/>
+<text x="640" y="593" text-anchor="middle" font-family="Yu Gothic, Meiryo, sans-serif" font-size="18" font-weight="700" fill="#17281E">この例では「気温の説明力が大きく、DIFの追加効果は小さめ」と読める</text>
+<text x="70" y="680" font-family="Yu Gothic, Meiryo, sans-serif" font-size="15" fill="#66756B">きゅうり生育予測ノート｜回帰分析の読み方</text></svg>
