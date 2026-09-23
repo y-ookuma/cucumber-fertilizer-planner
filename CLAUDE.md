@@ -22,6 +22,7 @@ GitHub Pages で公開する静的サイトで、ビルドは行わない。
 - データは `state` オブジェクトにまとめ、`saveState()` で window.storage → IndexedDB（DB `kyuuri`・ストア `kv`）→ localStorage の順に保存する。
   - localStorage は約5MBで上限に達したため IndexedDB に移した。`loadState()` は保存時刻 `at` を比べて新しい方を読み、localStorage にしか無いデータは IndexedDB へ移してから消す。
   - 起動時に `navigator.storage.persist()` で永続保存を依頼する。
+  - 保存中（`savePending>0`）と保存失敗中（`saveFailed`）は、`beforeunload` でタブを閉じる前の確認を出す。
 - Google Sheets 同期は GIS の OAuth トークン（約1時間）を使う。`push()` / `pull()` が送受信する。
 - 外気象は Open-Meteo API から取得する。
 - 変更の検知は `changeSeq` と `state.auth.dirty` / `dirtyAt` で行い、自動同期は3秒のデバウンスで `push(true)` を呼ぶ。
