@@ -760,8 +760,16 @@ footer{padding-top:4px!important;padding-bottom:20px!important;line-height:1.6}
         <div class="btnrow"><button id="btnRegRun">計算する</button><button class="ghost" id="btnRegCsv">組データをCSVで書き出す</button></div>
       </div>
       <div class="card pop-sun">
-        <h3>重回帰：気温 × DIF</h3>
-        <p class="sub">平均気温とDIF（昼夜温差）を同時に使い、Yを説明します。単回帰より実際の管理判断に近づきます。Yは上の欄と共通です。</p>
+        <h3>重回帰</h3>
+        <p class="sub">2つの環境要因を同時に使い、Yを説明します。単回帰より実際の管理判断に近づきます。Yは上の欄と共通です。</p>
+        <label><span>X1：環境側1（説明変数）</span><select id="mlrX1">
+          <option value="tmean">平均気温 ℃</option><option value="tday">昼温 ℃</option><option value="tnight">夜温 ℃</option>
+          <option value="dif">DIF（昼夜温差） ℃</option><option value="rh">相対湿度 %</option><option value="vpd">飽差 g/m³</option>
+          <option value="co2">CO₂濃度 ppm</option><option value="par">PAR µmol/m²/s</option><option value="transp">蒸散量 mm/日</option></select></label>
+        <label><span>X2：環境側2（説明変数）</span><select id="mlrX2">
+          <option value="tmean">平均気温 ℃</option><option value="tday">昼温 ℃</option><option value="tnight">夜温 ℃</option>
+          <option value="dif" selected>DIF（昼夜温差） ℃</option><option value="rh">相対湿度 %</option><option value="vpd">飽差 g/m³</option>
+          <option value="co2">CO₂濃度 ppm</option><option value="par">PAR µmol/m²/s</option><option value="transp">蒸散量 mm/日</option></select></label>
         <label><span>ラグ日数：<b id="mlrLagVal">7日</b></span>
           <input type="range" id="mlrLag" min="0" max="30" value="7" step="1"></label>
         <div class="check"><input type="checkbox" id="mlrAuto" checked><label for="mlrAuto" style="margin:0">R²が最大になるラグ日数を自動で探す</label></div>
@@ -769,7 +777,7 @@ footer{padding-top:4px!important;padding-bottom:20px!important;line-height:1.6}
       </div>
       <div class="card">
         <h3>読み方</h3>
-        <p class="sub" style="margin:0">環境の変化が生育に表れるまで7〜14日かかることが分かっています（マニュアル追補1）。まずは自動探索でどのラグが強く効いているかを見て、そこから茎径は気温・DIFとの関係を、節間長は湿度・飽差との関係を確認するのがおすすめです。r（相関係数）は−1〜1、絶対値が0.5を超えると関係ありとみなせます。n（組の数）が少ないと数値がぶれやすいので、5組未満のときは参考程度に。重回帰のR²は、気温とDIFの両方を使ったときにYのばらつきをどれだけ説明できるかを示し、単回帰のr²と見比べると、DIFを加える意味があるかどうかが分かります。</p>
+        <p class="sub" style="margin:0">環境の変化が生育に表れるまで7〜14日かかることが分かっています（マニュアル追補1）。まずは自動探索でどのラグが強く効いているかを見て、そこから茎径は気温・DIFとの関係を、節間長は湿度・飽差との関係を確認するのがおすすめです。r（相関係数）は−1〜1、絶対値が0.5を超えると関係ありとみなせます。n（組の数）が少ないと数値がぶれやすいので、5組未満のときは参考程度に。重回帰のR²は、選んだ2つの環境要因を使ったときにYのばらつきをどれだけ説明できるかを示し、単回帰のr²と見比べると、2つ目の要因を加える意味があるかどうかが分かります。X1とX2には異なる環境要因を選んでください。</p>
       </div>
     </div>
     <div class="pane-result">
@@ -2077,8 +2085,8 @@ function csvRegression(){
     ...pts.map(p=>[p.date,lag,f2(p.x),f2(p.y)])]);
 }
 
-/* ---- 重回帰（気温 × DIF） ---- */
-function multiPairs(yKey,lag){
+/* ---- 重回帰（説明変数はX1・X2から選択） ---- */
+function multiPairs(yKey,lag,x1Key,x2Key){
   const d=envDaily(); if(!d.length) return [];
   const map={}; d.forEach(x=>map[x.date]=x);
   const winMean=(end,key)=>{const a=[];for(let i=0;i<3;i++){const v=map[addDays(end,-i)];if(v&&v[key]!=null)a.push(v[key]);}return a.length?mean(a):null;};
@@ -2091,7 +2099,7 @@ function multiPairs(yKey,lag){
     else{ const g=agg(r); y=(yKey==='stem'||yKey==='node')?g[yKey]:(yKey==='yield'?yieldPer10a(r):r[yKey]); }
     if(y==null) return;
     const base=addDays(r.date,-lag);
-    const x1=winMean(base,'tmean'), x2=winMean(base,'dif');
+    const x1=winMean(base,x1Key), x2=winMean(base,x2Key);
     if(x1==null||x2==null) return;
     pts.push({date:r.date,x1,x2,y});
   });
@@ -2114,9 +2122,9 @@ function multReg(pts){
   const preds=pts.map(p=>{const pred=a+b1*p.x1+b2*p.x2; ssres+=(p.y-pred)**2; sstot+=(p.y-my)**2; return {actual:p.y,pred};});
   return {n,a,b1,b2,r2:sstot?Math.max(0,1-ssres/sstot):0,preds};
 }
-function scanLagsMulti(yKey){
+function scanLagsMulti(yKey,x1Key,x2Key){
   const out=[];
-  for(let lag=0;lag<=30;lag++){const m=multReg(multiPairs(yKey,lag)); if(m) out.push({lag,r2:m.r2,n:m.n});}
+  for(let lag=0;lag<=30;lag++){const m=multReg(multiPairs(yKey,lag,x1Key,x2Key)); if(m) out.push({lag,r2:m.r2,n:m.n});}
   return out;
 }
 function fitSVG(preds){
@@ -2138,27 +2146,31 @@ function fitSVG(preds){
   return s;
 }
 function runMulti(){
-  const yKey=$('regY').value, auto=$('mlrAuto').checked;
-  let lag=+$('mlrLag').value, scan=null;
-  if(auto){ scan=scanLagsMulti(yKey);
-    if(scan.length){ const best=scan.reduce((a,b)=>b.r2>a.r2?b:a); lag=best.lag; $('mlrLag').value=lag; $('mlrLagVal').textContent=lag+'日'; } }
-  const pts=multiPairs(yKey,lag), model=multReg(pts);
+  const yKey=$('regY').value, x1Key=$('mlrX1').value, x2Key=$('mlrX2').value, auto=$('mlrAuto').checked;
   const el=$('mlrResult');
+  if(x1Key===x2Key){
+    el.innerHTML='<p class="empty">X1とX2に異なる環境要因を選んでください。</p>';
+    $('mlrScanCard').style.display='none'; return;
+  }
+  let lag=+$('mlrLag').value, scan=null;
+  if(auto){ scan=scanLagsMulti(yKey,x1Key,x2Key);
+    if(scan.length){ const best=scan.reduce((a,b)=>b.r2>a.r2?b:a); lag=best.lag; $('mlrLag').value=lag; $('mlrLagVal').textContent=lag+'日'; } }
+  const pts=multiPairs(yKey,lag,x1Key,x2Key), model=multReg(pts);
   if(!model){
     el.innerHTML='<p class="empty">組になるデータが4組未満です。重回帰は係数が3つあるため、環境データと生育調査記録が増えるまでお待ちください。</p>';
     $('mlrScanCard').style.display='none'; return;
   }
   const strength=model.r2>=0.6?'よく説明できる':model.r2>=0.35?'ある程度説明できる':'説明力は弱い';
-  const singleT=linreg(regressionPairs('tmean',yKey,lag)), singleD=linreg(regressionPairs('dif',yKey,lag));
-  el.innerHTML='<h3>結果（重回帰）</h3><p class="sub">平均気温とDIF（'+lag+'日前・3日平均）で'+REGY_LABEL[yKey]+'を説明</p>'+
+  const singleT=linreg(regressionPairs(x1Key,yKey,lag)), singleD=linreg(regressionPairs(x2Key,yKey,lag));
+  el.innerHTML='<h3>結果（重回帰）</h3><p class="sub">'+REGX_LABEL[x1Key]+'と'+REGX_LABEL[x2Key]+'（'+lag+'日前・3日平均）で'+REGY_LABEL[yKey]+'を説明</p>'+
     '<div class="big"><div class="k">決定係数 R²</div><div class="v">'+model.r2.toFixed(2)+'<span class="u">（'+strength+'・n='+model.n+'）</span></div></div>'+
     '<div class="plan">'+
-    '<div><b>回帰式</b><span>Y = '+model.a.toFixed(3)+' + '+model.b1.toFixed(3)+'×気温 + '+model.b2.toFixed(3)+'×DIF</span></div>'+
-    '<div><b>気温の効き</b><span>DIFが同じなら、平均気温が1℃上がるとYは'+(model.b1>=0?'+':'')+model.b1.toFixed(3)+' 変わる</span></div>'+
-    '<div><b>DIFの効き</b><span>気温が同じなら、DIFが1℃上がるとYは'+(model.b2>=0?'+':'')+model.b2.toFixed(3)+' 変わる</span></div>'+
+    '<div><b>回帰式</b><span>Y = '+model.a.toFixed(3)+' + '+model.b1.toFixed(3)+'×'+REGX_LABEL[x1Key]+' + '+model.b2.toFixed(3)+'×'+REGX_LABEL[x2Key]+'</span></div>'+
+    '<div><b>'+REGX_LABEL[x1Key]+'の効き</b><span>'+REGX_LABEL[x2Key]+'が同じなら、'+REGX_LABEL[x1Key]+'が1上がるとYは'+(model.b1>=0?'+':'')+model.b1.toFixed(3)+' 変わる</span></div>'+
+    '<div><b>'+REGX_LABEL[x2Key]+'の効き</b><span>'+REGX_LABEL[x1Key]+'が同じなら、'+REGX_LABEL[x2Key]+'が1上がるとYは'+(model.b2>=0?'+':'')+model.b2.toFixed(3)+' 変わる</span></div>'+
     '<div><b>採用ラグ</b><span>'+lag+'日'+(auto?'（自動探索で選択）':'')+'</span></div>'+
-    (singleT?'<div><b>参考：気温のみ</b><span>単回帰 r²='+singleT.r2.toFixed(2)+'</span></div>':'')+
-    (singleD?'<div><b>参考：DIFのみ</b><span>単回帰 r²='+singleD.r2.toFixed(2)+'</span></div>':'')+
+    (singleT?'<div><b>参考：'+REGX_LABEL[x1Key]+'のみ</b><span>単回帰 r²='+singleT.r2.toFixed(2)+'</span></div>':'')+
+    (singleD?'<div><b>参考：'+REGX_LABEL[x2Key]+'のみ</b><span>単回帰 r²='+singleD.r2.toFixed(2)+'</span></div>':'')+
     '</div>'+
     '<div class="scatter" style="margin-top:14px">'+fitSVG(model.preds)+'</div>'+
     '<div class="reglegend"><span><i style="background:var(--sky)"></i>実測×予測の組</span><span><i style="background:var(--sun);border-radius:2px"></i>実測＝予測の線</span></div>'+
@@ -2172,9 +2184,9 @@ function runMulti(){
   } else { $('mlrScanCard').style.display='none'; }
 }
 function csvRegressionMulti(){
-  const yKey=$('regY').value, lag=+$('mlrLag').value;
-  const pts=multiPairs(yKey,lag); if(!pts.length) return null;
-  return toCSV([['調査日','ラグ日数','X1:平均気温','X2:DIF','Y:'+REGY_LABEL[yKey]],
+  const yKey=$('regY').value, x1Key=$('mlrX1').value, x2Key=$('mlrX2').value, lag=+$('mlrLag').value;
+  const pts=multiPairs(yKey,lag,x1Key,x2Key); if(!pts.length) return null;
+  return toCSV([['調査日','ラグ日数','X1:'+REGX_LABEL[x1Key],'X2:'+REGX_LABEL[x2Key],'Y:'+REGY_LABEL[yKey]],
     ...pts.map(p=>[p.date,lag,f2(p.x1),f2(p.x2),f2(p.y)])]);
 }
 
@@ -3171,6 +3183,7 @@ $('btnRegCsv').onclick=()=>{const c=csvRegression(); if(!c){toast('組になる�
 
 $('mlrLag').oninput=()=>{$('mlrLagVal').textContent=$('mlrLag').value+'日';};
 $('mlrLag').addEventListener('change',()=>{$('mlrAuto').checked=false;});
+['mlrX1','mlrX2'].forEach(id=>$(id).onchange=()=>{runMulti();});
 $('btnMlrRun').onclick=()=>{runMulti();finishInput();};
 $('btnMlrCsv').onclick=()=>{const c=csvRegressionMulti(); if(!c){toast('組になるデータがありません');return;} dl('regression-multi-data.csv',c);};
 
