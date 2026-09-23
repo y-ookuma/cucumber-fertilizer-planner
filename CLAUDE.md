@@ -19,7 +19,9 @@ GitHub Pages で公開する静的サイトで、ビルドは行わない。
 
 ## アーキテクチャの要点
 
-- データは `state` オブジェクトにまとめ、`saveState()` で window.storage → localStorage に保存する。
+- データは `state` オブジェクトにまとめ、`saveState()` で window.storage → IndexedDB（DB `kyuuri`・ストア `kv`）→ localStorage の順に保存する。
+  - localStorage は約5MBで上限に達したため IndexedDB に移した。`loadState()` は保存時刻 `at` を比べて新しい方を読み、localStorage にしか無いデータは IndexedDB へ移してから消す。
+  - 起動時に `navigator.storage.persist()` で永続保存を依頼する。
 - Google Sheets 同期は GIS の OAuth トークン（約1時間）を使う。`push()` / `pull()` が送受信する。
 - 外気象は Open-Meteo API から取得する。
 - 変更の検知は `changeSeq` と `state.auth.dirty` / `dirtyAt` で行い、自動同期は3秒のデバウンスで `push(true)` を呼ぶ。
@@ -70,6 +72,8 @@ GitHub Pages で公開する静的サイトで、ビルドは行わない。
 - Node.js は入っていない。JSの確認は **headless Edge** で行う。
   - `msedge --headless=new --disable-gpu --virtual-time-budget=8000 --dump-dom file:///...` を使う（`--user-data-dir` を付けると出力が空になることがある）。
   - テスト用スクリプトを差し込んだコピーをスクラッチパッドに作り、エラーや結果をDOMに書き出して読む。
+  - IndexedDB など実I/Oを伴う非同期処理は `--dump-dom` では完了前に書き出される。その場合はローカルHTTPサーバーでページを開き、結果を POST で受け取る方法をとる。
+  - テストで起動した Edge は PID を指定して終了する（`taskkill /IM msedge.exe` は利用者のブラウザまで閉じるので使わない）。
 - Googleサインインの実際の流れはローカルでは試せない。未確認であることを報告する。
 - PDFの本文は Python の pypdf で取り出す。
 
