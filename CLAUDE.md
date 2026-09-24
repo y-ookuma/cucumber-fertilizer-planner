@@ -15,6 +15,8 @@ GitHub Pages で公開する静的サイトで、ビルドは行わない。
 | `document/施設きゅうりの摘心栽培における生育予測に基づいた栽培管理導入マニュアル.pdf` | 計算方法の根拠となるマニュアル（表2-1, 2-3, 2-7, 5-1, 図4-2 など） |
 | `document/回帰分析の考え方*.html` | 回帰分析の解説ページ |
 | `document/生育調査シート.pdf` | 調査用紙 |
+| `document/Blanco_Folegatti2005_*.pdf` | 参照論文（CC BY-NC 4.0 のためリポジトリに収録） |
+| `document/東出ら2012_*.pdf`・`document/安ら2015_*.pdf` | 参照論文。再配布の許可がないため `.gitignore` で除外し、手元だけに置く。GitHub に上げない |
 | `privacy.html` / `terms.html` / `icon` / `LICENSE` | 公開用の付属ファイル |
 
 ## アーキテクチャの要点

@@ -21,7 +21,8 @@
     ├── 施設きゅうりの摘心栽培における生育予測に基づいた栽培管理導入マニュアル.pdf
     ├── 回帰分析の考え方.html
     ├── 回帰分析の考え方basic.html
-    └── 生育調査シート.pdf
+    ├── 生育調査シート.pdf
+    └── Blanco_Folegatti2005_cucumber_leaf_area_ScientiaAgricola62-4.pdf（参照論文。10章参照）
 ```
 
 `document` フォルダやPDFが見つからない場所にHTMLファイルだけを置いた場合、リンクを押すとブラウザの「ファイルが見つかりません」という画面が新しいタブで開きます。アプリの他の機能には影響ありません。
@@ -795,13 +796,24 @@ Y = 4.586 + 0.183×気温 + 0.060×DIF
 
 ## 10. 出典・参考文献
 
+### 基準にしたマニュアル
+
 岩手県農業研究センター県北農業研究所 果樹・野菜研究室「[施設きゅうりの摘心栽培における生育予測に基づいた栽培管理法導入マニュアル（ver.1.0、令和8年4月）](document/施設きゅうりの摘心栽培における生育予測に基づいた栽培管理導入マニュアル.pdf)」
 
-東出忠桐・後藤一郎・鈴木克己・安場健一郎・塚澤和憲・安 東赫・岩崎泰永（2012）「収量構成要素の解析からみたキュウリ短期栽培の摘心およびつる下ろし整枝法の差異」園芸学研究 11(4): 523–529（LAIと受光率、吸光係数、LAIの日ごとの補間、光利用効率・果実への分配率・果実乾物率）
+生育予測（平準点・周期・管理強度）、変温管理モデル、かん水・肥培管理の目安など、本アプリの中心となる考え方はこのマニュアルにもとづきます。
 
-安 東赫・東出忠桐・岩崎泰永・河崎 靖・中野明正（2015）「施設キュウリのハイワイヤー栽培におけるLAI簡易推定」野菜茶業研究所研究報告 14: 23–29（NARO式：相対葉面積比によるLAIの推定）
+### 参照論文
 
-Blanco, F. F. and M. V. Folegatti (2005) Estimation of leaf area for greenhouse cucumber by linear measurements under salinity and grafting. Scientia Agricola 62(4): 305–309（葉長・葉幅からの葉面積の推定式）
+| 文献 | 本アプリで使った内容 | 入手先 |
+|---|---|---|
+| 東出忠桐・後藤一郎・鈴木克己・安場健一郎・塚澤和憲・安 東赫・岩崎泰永（2012）「収量構成要素の解析からみたキュウリ短期栽培の摘心およびつる下ろし整枝法の差異」園芸学研究 11(4): 523–529 | 受光率の式と吸光係数1.17、LAIの日ごとの補間、適正LAIの考え方、光利用効率（0.69〜1.00）、果実への分配率、果実乾物率（5.0%）、遮光の日射条件（0.8kW/m²） | [J-STAGE（doi:10.2503/hrj.11.523）](https://doi.org/10.2503/hrj.11.523) |
+| 安 東赫・東出忠桐・岩崎泰永・河崎 靖・中野明正（2015）「施設キュウリのハイワイヤー栽培におけるLAI簡易推定」野菜茶業研究所研究報告 14: 23–29 | NARO式（相対葉面積比 RLA と葉位の関係式、株あたり葉面積・LAIの計算） | [農研機構（PDF）](https://www.naro.go.jp/publicity_report/publication/archive/files/vt_bulletin_14_20150310_3.pdf)、[研究成果情報](https://www.naro.go.jp/project/results/laboratory/vegetea/2014/vegetea14_s02.html) |
+| Blanco, F. F. and M. V. Folegatti (2005) Estimation of leaf area for greenhouse cucumber by linear measurements under salinity and grafting. Scientia Agricola 62(4): 305–309 | 葉長・葉幅から個葉の葉面積を出す式（0.88×葉長×葉幅−4.27） | [SciELO（doi:10.1590/S0103-90162005000400001）](https://doi.org/10.1590/S0103-90162005000400001)、[documentフォルダ](document/Blanco_Folegatti2005_cucumber_leaf_area_ScientiaAgricola62-4.pdf) |
+| Monsi, M. and T. Saeki (1953) Über den Lichtfaktor in den Pflanzengesellschaften und seine Bedeutung für die Stoffproduktion. Japanese Journal of Botany 14: 22–52 | 群落の光の減衰式（受光率 f＝1−e^(−k・LAI)）。東出ら（2012）が引用する原典 | ― |
+
+- Blanco・Folegatti（2005）は、クリエイティブ・コモンズ 表示-非営利 4.0 国際（CC BY-NC 4.0）で公開されているため、本リポジトリの `document` フォルダにも収録しています。
+- 東出ら（2012）と安ら（2015）は、著作権者（園芸学会・農研機構）の再配布の許可を得ていないため、本リポジトリには収録していません。上の入手先から読むことができます。
+- 本アプリの数値のうち、論文にない値（LAIの適正範囲1.5〜2.5の境目、被覆資材の透過率の目安、「摘心後」のLAIの簡略計算、実際÷見込みの70%・130%の目安など）は、本アプリで置いた目安です。各章にその旨を書いています。
 
 本アプリはこのマニュアルの考え方を実装した試作版であり、開発・検証は継続中です。実際の栽培判断は、ご自身のほ場の状況とあわせて行ってください。
 ---
