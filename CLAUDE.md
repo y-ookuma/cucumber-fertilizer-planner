@@ -16,6 +16,7 @@ GitHub Pages で公開する静的サイトで、ビルドは行わない。
 | `document/回帰分析の考え方*.html` | 回帰分析の解説ページ |
 | `document/生育調査シート.pdf` | 調査用紙 |
 | `document/Blanco_Folegatti2005_*.pdf` | 参照論文（CC BY-NC 4.0 のためリポジトリに収録） |
+| `document/論文とマニュアルの突き合わせとアプリの対応表.pdf` | 東出ら2012とマニュアルの突き合わせ・アプリの対応状況（自作。アプリの対応が変わったら作り直す） |
 | `document/東出ら2012_*.pdf`・`document/安ら2015_*.pdf` | 参照論文。再配布の許可がないため `.gitignore` で除外し、手元だけに置く。GitHub に上げない |
 | `privacy.html` / `terms.html` / `icon` / `LICENSE` | 公開用の付属ファイル |
 
