@@ -91,7 +91,8 @@ GitHub Pages で公開する静的サイトで、ビルドは行わない。
 ## 動作確認
 
 - Node.js は入っていない。JSの確認は **headless Edge** で行う。
-  - `msedge --headless=new --disable-gpu --virtual-time-budget=8000 --dump-dom file:///...` を使う（`--user-data-dir` を付けると出力が空になることがある）。
+  - `msedge --headless=new --disable-gpu --user-data-dir=<スクラッチパッド内の新しいフォルダ> --virtual-time-budget=8000 --dump-dom file:///...` を使う。
+    - 利用者のEdgeが起動中だと、`--user-data-dir` なしでは既存のEdgeに渡されて出力が空になる（2026-09-26 に確認）。PowerShell の `Start-Process ... -RedirectStandardOutput -Wait` で実行すると確実。
   - テスト用スクリプトを差し込んだコピーをスクラッチパッドに作り、エラーや結果をDOMに書き出して読む。
   - IndexedDB など実I/Oを伴う非同期処理は `--dump-dom` では完了前に書き出される。その場合はローカルHTTPサーバーでページを開き、結果を POST で受け取る方法をとる。
   - テストで起動した Edge は PID を指定して終了する（`taskkill /IM msedge.exe` は利用者のブラウザまで閉じるので使わない）。
