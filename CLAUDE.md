@@ -82,6 +82,7 @@ GitHub Pages で公開する静的サイトで、ビルドは行わない。
   - `push` / `pull`
   - アプリ内のシート構成カード
   - README 6章
+- **表示項目の選択（チェックボックス）を増やすとき**は、`state.xxxCols` に配列で持ち（未設定＝既定、空配列＝全部外した）、「設定」シートの `SETTINGS_SHEET_COLS`・`push` の書き込み・`pull` の `cfg()` 復元をそろえる（例：`envCols`、`recCols`）。
 - **README を編集したら、`index.html` 内の `const README_MD = "...";` も同じ内容に更新する。**
   - これは `file://` で開いたときの予備。通常は `README.md` を fetch して表示する。
   - 更新手順：README.md の中身を `\` → `\\`、`"` → `\"`、改行 → `\n` の順でエスケープし、その1行を置き換える。
