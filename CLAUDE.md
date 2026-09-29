@@ -87,6 +87,11 @@ GitHub Pages で公開する静的サイトで、ビルドは行わない。
 - **README を編集したら、`index.html` 内の `const README_MD = "...";` も同じ内容に更新する。**
   - これは `file://` で開いたときの予備。通常は `README.md` を fetch して表示する。
   - 更新手順：README.md の中身を `\` → `\\`、`"` → `\"`、改行 → `\n` の順でエスケープし、その1行を置き換える。
+- **ライト／ダークの切替はヘッダーのボタン1つ（`btnTheme`）で行う。**
+  - `applyTheme(t,save)` が `<html>` の `data-theme="dark"` を付け外しし、ボタンの文言（切り替え先のモード）と title を更新する。アイコンは `.ico-dark`（月）・`.ico-light`（太陽）を CSS で出し分ける。
+  - 保存先は localStorage の `kyuuri:theme`（端末のみ、シート同期なし）。ちらつき防止のため `<head>` 冒頭のスクリプトで先に適用する。
+  - 印刷時は `beforeprint` / `afterprint` で一時的にライトに戻す。
+  - ダーク用の配色は `:root[data-theme="dark"]` にまとめる。
 - コードの書き方は周囲に合わせる（1ファイル構成、短い関数名、コメントは少なめ）。
 - UIの文言と README は日本語。README の章番号を本文中で参照しない（章の構成が変わるとずれるため）。
 
