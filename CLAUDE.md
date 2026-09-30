@@ -87,13 +87,14 @@ GitHub Pages で公開する静的サイトで、ビルドは行わない。
 - **README を編集したら、`index.html` 内の `const README_MD = "...";` も同じ内容に更新する。**
   - これは `file://` で開いたときの予備。通常は `README.md` を fetch して表示する。
   - 更新手順：README.md の中身を `\` → `\\`、`"` → `\"`、改行 → `\n` の順でエスケープし、その1行を置き換える。
-- **ハウス内環境タブだけ「グラフ化／結果表示／入力」の3択にする**（`TAB_INFO.env.graph`）。
+- **ハウス内環境・毎日の記録タブは「グラフ化／結果表示／入力」の3択にする**（`TAB_INFO.<tab>.graph`）。グラフを描く関数と入れ先は `GRAPH_TABS` にタブごとに登録する。
   - `setMode` は mode に `'graph'` を取り、`#modeSeg` の `data-n`（ボタン数）と `data-pos`（位置）を決める。グラフ化のボタンは `data-n="3"` のときだけ表示する。
-  - グラフ化の対象カードは、表を `.tbl-pane`、グラフを `.viz-pane`（`envViz`・`lagViz`・`waterViz`）に入れ、`body[data-mode="graph"]` で出し分ける。印刷（`printCards`）は画面の表示のまま出る。
+  - グラフ化の対象カードは、表を `.tbl-pane`、グラフを `.viz-pane`（`envViz`・`lagViz`・`waterViz`・`dailyViz`）に入れ、`body[data-mode="graph"]` で出し分ける。印刷（`printCards`）は画面の表示のまま出る。
   - グラフは Chart.js 4.5.1（jsDelivr、`CHARTJS_URL`）。「グラフ化」を初めて押したときに `loadChartJs()` で読み込む（オフラインでは表を案内する）。描画は `scheduleGraphs()` → `renderGraphs()` → `drawGraphs()`。グラフ化のときだけ描き、テーマ切替でも描き直す。
   - ハウス内の推移は1枚のグラフ（`ENV_SERIES`・`ENV_AXES`）。線＝気温・DIF・飽差など、棒＝積算PAR・日射など。単位ごとに軸を分け、選んだ系列の軸だけ出す。既定は `ENV_VIZ_DEFAULT`（平均気温・DIF・飽差・積算PAR・日射）。グラフに出す系列は localStorage の `kyuuri:envVizSel`（端末のみ、表の `envCols` とは別）。
   - 潅水量と蒸散量の比較は、潅水量＝棒・右軸（`yW`）、蒸散量換算＝線・左軸（`yE`）。同じLなので左右の軸は同じ最大値にそろえる（利用者の指定。2軸だが比較をゆがめないため）。
   - 系列の色は `--viz-1`〜`--viz-8`（dataviz スキルの既定パレット、ライト／ダーク別）。外気由来の日は白抜きの点。
+  - 毎日の記録は `renderDailyChart`：収量（線・左軸 `yY`）と積算収量（線・右軸 `yC`、薄い塗り）。記録の最初の日から最後の日までを日ごとに並べ、収量のない日は線でつなぐ（積算は据え置き）。
   - 印刷（`printCards`）は `graphImages()` で canvas を画像にして差し込む。ダーク表示中はライトの配色で描き直してから取り込む。
   - 「環境と生育のずれ」の集計は `lagRows` を表とグラフで共用する。
 - **ライト／ダークの切替はヘッダーのボタン1つ（`btnTheme`）で行う。**
