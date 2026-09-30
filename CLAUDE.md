@@ -108,6 +108,7 @@ GitHub Pages で公開する静的サイトで、ビルドは行わない。
   - RACコードは `racTable`（`data/rac.json` の `RAC_DB` → 組み込みの `RAC_BUILTIN`〈サンプルの防除14剤〉）と `racFor`（同じ農薬コードの手入力を優先）。記録ごとに出どころ `racSrc`（`manual`／`db`／`builtin`）を持つ。起動時に `loadRacDb()` → `applyRacTable()` で、手入力でない記録を表の値に合わせる（`saveState(false)` で未送信にしない）。表に無い農薬はいまの値を残す。
   - `data/rac.json` の RAC 表記は `tools/build_rac.py` が作る（`m_dokusei.rac` を優先し、無い成分は spec.db の `rac_ai`。`-`・`-(生)`・`-(植)` は除く）。表記を変えるときはスクリプトと `RAC_BUILTIN` をそろえる。
   - 種類ごとの表示・非表示は localStorage の `kyuuri:calKinds`（端末のみ）。
+  - Googleカレンダー同期（`gcalSync`、ボタン `btnGcalSync`）はアプリ→Googleの一方向・手動。表示中のハウスの予定を `gcalWanted` で作り、`extendedProperties.private` の `kyuuriKey`（種類:記録ID）・`kyuuriHouse`・`kyuuriHash` で見分けて、登録・更新（ハッシュが違うとき）・削除（記録が消えたとき、同じキーの2件目以降）を行う。印の無い予定には触れない。ただし同じ日の「[ハウス] 生育調査 …」「[ハウス] 毎日の記録…」の印の無い予定（ログアウトタブの「最新の記録を登録」で入れたもの）は引き取って印を付ける。色は `GCAL_COLOR`。登録先は `gcalId()`（`state.gcalId`、空欄＝`primary`）と名前 `state.gcalName` で、ログインタブの「Googleカレンダーと同期」カード（`gcalIdIn`・「一覧から選ぶ」`gcalPick`）で決め、「設定」シートの `gcalId`・`gcalName` 列で同期する。カレンダータブは名前とIDを表示するだけ（`cvGcalName`・`cvGcalId`）。`gcalBase()` を同期と「カレンダーへ登録」（`calInsert`）の両方で使う。名前は `calendarList/{id}`、一覧は `calendarList?minAccessRole=writer`（スコープ `calendar.calendarlist.readonly`）。同じ操作を繰り返しても結果が変わらないようにしてある（途中で失敗しても押し直せば続きから）。
 - **ライト／ダークの切替はヘッダーのボタン1つ（`btnTheme`）で行う。**
   - `applyTheme(t,save)` が `<html>` の `data-theme="dark"` を付け外しし、ボタンの文言（切り替え先のモード）と title を更新する。アイコンは `.ico-dark`（月）・`.ico-light`（太陽）を CSS で出し分ける。
   - 保存先は localStorage の `kyuuri:theme`（端末のみ、シート同期なし）。ちらつき防止のため `<head>` 冒頭のスクリプトで先に適用する。
