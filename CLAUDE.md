@@ -20,6 +20,9 @@ GitHub Pages で公開する静的サイトで、ビルドは行わない。
 | `doc/【検証2】マニュアルの食い違いとアプリの対応表.pdf` | マニュアル内の食い違い8項目とアプリの採り方（自作。対応が変わったら作り直す） |
 | `doc/【検証1】マニュアルの根拠の弱い点と対応案.pdf` | マニュアルの根拠の弱い点・論文で補えた点／補えない点と、アプリ・現場・作成元の対応案（自作。対応が変わったら作り直す） |
 | `doc/【論文】東出ら2012_*.pdf`・`doc/【論文】安ら2015_*.pdf` | 参照論文。再配布の許可がないため `.gitignore` で除外し、手元だけに置く。GitHub に上げない。`.gitignore` は接頭辞が付いても外れるよう `doc/*東出ら2012_*.pdf` の形にしてある。`git add -A doc` の前に `git status` で確認する |
+| `data/rac.json` | RACコード表（登録番号→農薬名・RACコード・有効成分）。GitHub Actions が毎週作り直す。手で編集しない |
+| `tools/build_rac.py` | ACFinder の `acis.db`・`spec.db` から `data/rac.json` を作るスクリプト |
+| `.github/workflows/rac-update.yml` | 毎週月曜 6:00（JST）に macs-labo/macs の DB を取得して `data/rac.json` を更新・コミットする。DB本体はコミットしない（FAMICデータの再配布になるため） |
 | `privacy.html` / `terms.html` / `icon` / `LICENSE` | 公開用の付属ファイル |
 
 ## アーキテクチャの要点
@@ -31,7 +34,7 @@ GitHub Pages で公開する静的サイトで、ビルドは行わない。
 - Google Sheets 同期は GIS の OAuth トークン（約1時間）を使う。`push()` / `pull()` が送受信する。
 - 外気象は Open-Meteo API から取得する。
 - 変更の検知は `changeSeq` と `state.auth.dirty` / `dirtyAt` で行い、自動同期は3秒のデバウンスで `push(true)` を呼ぶ。
-- スプレッドシートは9シート：`SHEET_ORDER`、`SH`（列定義）、`SHKEY` で定義している。
+- スプレッドシートは10シート：`SHEET_ORDER`、`SH`（列定義）、`SHKEY` で定義している。
 
 ## 守るべき設計ルール（決定済み）
 
@@ -97,6 +100,13 @@ GitHub Pages で公開する静的サイトで、ビルドは行わない。
   - 毎日の記録は `renderDailyChart`：収量（線・左軸 `yY`）と積算収量（線・右軸 `yC`、薄い塗り）。記録の最初の日から最後の日までを日ごとに並べ、収量のない日は線でつなぐ（積算は据え置き）。
   - 印刷（`printCards`）は `graphImages()` で canvas を画像にして差し込む。ダーク表示中はライトの配色で描き直してから取り込む。
   - 「環境と生育のずれ」の集計は `lagRows` を表とグラフで共用する。
+- **カレンダータブ（`cal`）は、毎日の記録・生育調査・農薬散布を月表示で3色に分ける**（`--cal-daily`・`--cal-rec`・`--cal-spray`）。
+  - 農薬散布は `state.sprays`（`{id,houseId,date,work,code,name,rac}`）。「農薬散布」シートで同期し、シートが空（見出し行も無い）なら端末の分を残す（作業項目と同じ扱い）。
+  - 作業一覧CSV（JAの栽培履歴の書き出し）は `parseSprayCsv`：「作業名」と「農薬コード…」を含む行を列名として探し、作業名「防除」の行だけ取り込む。Shift_JIS／UTF-8 は `decodeCsvBuf` で判定。
+  - 二重登録の判定は同じハウスで `sprayKey`（日付＋農薬コード＋農薬名）。
+  - RACコードは `racTable`（`data/rac.json` の `RAC_DB` → 組み込みの `RAC_BUILTIN`〈サンプルの防除14剤〉）と `racFor`（同じ農薬コードの手入力を優先）。記録ごとに出どころ `racSrc`（`manual`／`db`／`builtin`）を持つ。起動時に `loadRacDb()` → `applyRacTable()` で、手入力でない記録を表の値に合わせる（`saveState(false)` で未送信にしない）。表に無い農薬はいまの値を残す。
+  - `data/rac.json` の RAC 表記は `tools/build_rac.py` が作る（`m_dokusei.rac` を優先し、無い成分は spec.db の `rac_ai`。`-`・`-(生)`・`-(植)` は除く）。表記を変えるときはスクリプトと `RAC_BUILTIN` をそろえる。
+  - 種類ごとの表示・非表示は localStorage の `kyuuri:calKinds`（端末のみ）。
 - **ライト／ダークの切替はヘッダーのボタン1つ（`btnTheme`）で行う。**
   - `applyTheme(t,save)` が `<html>` の `data-theme="dark"` を付け外しし、ボタンの文言（切り替え先のモード）と title を更新する。アイコンは `.ico-dark`（月）・`.ico-light`（太陽）を CSS で出し分ける。
   - 保存先は localStorage の `kyuuri:theme`（端末のみ、シート同期なし）。ちらつき防止のため `<head>` 冒頭のスクリプトで先に適用する。
