@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>マニュアルの食い違いとアプリの対応表</title>
+<style>
+  @page { size: A4 landscape; margin: 6mm 8mm; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: "Yu Gothic UI", "Yu Gothic", "Meiryo", sans-serif;
+    font-size: 8.2pt; line-height: 1.32; color: #1d2433;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+  }
+  header { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 1.6pt solid #2f5d50; padding-bottom: 3pt; margin-bottom: 5pt; }
+  h1 { font-size: 14pt; margin: 0; color: #1f3f36; }
+  .meta { font-size: 7.2pt; color: #4b5563; text-align: right; }
+  .summary { display: flex; gap: 6pt; margin-bottom: 4pt; font-size: 7.6pt; }
+  .summary .box { flex: 1; border: .6pt solid #b8c2cc; border-radius: 2pt; padding: 3pt 6pt; }
+  .summary .box b { font-size: 12pt; margin-right: 3pt; }
+  .summary p { margin: 0; }
+  table { width: 100%; border-collapse: collapse; font-size: 6.85pt; line-height: 1.26; }
+  th, td { border: .5pt solid #b8c2cc; padding: 1.2pt 2.6pt; vertical-align: top; text-align: left; }
+  th { background: #2f5d50; color: #fff; font-weight: 700; }
+  th.ans { background: #3730a3; }
+  tr { break-inside: avoid; page-break-inside: avoid; }
+  td.n { text-align: center; color: #6b7280; width: 2%; }
+  td.item { width: 8.5%; font-weight: 700; }
+  td.man { width: 17%; }
+  td.ans { width: 21%; background: #f3f4ff; }
+  td.st { width: 6%; text-align: center; white-space: nowrap; }
+  td.app { width: 26%; }
+  td.next { width: 19.5%; }
+  .s { display: inline-block; padding: .5pt 4pt; border-radius: 2pt; font-weight: 700; font-size: 7.4pt; }
+  .done { background: #dcf1e5; color: #1f6f4a; }
+  .part { background: #fdf0d5; color: #8a5a00; }
+  .none { background: #fde2e1; color: #9b1c1c; }
+  .na   { background: #e5e7eb; color: #374151; }
+  .new { color: #3730a3; font-weight: 700; }
+  .where { display: block; color: #6b7280; font-size: 6.9pt; margin-top: 1pt; }
+  .disc { border: .6pt solid #d6a23a; background: #fff8e6; border-radius: 2pt; padding: 1.8pt 6pt; margin-bottom: 4pt; font-size: 7pt; }
+  footer { margin-top: 4pt; font-size: 7pt; color: #4b5563; }
+  footer p { margin: 0 0 1pt; }
+</style>
+</head>
+<body>
+<header>
+  <h1>マニュアル内の食い違いと「きゅうり生育予測ノート」での対応表</h1>
+  <div class="meta">基準：岩手県農業研究センター『施設きゅうりの摘心栽培における生育予測に基づいた栽培管理法導入マニュアル ver.1.0』（令和8年4月）<br>
+  対象：きゅうり生育予測ノート（GitHub Pages 版、2026-10-05 時点）｜作成 2026-09-25、改訂 2026-10-05（作成元の回答を反映）｜ページ番号はマニュアル下部のノンブル</div>
+</header>
+
+<div class="disc"><b>作成元の回答（2026年10月）を反映した改訂版です。</b>回答は、作成元への照会に対するもので、本アプリの計算方法や推奨内容の精度・妥当性を保証するものではありません。きゅうり生育予測ノートは個人が開発した試作版で、岩手県農業研究センターが開発・監修・推奨したアプリではありません。</div>
+
+<div class="summary">
+  <div class="box"><p><span class="s done">対応済み</span> <b>5</b>項目　食い違いの扱いを決め、画面・READMEに根拠を明記</p></div>
+  <div class="box"><p><span class="s part">一部対応</span> <b>1</b>項目　影響を抑える作りにしたが、手当てが残る</p></div>
+  <div class="box"><p><span class="s none">未対応</span> <b>1</b>項目　マニュアルの一方の記述をそのまま採用している</p></div>
+  <div class="box"><p><span class="s na">対象外</span> <b>1</b>項目　表記の誤りで、アプリの計算には影響しない</p></div>
+</div>
+
+<table>
+<tr><th>#</th><th>項目</th><th>マニュアル内の食い違い</th><th class="ans">作成元の回答（2026-10）</th><th>状況</th><th>アプリでの扱い（該当箇所）</th><th>今後の対応案</th></tr>
+
+<tr><td class="n">1</td><td class="item">DIFの向き</td>
+<td class="man">本文p.15・図2-1は「DIF大＝節間が伸びて栄養成長」。表2-7と図4-1は「栄養へ＝DIF小さく」で逆。図5-9でもDIF→節間伸長は負（n.s.）。</td>
+<td class="ans">本文と早見表は異なる方向を示しており、見直しが必要。成長のバランスは、DIFだけでなく平均気温・高温時間帯・夕方の降温方法・かん水・肥培管理等を組み合わせて調整するもの。「DIFが大きい／小さい」だけで栄養・生殖への方向を一律に示す表現は改める方向で、<b>表2-7の削除を含め</b>本文・図表の整理を検討。<b>表2-7側の方向が正しいと確定したわけではない。</b>アプリでもDIF単独の作用と変温管理全体による調整を区別してほしい。</td>
+<td class="st"><span class="s done">対応済み</span></td>
+<td class="app"><span class="new">10-05変更</span>：<b>DIF単独では栄養・生殖の向きを示さない</b>扱いにした。推奨管理の「昼夜温差 DIF」行は草勢に合わせた夜温（強める＝低く、弱める＝高く）だけを示し、栄養・生殖の調整は表2-1の変温管理モデルで提示。早見表（表2-7）は参考として残し、DIFの欄に「作成元で見直し中・向きは未確定」と注記。節間長の読み方（表3-1）は変えない。（09-24〜10-04は表2-7・図4-1の向きで表示していた）<span class="where">いまの生育＞推奨する栽培管理・早見表／README「DIFの扱い」</span></td>
+<td class="next">マニュアルの改訂版で表2-7・本文p.15の扱いが決まったら、それにそろえる。</td></tr>
+
+<tr><td class="n">2</td><td class="item">表2-1のモデル区分</td>
+<td class="man">DIF 12.2℃のモデルⅤが「生殖成長」、DIF 7.3℃のモデルⅠが「栄養成長」で、本文の「DIF大＝栄養」と逆に見える。</td>
+<td class="ans">表2-1の変温管理モデルは、複数の管理要素を組み合わせたモデルとして位置づける。</td>
+<td class="st"><span class="s done">対応済み</span></td>
+<td class="app"><span class="new">10-05変更</span>：モデルを「平均気温・DIF・高温時間帯（午前／午後）・夕方の降温（緩徐／急速）の組み合わせで、DIFはその要素の一つ」と注記し、栄養・生殖の調整はモデル全体で行うよう案内。以前の「モデルのDIFと昼夜温差の行が合わないときは昼夜温差の行を優先」の注記は削除。モデルは「草勢の方向×節間長の振れ幅」で選び、理由を表示。<span class="where">いまの生育＞変温管理モデル／README「管理方針の決め方」</span></td>
+<td class="next">（現状維持）</td></tr>
+
+<tr><td class="n">3</td><td class="item">平均気温の効果</td>
+<td class="man">p.15は「平均気温が低いと草勢が強い」（一般則）。p.29は「気温上昇で早熟作型は草勢弱、抑制作型は草勢強」と作型で逆。</td>
+<td class="ans">個別の回答なし（No.1で、成長のバランスは平均気温・高温時間帯などを組み合わせて調整するものと説明）。</td>
+<td class="st"><span class="s none">未対応</span></td>
+<td class="app">p.15と表2-7の一般則のみを採用（草勢を強める＝平均気温を下げる、弱める＝上げる）。ハウスに作型は登録できるが、気温の向きには反映していない。</td>
+<td class="next">直近の実測の平均気温が生育適温（昼25〜28℃・夜13〜16℃、p.14）より低い時期は、「気温を上げると草勢が強まる」向きに切り替える。作型ではなく実測気温で判定する。</td></tr>
+
+<tr><td class="n">4</td><td class="item">生育→収量のタイムラグ</td>
+<td class="man">p.26「最短7日」に対し、同じ文の95%信頼区間が「10〜16日」で、推定値が区間の外。</td>
+<td class="ans"><b>10〜16日は平均ラグ（13日）の95%信頼区間</b>で、最短7日の信頼区間ではない。解析事例の中で最短7日のラグが確認されたため、調査間隔を7日以内としている。最短値と平均値の信頼区間を分けて記載する。→ 食い違いではなく書き方の問題と判明。</td>
+<td class="st"><span class="s done">対応済み</span></td>
+<td class="app"><span class="new">10-05</span>：画面とREADMEで「最短7日、平均13日（平均の95%信頼区間10〜16日）」と分けて表示。この日数は計算には使っていない（生育から収量を予測する機能はない）。回帰分析のラグは0〜30日を自動で探索。<span class="where">いまの生育＞向こう1か月の生育予測／README 1章</span></td>
+<td class="next">収量の見通しを表示する場合は、平均13日・幅10〜16日（最短7日）で示す。</td></tr>
+
+<tr><td class="n">5</td><td class="item">環境→生育のタイムラグ</td>
+<td class="man">気温→茎径が、p.27本文は14日（11〜17日）、表5-3は7日。CO₂→茎径も本文18日／表17日。</td>
+<td class="ans"><b>表5-3の誤り</b>で、気温→茎径14日、CO₂→茎径18日（本文の値）が正しい。表の数値を修正する。</td>
+<td class="st"><span class="s part">一部対応</span></td>
+<td class="app">回帰分析のラグは自動探索で、どちらの値にも依存しない。説明文は「環境の変化が生育に表れるまで7〜14日」と幅で表記し、生育予測の注記に「設定変更は14日間隔を目安に」と記載。推奨管理のカード自体には、効き始めの日数を添えていない。<span class="where">回帰分析の説明文／いまの生育＞向こう1か月の生育予測</span></td>
+<td class="next">推奨管理の表示に「効き始めは7〜14日後（気温→茎径は約14日）」を添え、変更を急がないよう注意書きを加える。</td></tr>
+
+<tr><td class="n">6</td><td class="item">茎径か茎周か</td>
+<td class="man">表3-1は茎径（mm）、p.20は摘心栽培で茎周を推奨しない。一方、解析図（図5-1・5-6〜5-8）の凡例は「茎周」。</td>
+<td class="ans">ラグ解析では茎径・茎周の両方を対象とし、解析したすべてのほ場で両者のラグ日数は同じだった。現場では、枝の混みやすい摘心栽培での測定作業と折損リスクを考え、茎径を推奨。解析対象と推奨測定項目の違いをマニュアルに補足する。</td>
+<td class="st"><span class="s done">対応済み</span></td>
+<td class="app">「茎径mm」で統一（表3-1）。入力欄の上に「直径をノギスで測る。茎周で測らない。途中で変えると平準点がずれる」と注記（09-25）。<span class="new">10-05</span>：茎径を勧める理由（測定の手間・折損のおそれ）を追記。<span class="where">いまの生育＞生育調査を記録する／README</span></td>
+<td class="next">周期（16日・12日）がどちらのデータによるかは明示されていない。自分のハウスの周期の目安で確かめる。</td></tr>
+
+<tr><td class="n">7</td><td class="item">N/K比の範囲</td>
+<td class="man">表2-5の目安は0.6〜1.5。実証（p.32）ではN/K比2.5の液肥（住友液肥1号）を使用。</td>
+<td class="ans">住友液肥1号は栄養成長側への調整を意図した管理に、くみあい液肥2号は基本管理に使用したという意味。表2-5のN/K比の「基本」区分と混同されないよう、使用目的を文章で説明する。</td>
+<td class="st"><span class="s done">対応済み</span></td>
+<td class="app">N/K比が0.6〜1.5を外れる液肥は「目安の範囲外」と表示し、候補1位が範囲外なら注意書きを出す（09-25）。見本の液肥の使いどころ（住友液肥1号＝強める・栄養成長へ、くみあい液肥2号＝基本）は回答と同じ。<span class="where">ライブラリ＞液肥／かん水と液肥＞液肥の候補</span></td>
+<td class="next">（現状維持）</td></tr>
+
+<tr><td class="n">8</td><td class="item">表記の誤り</td>
+<td class="man">目次と本文で追補1・2の題が逆。図4-2が2つ。表4-1の「p.13再掲」は実際p.14。図4-3のCO₂単位「%」・横軸名「DIF（日）」。第2章の節番号が4→7に飛ぶ。</td>
+<td class="ans">図4-3は、CO₂濃度の単位はppm、横軸は定植後日数が正しい。その他の図番号・参照ページ・引用文献等の表記もあわせて確認する。</td>
+<td class="st"><span class="s na">対象外</span></td>
+<td class="app">計算には影響しない。アプリとREADMEでの参照は本文側の名称とノンブルにそろえている（例：追補1＝現地事例の解析、表5-1、図4-2＝管理強度の図、p.15）。</td>
+<td class="next">（改訂版で確認）</td></tr>
+</table>
+
+<footer>
+<p>・「対応済み」は、食い違いの扱いを決めてアプリに反映し、その根拠を画面またはREADMEに書いたものを指す。マニュアルの食い違いそのものの解消は、作成元の改訂を待つ。</p>
+<p>・変更履歴：09-24改訂でNo.1 DIFの向きを表2-7・図4-1にそろえNo.2を更新。09-25版でNo.6・No.7を実装。10-05改訂で作成元の回答（2026年10月）の列を追加し、No.1をDIF単独では向きを示さない扱いに、No.2の注記を変更、No.4・No.6の表示を更新。No.3・No.5の対応案は未実装。</p>
+<p>・回答では、本アプリ独自の機能（LAI推定・光利用効率など）は対象条件での検証が必要とされ、由来の区別と作成元の開発・監修・推奨ではない旨の画面表示を求められた（全タブ上部の帯と由来バッジで対応、10-05）。</p>
+</footer>
+</body>
+</html>

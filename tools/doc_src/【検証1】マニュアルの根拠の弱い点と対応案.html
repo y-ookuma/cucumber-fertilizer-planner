@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>根拠の弱い点と対応案</title>
+<style>
+  @page { size: A4 landscape; margin: 7mm 9mm; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body { font-family: "Yu Gothic UI", "Yu Gothic", "Meiryo", sans-serif; font-size: 8.4pt; line-height: 1.4; color: #1d2433;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  header { border-bottom: 1.6pt solid #2f5d50; padding-bottom: 3pt; margin-bottom: 4pt; }
+  h1 { font-size: 13.5pt; margin: 0; color: #1f3f36; }
+  h2 { font-size: 9.6pt; margin: 5pt 0 2.5pt; color: #1f3f36; border-left: 3pt solid #2f5d50; padding-left: 4pt; }
+  .meta { font-size: 7.1pt; color: #4b5563; line-height: 1.35; margin-top: 1.5pt; }
+  .concl { border: .8pt solid #2f5d50; border-radius: 2pt; padding: 3pt 7pt; background: #f3f8f5; margin-bottom: 3pt; }
+  .concl p { margin: 0 0 1pt; }
+  .concl b.k { color: #1f3f36; }
+  .concl .r { border-top: .5pt dashed #9aa9c9; margin-top: 2pt; padding-top: 2pt; }
+  table { width: 100%; border-collapse: collapse; font-size: 7.2pt; line-height: 1.32; }
+  th, td { border: .5pt solid #b8c2cc; padding: 1.6pt 3pt; vertical-align: top; text-align: left; }
+  th { background: #2f5d50; color: #fff; font-weight: 700; }
+  tr { break-inside: avoid; page-break-inside: avoid; }
+  td.n { text-align: center; color: #6b7280; width: 2%; }
+  td.item { width: 9%; font-weight: 700; }
+  td.why { width: 30%; }
+  td.pap { width: 14%; }
+  td.imp { width: 4.5%; text-align: center; white-space: nowrap; }
+  td.act { width: 40.5%; }
+  .p { display: inline-block; padding: .3pt 3pt; border-radius: 2pt; font-weight: 700; font-size: 6.9pt; white-space: nowrap; }
+  .p0 { background: #fde2e1; color: #9b1c1c; }
+  .p1 { background: #fdf0d5; color: #8a5a00; }
+  .p2 { background: #dcf1e5; color: #1f6f4a; }
+  .hi { color: #9b1c1c; font-weight: 700; }
+  .mid { color: #8a5a00; font-weight: 700; }
+  .lo { color: #4b5563; font-weight: 700; }
+  .was { display: block; font-size: 6.4pt; color: #6b7280; font-weight: 400; }
+  .t { display: inline-block; font-size: 6.6pt; font-weight: 700; padding: 0 2.5pt; border-radius: 1.5pt; margin-right: 2pt; }
+  .ta { background: #e0e7ff; color: #3730a3; }
+  .tg { background: #e7f5e9; color: #1f6f4a; }
+  .ts { background: #f3e8ff; color: #6b21a8; }
+  .tr { background: #1f3f8a; color: #fff; }
+  .done { color: #1f6f4a; font-weight: 700; }
+  .todo { color: #8a5a00; font-weight: 700; }
+  .act div { margin-bottom: .8pt; }
+  .act div.ans { background: #f3f4ff; border-left: 2pt solid #1f3f8a; padding: .6pt 3pt; }
+  .new { color: #1f3f8a; font-weight: 700; }
+  footer { margin-top: 3pt; font-size: 6.9pt; color: #4b5563; }
+  footer p { margin: 0 0 .8pt; }
+  .pb { break-before: page; page-break-before: always; }
+</style>
+</head>
+<body>
+<header>
+  <h1>摘心栽培「生育予測マニュアル」の根拠の弱い点と対応案 ― 東出ら（2012）で補えた点・補えない点、作成元の回答</h1>
+  <div class="meta">基準：岩手県農業研究センター『施設きゅうりの摘心栽培における生育予測に基づいた栽培管理法導入マニュアル ver.1.0』（令和8年4月）｜
+  比較：東出ら（2012）「収量構成要素の解析からみたキュウリ短期栽培の摘心およびつる下ろし整枝法の差異」園学研 11(4):523–529｜
+  作成元の回答：岩手県農業研究センター（2026年10月）｜アプリ：きゅうり生育予測ノート（2026-10-05 時点）｜作成 2026-09-25、改訂 2026-10-05｜ページ番号はマニュアル下部のノンブル</div>
+</header>
+
+<div class="concl">
+  <p><b class="k">結論</b>　論文は「収量がどう決まるか」（受光量 × 光利用効率 × 果実への分配、LAI、果実乾物率、節あたり着果数）を補い、マニュアルの「茎径・節間長は収量の原因ではなく先行指標」という見方とも矛盾しない。</p>
+  <p>　　　ただし論文は <b>DIF・平準点・周期・タイムラグ・平均気温の効果</b> を扱っていない。マニュアル内の食い違いと、生育予測の中心である周期の根拠は、論文では補えない。</p>
+  <p>　　　論文自体も n＝4〜6・1作・植物工場の水耕で、補えた値も「既定値と幅」として扱い、自分のハウスのデータで確かめる必要がある。</p>
+  <p class="r"><b class="k">作成元の回答で分かったこと（2026年10月）</b>　<b>解消</b>：タイムラグは書き方の問題（平均13日・95%信頼区間10〜16日、最短7日は個別事例）、表5-3は誤記（本文の14日・18日が正しい）、茎径・茎周のラグは同じ。
+  <b>確定した限界</b>：DIFの向きは作成元でも未確定で、表2-7の削除を含め見直し中。実証は管理ごとに別棟ハウス1棟ずつで、反復はなく、ハウス差と管理差を分けられない。
+  <b>残る弱さ</b>：周期の元データ・品種別の値は未公表で提供されず、補間・自己相関への指摘は検討事項にとどまり、追加解析は約束されていない。回答は本アプリの計算方法・推奨内容の精度・妥当性を保証するものではない。</p>
+</div>
+
+<h2>1. マニュアルの根拠の弱い点（生育予測の中心部分）</h2>
+<table>
+<tr><th>#</th><th>項目</th><th>根拠が弱い理由</th><th>論文で補えるか</th><th>影響</th><th>回答と対応案　<span class="t tr">回答</span><span class="t ta">アプリ</span><span class="t tg">現場</span><span class="t ts">作成元</span>　済＝実装・実施済み／未＝未実装</th></tr>
+
+<tr><td class="n">1</td><td class="item">DIFの向き</td>
+<td class="why">本文p.15・図2-1（DIF大＝栄養）と、表2-7・図4-1（栄養へ＝DIF小）が逆。図5-9でもDIF→節間伸長は負でn.s.。どちらが正しいかを決めるデータが示されていない。<span class="new">回答で、作成元もどちらの向きか確定していないことが分かった。</span></td>
+<td class="pap"><span class="p p0">補えない</span><br>論文は昼夜温を処理していない（夜間23℃の冷房で一定）。</td>
+<td class="imp"><span class="hi">大</span></td>
+<td class="act"><div class="ans"><span class="t tr">回答</span> 見直しが必要。成長のバランスはDIFだけでなく平均気温・高温時間帯・夕方の降温・かん水・肥培管理等の組み合わせで調整するもので、DIFの大小だけで向きを一律に示す表現は改める方向（表2-7の削除を含め検討）。表2-7の向きが正しいと確定したわけではない。</div>
+<div><span class="t ta">アプリ</span><span class="done">済</span> <span class="new">10-05</span> DIF単独では栄養・生殖の向きを示さず、表2-1の変温管理モデル（複数要素の組み合わせ）で調整する扱いに変更。早見表のDIF欄に見直し中と注記。（09-24〜は表2-7の向きで表示していた）</div>
+<div><span class="t tg">現場</span> DIFは一度に大きく変えず（1〜2℃ずつ）、2週間後の節間長・茎径の変化を記録。回帰分析で「DIF→節間長」の向きと遅れ日数を自分のハウスで確かめる。</div>
+<div><span class="t ts">作成元</span><span class="done">済</span> 照会し回答を得た。<span class="todo">未</span> 改訂版で表2-7・本文p.15の扱いを確認する。</div></td></tr>
+
+<tr><td class="n">2</td><td class="item">周期（茎径16日・節間長12日）</td>
+<td class="why">マニュアルには解析したハウス数・作数・株数の記載がない（成果書 R7-指-24 に県内29事例と記載、と回答）。3品種をまとめた値で、県南の抑制作型は茎径に周期性なし（表5-1でns）。3〜10日おきの調査値を線形補間してから自己相関・Ljung-Box検定をしており、短い日数の相関が人工的に高まり、見かけのデータ数が増えてp値が甘くなる。</td>
+<td class="pap"><span class="p p0">補えない</span><br>論文は周期・平準点を扱っていない。</td>
+<td class="imp"><span class="hi">大</span></td>
+<td class="act"><div class="ans"><span class="t tr">回答</span> 解析対象は県内29事例（R7-指-24）。補間処理・自己相関解析への指摘は、解析方法と適用範囲を説明するうえでの検討事項として受け止めるが、追加解析は約束しない。ほ場別の詳細値や元データは、取りまとめ中・未公表のため提供できないものがある。</div>
+<div><span class="t ta">アプリ</span><span class="done">済</span> 調査10回以上・期間42日以上のハウスで、補間しない実測値の自己相関から周期の目安を出し、16日・12日と並べて表示（09-25）。予測自体はマニュアルの値のまま。</div>
+<div><span class="t tg">現場</span> 7日間隔を守り、1作を通して記録する（8日以上あけない）。再解析・データ公開は当面見込めないため、自分のハウスでの確認がいっそう重要。</div>
+<div><span class="t ts">作成元</span><span class="done">済</span> 照会済み。論文の公表を待つ。</div></td></tr>
+
+<tr><td class="n">3</td><td class="item">品種</td>
+<td class="why">ニーナZ・兼備2号・まりんの3品種をまとめた値。「強勢品種は周期が短い」としながら品種別の値はなく、実証は兼備2号のみ。</td>
+<td class="pap"><span class="p p0">補えない</span><br>論文の品種（エクセレント節成2号・KAC-002・ズバリ163）はマニュアルと重ならない。</td>
+<td class="imp"><span class="mid">中</span></td>
+<td class="act"><div class="ans"><span class="t tr">回答</span> 品種別の詳細値は、論文として取りまとめ中・未公表の情報を含むため、現時点では提供できないものがある。</div>
+<div><span class="t ta">アプリ</span><span class="done">済</span> ハウスごとに品種を登録でき、全ハウスの周期の目安を品種・定植日と並べた比較表を表示（09-25）。</div>
+<div><span class="t tg">現場</span> 品種を変えた年は、最初の1作を「周期の確認の作」と位置づける。</div></td></tr>
+
+<tr><td class="n">4</td><td class="item">実証の規模</td>
+<td class="why">1年・1か所・1品種。「1区4株×2反復」は、<span class="new">回答で、管理ごとに同じ仕様の別棟ハウスを1棟ずつ割り当て、ハウス内の2地点で各4株を調べたもの（2地点は反復ではない）と確定</span>。早熟・抑制の両作型で割り当ては同じハウス。ハウス差と処理効果を区別できない。可販収量は増えたが総収量は有意差なし。増収109%・106%に対し本文は「約10%」。</td>
+<td class="pap"><span class="p p1">一部</span><br>分配率の差で収量が変わるという仕組みは支持。ただし論文もn＝4〜6で検定なし。</td>
+<td class="imp"><span class="hi">大</span></td>
+<td class="act"><div class="ans"><span class="t tr">回答</span> この配置では管理方法の差とハウス固有の差を分離できない限界がある。株別データの検定結果を一般的な増収効果の根拠とする表現と、「4株×2反復」の記載を見直す。両作型で実証区の可販収量が慣行区を上回った観測結果と、他の施設にも一般化できる効果は区別して説明する。</div>
+<div><span class="t tg">現場</span> 効果は「量」より「品質（流れ果の減少）」と読むのが妥当。自分のハウスで前作・同時期と比べ、可販収量と総収量を分けて記録する。</div>
+<div><span class="t ta">アプリ</span><span class="done">済</span> 増収効果を前提にした表示はしない。毎日の収量を記録でき、回帰分析のYに日次収量を使える。<span class="todo">未</span> 可販・規格外を分けて入力できるようにする。</div></td></tr>
+
+<tr><td class="n">5</td><td class="item">生育→収量の遅れ</td>
+<td class="why">p.26「最短7日」に対し、同じ文の95%信頼区間が「10〜16日」で、推定値が区間の外。<span class="new">回答で、10〜16日は平均13日の信頼区間で、最短7日は個別事例の値と判明。食い違いではなく書き方の問題。</span></td>
+<td class="pap"><span class="p p1">一部</span><br>茎・新葉に乾物を回すと果実が減る向きは支持。日数は扱っていない。</td>
+<td class="imp"><span class="lo">小</span><span class="was">（旧：中）</span></td>
+<td class="act"><div class="ans"><span class="t tr">回答</span> 平均ラグ13日（95%信頼区間10〜16日）。解析事例の中で最短7日のラグがあったため、調査間隔を7日以内としている。両者を分けて記載する。</div>
+<div><span class="t ta">アプリ</span><span class="done">済</span> この日数は計算に使わず、回帰分析のラグは0〜30日を自動で探索。<span class="new">10-05</span> 画面とREADMEで「最短7日、平均13日（10〜16日）」と分けて表示。</div>
+<div><span class="t tg">現場</span> 管理を変えた効果は、平均13日後（10〜16日）を中心に見て、1週間で結論を出さない。</div></td></tr>
+
+<tr><td class="n">6</td><td class="item">環境→生育の遅れ</td>
+<td class="why">気温→茎径が本文14日（11〜17日）、表5-3は7日。CO₂→茎径も本文18日／表17日。<span class="new">回答で表5-3の誤記と確定。</span></td>
+<td class="pap"><span class="p p0">補えない</span></td>
+<td class="imp"><span class="lo">小</span><span class="was">（旧：中）</span></td>
+<td class="act"><div class="ans"><span class="t tr">回答</span> 気温→茎径14日、CO₂→茎径18日が正しく、表5-3の数値を修正する。</div>
+<div><span class="t ta">アプリ</span><span class="done">済</span> 回帰分析のラグは自動探索。<span class="todo">未</span> 推奨管理に「効き始めは7〜14日後（気温→茎径は約14日）」を添える（食い違い対応表No.5）。</div></td></tr>
+
+<tr><td class="n">7</td><td class="item">平均気温の効果</td>
+<td class="why">p.15「平均気温が低いと草勢が強い」（一般則）と、p.29「気温上昇で早熟作型は草勢弱、抑制作型は草勢強」が作型で逆。低温期は温度を上げると草勢が強まるという一般的な知見とも合わない場合がある。</td>
+<td class="pap"><span class="p p0">補えない</span><br>夏の短期栽培のみ。</td>
+<td class="imp"><span class="mid">中</span></td>
+<td class="act"><div class="ans"><span class="t tr">回答</span> 個別の回答なし（DIFの項で、成長のバランスは平均気温・高温時間帯などを組み合わせて調整するものと説明）。</div>
+<div><span class="t ta">アプリ</span><span class="todo">未</span> 実測の平均気温が生育適温（昼25〜28℃・夜13〜16℃、p.14）より低い時期は「上げると草勢が強まる」向きに切り替える（食い違い対応表No.3）。切り替えの基準は要相談。</div>
+<div><span class="t tg">現場</span> 低温期・高温期で逆に効くことがある前提で、推奨の向きと実際の茎径の変化を見比べる。</div></td></tr>
+
+<tr><td class="n">8</td><td class="item">茎径か茎周か</td>
+<td class="why">表3-1は茎径、p.20は茎周を推奨しないが、解析図（図5-1・5-6〜5-8）の凡例は「茎周」。<span class="new">回答で、ラグ解析は両方を対象とし、ラグ日数は同じだったと判明。</span>周期の日数がどちらのデータによるかは明示されていない。</td>
+<td class="pap"><span class="p p0">補えない</span><br>論文は茎径を測っていない。</td>
+<td class="imp"><span class="lo">小</span></td>
+<td class="act"><div class="ans"><span class="t tr">回答</span> 解析したすべてのほ場で、茎径・茎周から得られたラグ日数は同じ。現場では、枝の混みやすい摘心栽培での測定作業と折損リスクから茎径を推奨。マニュアルに説明を補足する。</div>
+<div><span class="t ta">アプリ</span><span class="done">済</span> 入力欄に「直径をノギスで測る。茎周で測らない」と注記し、<span class="new">10-05</span> 茎径を勧める理由を追記。平準点は自分の記録の平均なので、測り方を変えなければ判定は成り立つ。</div></td></tr>
+
+<tr><td class="n">9</td><td class="item">引用文献</td>
+<td class="why">中心は非公開の成績書（文献1）と学会講演要旨（文献2）で、査読論文になっていない。DIFの根拠9〜16のうち12〜16はかん水・水ストレス・追肥の文献。表2-5は企業ガイド。文献7は巻と年が合わない。</td>
+<td class="pap"><span class="p p1">一部</span><br>収量の仕組みの部分だけは査読論文で裏づけられた。</td>
+<td class="imp"><span class="mid">中</span></td>
+<td class="act"><div class="ans"><span class="t tr">回答</span> 解析対象・試験条件は、同時公開の成果書「施設きゅうりの摘心栽培における生育予測手法」（R7-指-24）と「…生育予測に基づく栽培管理支援ツール」（R7-指-25）を参照。引用文献等の表記もあわせて確認する。論文として取りまとめ中のデータがある。</div>
+<div><span class="t ta">アプリ</span><span class="done">済</span> READMEで、マニュアル・参照論文・本アプリ独自の値を区別して明記し、成果書2点を参考文献に追加。<span class="new">10-05</span> 画面のカードにも由来バッジ（マニュアル／文献／独自）を表示。</div>
+<div><span class="t ts">作成元</span><span class="todo">未</span> 論文の公表と、改訂版での文献7の書誌を確認する。</div></td></tr>
+</table>
+
+<h2 class="pb">2. 論文で補えた点に残る弱さ（論文自体の限界と、本アプリの仮置き）</h2>
+<table>
+<tr><th>#</th><th>項目</th><th>根拠が弱い理由</th><th>補った内容</th><th>影響</th><th>回答と対応案　<span class="t tr">回答</span><span class="t ta">アプリ</span><span class="t tg">現場</span><span class="t ts">作成元</span>　済＝実装・実施済み／未＝未実装</th></tr>
+
+<tr><td class="n">10</td><td class="item">論文の試験条件</td>
+<td class="why">噴霧耕の水耕・夏の1作（98日）・夜間23℃冷房の植物工場。相関はn＝4〜6、収量は反復をまとめた集計で検定なし。岩手の土耕パイプハウス・長期どりとは条件が大きく違う。</td>
+<td class="pap">収量＝受光量×光利用効率×果実分配率の枠組み</td>
+<td class="imp"><span class="mid">中</span></td>
+<td class="act"><div class="ans"><span class="t tr">回答</span> 東出ら（2012）等をもとに加えたLAI推定・光利用効率・果実分配率・果実乾物率・かん水量・養分収支・収量推定は、マニュアルの手法に加えて本アプリで独自に構築した機能と理解。文献の試験条件と利用対象の栽培条件が異なる場合がある。マニュアル由来・他の文献由来・開発者独自を区別し、作成元の開発・監修・推奨ではない旨を利用画面でも示してほしい。</div>
+<div><span class="t ta">アプリ</span><span class="done">済</span> 論文の値は既定値と幅として使い、画面で変えられるようにした。<span class="new">10-05</span> 全タブ上部の帯・フッター・PDF出力に「作成元の開発・監修・推奨ではない」旨を表示し、カードに由来バッジを付けた。</div>
+<div><span class="t tg">現場</span> 1作分の受光量と収量がそろったら、自分のハウスの実効値を逆算して既定値を置き換える。</div></td></tr>
+
+<tr><td class="n">11</td><td class="item">光利用効率・分配率</td>
+<td class="why">光利用効率の95%区間が0.40〜1.27と広い。分配率（40日0.56→98日0.79）は2時点のみ。98日を超えると葉の老化で下がる可能性があるが、データがない。</td>
+<td class="pap">光から見た収量の目安（LUE 0.85、幅0.69〜1.00）</td>
+<td class="imp"><span class="mid">中</span></td>
+<td class="act"><div><span class="t ta">アプリ</span><span class="done">済</span> 98日を超えると「論文の範囲外」と注記。カードに「文献」「独自」のバッジ（10-05）。<span class="todo">未</span> 実収量と受光量から、そのハウスの実効LUEを自動で計算して表示する。</div></td></tr>
+
+<tr><td class="n">12</td><td class="item">吸光係数・LAIの適正範囲</td>
+<td class="why">吸光係数 k＝1.17 は定植96日後に1回だけ測った値。LAIの適正1.5〜2.5は「LAI 2で約90%吸収」から本アプリが決めた値で、論文の結論ではない。</td>
+<td class="pap">受光率 f＝1−e<sup>−1.17·LAI</sup>、LAIの判定</td>
+<td class="imp"><span class="lo">小</span></td>
+<td class="act"><div class="ans"><span class="t tr">回答</span> 各パラメータ・判定範囲は、対象条件での検証が必要。</div>
+<div><span class="t ta">アプリ</span><span class="done">済</span> 適正範囲が本アプリの値であることを画面とREADMEに明記。</div>
+<div><span class="t tg">現場</span> 過繁茂の判定は、LAIだけでなく下葉の黄化・病害・果実の着色も見て決める。</div></td></tr>
+
+<tr><td class="n">13</td><td class="item">節あたり着果数</td>
+<td class="why">論文でも「収量差は節あたり着果数の差と推察」で、検定された結論ではない。</td>
+<td class="pap">1株あたり開花数・着果数・着果率（2026-09-25）</td>
+<td class="imp"><span class="mid">中</span></td>
+<td class="act"><div><span class="t ta">アプリ</span><span class="done">済</span> 株ごとの開花数・着果数から1株あたりの値と着果率を出す。<span class="todo">未</span> 株ごとの節数を記録し、節あたり着果数を出す。</div>
+<div><span class="t tg">現場</span> 着果率と、その約2週間後（平均13日、10〜16日）の収量の関係を1作分ためて確かめる。</div></td></tr>
+
+<tr><td class="n">14</td><td class="item">LAIの推定（NARO式）</td>
+<td class="why">NARO式（安ら 2015）はハイワイヤー・つる下ろし向けで、摘心栽培での検証はない。「摘心後」モード（葉数×0.896×最大葉）は本アプリの簡略化。</td>
+<td class="pap">株ごとの葉数・最大葉の葉長・葉幅からLAI</td>
+<td class="imp"><span class="mid">中</span></td>
+<td class="act"><div class="ans"><span class="t tr">回答</span> 特に、摘心栽培へのLAI推定式の適用は、対象条件での検証が必要。</div>
+<div><span class="t ta">アプリ</span><span class="done">済</span> <span class="new">10-05</span> 生育調査の入力カードに「摘心栽培での検証はまだ」と表示。<span class="todo">未</span> 下の補正係数を入力できるようにする。</div>
+<div><span class="t tg">現場</span> 1作に1回、2〜3株の全葉の葉長・葉幅を測り（非破壊）、Blanco式で合計した葉面積とアプリの推定値を比べる。ずれが大きければ補正係数を決める。</div></td></tr>
+
+<tr><td class="n">15</td><td class="item">ハウスの透過率</td>
+<td class="why">被覆資材ごとの透過率の目安、骨材の係数0.85、遮光を始める800W/m²は本アプリの仮置きで、論文由来ではない。</td>
+<td class="pap">外気の日射・PARをハウス内の値に換算</td>
+<td class="imp"><span class="lo">小</span></td>
+<td class="act"><div><span class="t ta">アプリ</span><span class="done">済</span> 実測の透過率を入れれば、そちらを優先する。</div>
+<div><span class="t tg">現場</span> 晴天の正午前後に、ハウス内外のPAR（または日射）を同時に測って透過率を入れる。被覆を張り替えた年は測り直す。</div></td></tr>
+</table>
+
+<h2>3. 優先して取り組むこと</h2>
+<table>
+<tr><th style="width:3%">順</th><th style="width:30%">取り組み</th><th style="width:10%">担当</th><th>理由</th></tr>
+<tr><td class="n">1</td><td><span class="done">済（2026年10月回答）</span> 作成元への確認（DIFの向き、周期の根拠データ、茎径か茎周か、タイムラグ、実証の設計）</td><td><span class="t ts">作成元</span></td><td>タイムラグ・表5-3・茎径と茎周は解消。DIFの向きと実証の限界は作成元も認め、改訂で見直す。周期の元データと追加解析は得られず、No.2・3の弱さは残る。</td></tr>
+<tr><td class="n">2</td><td><span class="done">済（10-05）</span> 回答を受けたアプリの変更（DIF単独で向きを示さない、作成元の開発・監修・推奨ではない旨の画面表示、由来バッジ、LAIの注記、ラグの表記）</td><td><span class="t ta">アプリ</span></td><td>作成元から、DIF単独の作用と変温管理全体を区別すること、由来の区別と画面での表示を求められたため。</td></tr>
+<tr><td class="n">3</td><td>1作を通した記録（7日間隔の生育調査、毎日の収量、2〜3回のLAI、透過率の実測1回）と、自分のハウスの周期の確認</td><td><span class="t tg">現場</span></td><td>周期の元データが公開されない以上、16日・12日を確かめる手段は自分の記録だけになる。No.10〜15の値を実効値に置き換える材料にもなる。</td></tr>
+<tr><td class="n">4</td><td>推奨管理への効き始めの日数（No.6）、実効LUEの自動計算、節数の記録、NARO式の補正係数（No.11・13・14）</td><td><span class="t ta">アプリ</span></td><td>3の記録がそろってから効く。先に作っておけば、1作目の終わりにすぐ使える。</td></tr>
+<tr><td class="n">5</td><td>マニュアル改訂版、作成元の栽培管理支援Web版・出荷量予測Webアプリの公開の確認</td><td><span class="t ts">作成元</span></td><td>表2-7の扱いなどが決まれば、本アプリの表示をそろえる。利用者が各ツールの位置づけを取り違えないよう、READMEで案内する。</td></tr>
+</table>
+
+<footer>
+<p>・「論文で補えるか」：補えない＝論文がその項目を扱っていない、一部＝仕組みの向きは支持するが数値や条件までは裏づけない。「影響」は、アプリの推奨や判定を誤らせる大きさの目安（本資料の判断）。No.5・6は回答で食い違いが解消したため「中」から「小」に下げた。</p>
+<p>・本資料はマニュアルと東出ら（2012）の記載を読み比べた整理に、作成元の回答（2026年10月）を加えたもの。回答は本アプリの計算方法や推奨内容の精度・妥当性を保証するものではない。きゅうり生育予測ノートは個人が開発した試作版で、岩手県農業研究センターが開発・監修・推奨したアプリではない。アプリでの対応状況は「マニュアルの食い違いとアプリの対応表」（2026-10-05改訂）と対応している。</p>
+</footer>
+</body>
+</html>
