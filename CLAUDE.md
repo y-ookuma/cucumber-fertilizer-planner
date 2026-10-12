@@ -105,6 +105,14 @@ GitHub Pages で公開する静的サイトで、ビルドは行わない。
   - 各グラフの右上に「↓PNG」ボタン（`pngBtn(id,表題)`、`data-png`、アイコンは `download`）。`saveChartPng` がライト配色・2倍解像度で描き直した canvas を白背景に貼り、上に表題とハウス名、右上に作成年月日、右下に「Copyright (c) 保存した年 きゅうり生育予測ノート」を入れて保存する。グラフを足すときはボタンも付ける。
   - 印刷（`printCards`）は `graphImages()` で canvas を画像にして差し込む。ダーク表示中はライトの配色で描き直してから取り込む。
   - 「環境と生育のずれ」の集計は `lagRows` を表とグラフで共用する。
+- **グラフタブ（`chart`、回帰分析とカレンダーの間）は、横軸＝日付・縦軸＝各タブの項目（8項目まで、`GRAPH_MAX`）**。
+  - 項目は `GRAPH_GROUPS`（`now`＝生育調査・`daily`＝毎日の記録・`wx`＝外気象 `wxCache`・`env`＝`ENV_SERIES`）。キーは `区分:項目`（例 `env:tmean`）、値は `graphData`。
+  - 表し方は項目ごと（`mode`：`raw`＝生値〈既定〉・`ma`＝移動平均・`cum`＝積算、`GRAPH_MODES`）。`movingAvg`：その日を含む直近Z日（`z`、2〜60日）の平均。毎日の値はZ日の半分以上そろう日だけ、生育調査（`sparse`）は調査日だけ。`cumulative`：表示する期間の初日からの合計（値のない日は前日のまま、sparse は調査日だけ）。積算の単位は `cumUnit`（「/日」を外す、それ以外は「·日」）で、別の軸に積算の値だけ描く。
+  - グラフの形は項目ごと（`type`：`bar`／`line`、`GRAPH_TYPES`。未設定は `graphTypeOf` で項目の既定＝`GRAPH_GROUPS` の `bar`）。生値・積算は選んだ形、移動平均は元の値を選んだ形で薄く、平均はいつも線。
+  - 選択は `state.graphCfg`（`{items:[{k,c,mode,z,type}],days}`、未設定は `GRAPH_DEFAULT`＝4項目とも生値。以前の版の `ma:true` は `mode:"ma"` として読む）。色 `c` は項目について回り、外しても他の色を変えない。「設定」シートの `graphSel`（`k|c|r/m/c|z|b/l` を空白区切り。形の無い4つ組・以前の `k|c|z`〈z=0＝移動平均なし〉も読める）・`graphDays` で同期。
+  - `TAB_INFO.chart` は `modal:false,graph:true`。モード切替は「グラフ化／結果表示」の2つ（`#modeSeg[data-noinput]`）。開くとグラフ化、結果表示は表（`renderChartTable`）。
+  - `envDaily()` は重いので、1回の描画の間だけ `graphEnvMemo` で使い回す。
+  - 「↓PNG」の隣の「↓CSV」（`btnChartCsv`、`csvChart`・`saveChartCsv`）：表示中の期間で値のある日を古い順に、項目ごとに元の値・移動平均または積算・外気由来の印の列。ファイル名は `グラフ_ハウス名_日付.csv`。
 - **カレンダータブ（`cal`）は、毎日の記録・生育調査・農薬散布を月表示で3色に分ける**（`--cal-daily`・`--cal-rec`・`--cal-spray`）。
   - 農薬散布は `state.sprays`（`{id,houseId,date,work,code,name,rac}`）。「農薬散布」シートで同期し、シートが空（見出し行も無い）なら端末の分を残す（作業項目と同じ扱い）。
   - 作業一覧CSV（JAの栽培履歴の書き出し）は `parseSprayCsv`：「作業名」と「農薬コード…」を含む行を列名として探し、作業名「防除」の行だけ取り込む。Shift_JIS／UTF-8 は `decodeCsvBuf` で判定。
