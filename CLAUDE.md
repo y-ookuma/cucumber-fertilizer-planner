@@ -108,8 +108,9 @@ GitHub Pages で公開する静的サイトで、ビルドは行わない。
 - **グラフタブ（`chart`、回帰分析とカレンダーの間）は、横軸＝日付・縦軸＝各タブの項目（8項目まで、`GRAPH_MAX`）**。
   - 項目は `GRAPH_GROUPS`（`now`＝生育調査・`daily`＝毎日の記録・`wx`＝外気象 `wxCache`・`env`＝`ENV_SERIES`）。キーは `区分:項目`（例 `env:tmean`）、値は `graphData`。
   - 表し方は項目ごと（`mode`：`raw`＝生値〈既定〉・`ma`＝移動平均・`cum`＝積算、`GRAPH_MODES`）。`movingAvg`：その日を含む直近Z日（`z`、2〜60日）の平均。毎日の値はZ日の半分以上そろう日だけ、生育調査（`sparse`）は調査日だけ。`cumulative`：表示する期間の初日からの合計（値のない日は前日のまま、sparse は調査日だけ）。積算の単位は `cumUnit`（「/日」を外す、それ以外は「·日」）で、別の軸に積算の値だけ描く。
-  - グラフの形は項目ごと（`type`：`bar`／`line`、`GRAPH_TYPES`。未設定は `graphTypeOf` で項目の既定＝`GRAPH_GROUPS` の `bar`）。生値・積算は選んだ形、移動平均は元の値を選んだ形で薄く、平均はいつも線。
-  - 選択は `state.graphCfg`（`{items:[{k,c,mode,z,type}],days}`、未設定は `GRAPH_DEFAULT`＝4項目とも生値。以前の版の `ma:true` は `mode:"ma"` として読む）。色 `c` は項目について回り、外しても他の色を変えない。「設定」シートの `graphSel`（`k|c|r/m/c|z|b/l` を空白区切り。形の無い4つ組・以前の `k|c|z`〈z=0＝移動平均なし〉も読める）・`graphDays` で同期。
+  - アノテーション（`type:'anno'`）は on／off だけを表す：生値が `GRAPH_ANNO_ON`（=1）以上の日に、`graphAnnoPlugin`（`afterDatasetsDraw`）がグラフの上端から下端まで項目の色の点線を引く。データセットは見えない軸 `gAnno` 上の点（on の日だけ1、凡例とツールチップ用）。表し方は使わず生値で判定し、単位の軸は作らない。`daily:fertL` をアノテーションにしたときは、その日の液肥の名前（`graphData` の `info`、`fertId`→`state.ferts`）をツールチップ・表・CSVに添える。
+  - グラフの形は項目ごと（`type`：`bar`／`line`／`anno`、`GRAPH_TYPES`。未設定は `graphTypeOf` で項目の既定＝`GRAPH_GROUPS` の `bar`）。生値・積算は選んだ形、移動平均は元の値を選んだ形で薄く、平均はいつも線。
+  - 選択は `state.graphCfg`（`{items:[{k,c,mode,z,type}],days}`、未設定は `GRAPH_DEFAULT`＝4項目とも生値。以前の版の `ma:true` は `mode:"ma"` として読む）。色 `c` は項目について回り、外しても他の色を変えない。「設定」シートの `graphSel`（`k|c|r/m/c|z|b/l/a` を空白区切り。形の無い4つ組・以前の `k|c|z`〈z=0＝移動平均なし〉も読める）・`graphDays` で同期。
   - `TAB_INFO.chart` は `modal:false,graph:true`。モード切替は「グラフ化／結果表示」の2つ（`#modeSeg[data-noinput]`）。開くとグラフ化、結果表示は表（`renderChartTable`）。
   - `envDaily()` は重いので、1回の描画の間だけ `graphEnvMemo` で使い回す。
   - 「↓PNG」の隣の「↓CSV」（`btnChartCsv`、`csvChart`・`saveChartCsv`）：表示中の期間で値のある日を古い順に、項目ごとに元の値・移動平均または積算・外気由来の印の列。ファイル名は `グラフ_ハウス名_日付.csv`。
