@@ -35,7 +35,7 @@ GitHub Pages で公開する静的サイトで、ビルドは行わない。
 - Google Sheets 同期は GIS の OAuth トークン（約1時間）を使う。`push()` / `pull()` が送受信する。
 - 外気象は Open-Meteo API から取得する。
 - 変更の検知は `changeSeq` と `state.auth.dirty` / `dirtyAt` で行い、自動同期は3秒のデバウンスで `push(true)` を呼ぶ。
-- スプレッドシートは10シート：`SHEET_ORDER`、`SH`（列定義）、`SHKEY` で定義している。
+- スプレッドシートは11シート（観察項目 `state.obs` を作業項目 `state.tasks` と同じ作りで追加。毎日の記録の `obs` 列）：`SHEET_ORDER`、`SH`（列定義）、`SHKEY` で定義している。
 
 ## 守るべき設計ルール（決定済み）
 
@@ -109,7 +109,7 @@ GitHub Pages で公開する静的サイトで、ビルドは行わない。
   - 項目は `GRAPH_GROUPS`（`now`＝生育調査・`daily`＝毎日の記録・`wx`＝外気象 `wxCache`・`env`＝`ENV_SERIES`）。キーは `区分:項目`（例 `env:tmean`）、値は `graphData`。
   - 表し方は項目ごと（`mode`：`raw`＝生値〈既定〉・`ma`＝移動平均・`cum`＝積算、`GRAPH_MODES`）。`movingAvg`：その日を含む直近Z日（`z`、2〜60日）の平均。毎日の値はZ日の半分以上そろう日だけ、生育調査（`sparse`）は調査日だけ。`cumulative`：表示する期間の初日からの合計（値のない日は前日のまま、sparse は調査日だけ）。積算の単位は `cumUnit`（「/日」を外す、それ以外は「·日」）で、別の軸に積算の値だけ描く。
   - 注釈（`type:'anno'`）は on／off だけを表す：生値が `GRAPH_ANNO_ON`（=1）以上の日に、`graphAnnoPlugin`（`afterDatasetsDraw`）がグラフの上端から下端まで項目の色の点線を引く。データセットは見えない軸 `gAnno` 上の点（on の日だけ1、凡例とツールチップ用）。表し方は使わず生値で判定し、単位の軸は作らない。`daily:fertL` を注釈にしたときは、その日の液肥の名前（`graphData` の `info`、`fertId`→`state.ferts`）をツールチップ・表・CSVに添える。
-  - 注釈専用の項目（`annoOnly`）：`daily:task`（作業。`pick:'task'`、項目に選んだ作業名 `t` を1つだけ持つ。選択肢は `graphTaskNames()`＝`state.tasks`＋毎日の記録の作業名。その作業の日＝1、毎日の記録はあるがしていない日＝0）と `cal:spray`（農薬散布。`houseSprays()` の日ごとの件数、`info` に農薬名（RACコード））。`graphTypeOf` で常に `anno`、表し方は `raw`。表・CSVに元の値は出さない。
+  - 注釈専用の項目（`annoOnly`）：`daily:task`・`daily:obs`（作業・観察。`pick` は毎日の記録の欄名 `tasks`／`obs`、`GRAPH_PICKS`。項目に選んだ名前 `t` を1つだけ持つ。選択肢は `graphPickNames(pick)`＝`state.tasks`／`state.obs`＋毎日の記録の名前。その作業の日＝1、毎日の記録はあるがしていない日＝0）と `cal:spray`（農薬散布。`houseSprays()` の日ごとの件数、`info` に農薬名（RACコード））。`graphTypeOf` で常に `anno`、表し方は `raw`。表・CSVに元の値は出さない。
   - ドラッグで拡大（`attachGraphZoom`・`graphZoomPlugin`、外部プラグインは使わない）：マウス・ペンの pointer イベントで始点〜終点の日付を `graphZoom={from,to}` に入れ、横軸の `min`／`max`（位置）にする。保存しない。ダブルクリック・「拡大を戻す」（`btnChartZoomReset`）・期間の変更で解除。PNG・CSVは拡大中の範囲、表は期間の全体。積算の起点は期間の初日のまま。指（touch）は対象外。
   - グラフの形は項目ごと（`type`：`bar`／`line`／`anno`、`GRAPH_TYPES`。未設定は `graphTypeOf` で項目の既定＝`GRAPH_GROUPS` の `bar`）。生値・積算は選んだ形、移動平均は元の値を選んだ形で薄く、平均はいつも線。
   - 選択は `state.graphCfg`（`{items:[{k,c,mode,z,type,t?}],days}`、未設定は `GRAPH_DEFAULT`＝4項目とも生値。以前の版の `ma:true` は `mode:"ma"` として読む）。色 `c` は項目について回り、外しても他の色を変えない。「設定」シートの `graphSel`（`k|c|r/m/c|z|b/l/a[|作業名（URLエンコード）]` を空白区切り。形の無い4つ組・以前の `k|c|z`〈z=0＝移動平均なし〉も読める）・`graphDays` で同期。
@@ -118,6 +118,7 @@ GitHub Pages で公開する静的サイトで、ビルドは行わない。
   - 「↓PNG」の隣の「↓CSV」（`btnChartCsv`、`csvChart`・`saveChartCsv`）：表示中の期間で値のある日を古い順に、項目ごとに元の値・移動平均または積算・外気由来の印の列。ファイル名は `グラフ_ハウス名_日付.csv`。
 - **カレンダータブ（`cal`）は、毎日の記録・生育調査・農薬散布を月表示で3色に分ける**（`--cal-daily`・`--cal-rec`・`--cal-spray`）。
   - 農薬散布は `state.sprays`（`{id,houseId,date,work,code,name,rac}`）。「農薬散布」シートで同期し、シートが空（見出し行も無い）なら端末の分を残す（作業項目と同じ扱い）。
+  - ハウス内の推移の表（`#envTable`）：行（`tr[data-date]`）を押して選択（`envSelDate`）、ダブルクリック・Enter・「選んだ日を編集」（`btnEnvEdit`）で `openEnvEdit(date)`。編集は `state.env` のその日の時別の値（`ENV_EDIT_FIELDS`）を直接書き換え、直した項目は `wxf` から外す。日別は保存せず `envDaily()` で計算し直す。
   - 作業一覧CSV（JAの栽培履歴の書き出し）は `parseSprayCsv`：「作業名」と「農薬コード…」を含む行を列名として探し、作業名「防除」の行だけ取り込む。Shift_JIS／UTF-8 は `decodeCsvBuf` で判定。
   - 二重登録の判定は同じハウスで `sprayKey`（日付＋農薬コード＋農薬名）。
   - RACコードは `racTable`（`data/rac.json` の `RAC_DB` → 組み込みの `RAC_BUILTIN`〈サンプルの防除14剤〉）と `racFor`（同じ農薬コードの手入力を優先）。記録ごとに出どころ `racSrc`（`manual`／`db`／`builtin`）を持つ。起動時に `loadRacDb()` → `applyRacTable()` で、手入力でない記録を表の値に合わせる（`saveState(false)` で未送信にしない）。表に無い農薬はいまの値を残す。
