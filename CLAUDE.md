@@ -112,7 +112,7 @@ GitHub Pages で公開する静的サイトで、ビルドは行わない。
   - 注釈専用の項目（`annoOnly`）：`daily:task`・`daily:obs`（作業・観察。`pick` は毎日の記録の欄名 `tasks`／`obs`、`GRAPH_PICKS`。項目に選んだ名前 `t` を1つだけ持つ。選択肢は `graphPickNames(pick)`＝`state.tasks`／`state.obs`＋毎日の記録の名前。その作業の日＝1、毎日の記録はあるがしていない日＝0）と `cal:spray`（農薬散布。`houseSprays()` の日ごとの件数、`info` に農薬名（RACコード））。`graphTypeOf` で常に `anno`、表し方は `raw`。表・CSVに元の値は出さない。
   - ドラッグで拡大（`attachGraphZoom`・`graphZoomPlugin`、外部プラグインは使わない）：マウス・ペンの pointer イベントで始点〜終点の日付を `graphZoom={from,to}` に入れ、横軸の `min`／`max`（位置）にする。保存しない。ダブルクリック・「拡大を戻す」（`btnChartZoomReset`）・期間の変更で解除。PNG・CSVは拡大中の範囲、表は期間の全体。積算の起点は期間の初日のまま。指（touch）は対象外。
   - グラフの形は項目ごと（`type`：`bar`／`line`／`anno`、`GRAPH_TYPES`。未設定は `graphTypeOf` で項目の既定＝`GRAPH_GROUPS` の `bar`）。生値・積算は選んだ形、移動平均は元の値を選んだ形で薄く、平均はいつも線。
-  - 選択は `state.graphCfg`（`{items:[{k,c,mode,z,type,t?}],days}`、未設定は `GRAPH_DEFAULT`＝4項目とも生値。以前の版の `ma:true` は `mode:"ma"` として読む）。色 `c` は項目について回り、外しても他の色を変えない。「設定」シートの `graphSel`（`k|c|r/m/c|z|b/l/a[|作業名（URLエンコード）]` を空白区切り。形の無い4つ組・以前の `k|c|z`〈z=0＝移動平均なし〉も読める）・`graphDays` で同期。
+  - 選択は `state.graphCfg`（`{items:[{k,c,mode,z,type,t?}],days,from,to}`。期間は `graphRange`：`from`/`to`（YYYY-MM-DD、空＝自動）、空の `to` はデータの最新日、空の `from` は `to` から `days`（既定90）日。「設定」の `graphDays` は `from~to` か日数、未設定は `GRAPH_DEFAULT`＝4項目とも生値。以前の版の `ma:true` は `mode:"ma"` として読む）。色 `c` は項目について回り、外しても他の色を変えない。「設定」シートの `graphSel`（`k|c|r/m/c|z|b/l/a[|作業名（URLエンコード）]` を空白区切り。形の無い4つ組・以前の `k|c|z`〈z=0＝移動平均なし〉も読める）・`graphDays` で同期。
   - `TAB_INFO.chart` は `modal:false,graph:true`。モード切替は「グラフ化／結果表示」の2つ（`#modeSeg[data-noinput]`）。開くとグラフ化、結果表示は表（`renderChartTable`）。
   - `envDaily()` は重いので、1回の描画の間だけ `graphEnvMemo` で使い回す。
   - 「↓PNG」の隣の「↓CSV」（`btnChartCsv`、`csvChart`・`saveChartCsv`）：表示中の期間で値のある日を古い順に、項目ごとに元の値・移動平均または積算・外気由来の印の列。ファイル名は `グラフ_ハウス名_日付.csv`。
