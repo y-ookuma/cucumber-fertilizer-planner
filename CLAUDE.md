@@ -122,7 +122,7 @@ GitHub Pages で公開する静的サイトで、ビルドは行わない。
   - 農薬散布は `state.sprays`（`{id,houseId,date,work,code,name,rac}`）。「農薬散布」シートで同期し、シートが空（見出し行も無い）なら端末の分を残す（作業項目と同じ扱い）。
   - かん水計画の日射（`wtRadSrc`＝`state.wtRadSrc`、`out`＝屋外の予報〈既定〉／`in`＝`houseRadFromWx`＝時別の予報×`houseTau`、遮光は800W/m²以上の時刻だけ）。`irrigationPlan` は日ごとに `out`・`inn` の両方を持ち、`src` の方を本体に使う。比べる表示は `state.wtCmp`（`wtCmpTable`）。「設定」シートの `wtRad`。マニュアル表2-3の係数の基準の日射（屋外かハウス内か）はマニュアルに記載なし。
   - サインイン後（`signIn` のコールバック → `afterSignIn(sync)`）：同期（`pull`／未送信ありで OK なら `push`）→ 緯度経度があれば `getWeather`。その間 `busyOn`／`busyOff`（`#busyOverlay`、header・.app を inert、2分で自動解除）。シート未指定・緯度経度なしはそれぞれ飛ばす。
-  - 本日の潅水量/面積（`todayWater`・`todayWaterText`）：きょうの毎日の記録の waterL 合計と面積。ハウスのカードと「きょうの目安」に表示。目安の量は `targetWater(d,h)`（`irrigationPlan` の total と面積）。ハウス一覧の `targetWaterText` は表示中のハウスだけ（wxCache がそのハウスの分のため）。
+  - かん水量の目安/面積：目安の量は `targetWater(d,h)`（`irrigationPlan` の total と面積）。ハウス一覧の `targetWaterText` は表示中のハウスだけ（wxCache がそのハウスの分のため）。
   - ハウス内の推移の表（`#envTable`）：行（`tr[data-date]`）を押して選択（`envSelDate`）、ダブルクリック・Enter・「選んだ日を編集」（`btnEnvEdit`）で `openEnvEdit(date)`。編集は `state.env` のその日の時別の値（`ENV_EDIT_FIELDS`）を直接書き換え、直した項目は `wxf` から外す。日別は保存せず `envDaily()` で計算し直す。
   - 作業一覧CSV（JAの栽培履歴の書き出し）は `parseSprayCsv`：「作業名」と「農薬コード…」を含む行を列名として探し、作業名「防除」の行だけ取り込む。Shift_JIS／UTF-8 は `decodeCsvBuf` で判定。
   - 二重登録の判定は同じハウスで `sprayKey`（日付＋農薬コード＋農薬名）。
